@@ -55,6 +55,8 @@ builder.Services.AddCors();
 builder.Services.RegisterSettings(builder.Configuration);
 builder.Services.RegisterServices();
 builder.Services.RegisterRepositories();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<IVendorRepository, VendorRepository>();
 
 builder.Services.AddJwt();
 
