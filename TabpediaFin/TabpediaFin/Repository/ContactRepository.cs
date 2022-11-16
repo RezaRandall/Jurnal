@@ -7,101 +7,15 @@
 
         }
 
-        public async Task<bool> CreateCustomer(contactpost customer, int CreatedUid, int TenantId)
+        public async Task<Contact> CreateCustomer(AddCustomer customer)
         {
             var sql = @"INSERT INTO ""Contact"" (""TenantId"",""Name"", ""Address"", ""CityName"",""PostalCode"",""Email"",""Phone"",""Fax"",""Website"",""Npwp"",""GroupId"",""Notes"",""CreatedUid"",""CreatedUtc"", ""IsCustomer"")
-            VALUES(@Name, @Address, @CityName,@PostalCode,@Email,@Phone,@Fax,@Website,@Npwp,@GroupId,@Notes,@CreatedUid,@CreatedUtc,TRUE)";
+            VALUES(@TenantId, @Name, @Address, @CityName,@PostalCode,@Email,@Phone,@Fax,@Website,@Npwp,@GroupId,@Notes,@CreatedUid,@CreatedUtc,TRUE) RETURNING ""Id""";
 
-            var expiredUtc = DateTime.UtcNow.AddDays(1);
-
-            var parameters = new DynamicParameters();
-            parameters.Add("TenantId", TenantId);
-            parameters.Add("Name", customer.Name);
-            parameters.Add("Address",customer.Address);
-            parameters.Add("CityName",customer.CityName);
-            parameters.Add("PostalCode",customer.PostalCode);
-            parameters.Add("Email",customer.Email);
-            parameters.Add("Phone",customer.Phone);
-            parameters.Add("Fax",customer.Fax);
-            parameters.Add("Website",customer.Website);
-            parameters.Add("Npwp",customer.Npwp);
-            parameters.Add("GroupId",customer.GroupId);
-            parameters.Add("Notes",customer.Notes);
-            parameters.Add("CreatedUid", CreatedUid);
-            parameters.Add("CreatedUtc", DateTime.UtcNow);
-
-            using (var cn = _dbManager.CreateConnection())
-            {
-                var affected = await cn.ExecuteAsync(sql, parameters);
-                return affected > 0;
-            }
-        }
-
-        public async Task<bool> DeleteCustomer(int id, int TenantId)
-        {
-            var sql = @"DELETE FROM ""Contact"" where ""Id"" = @id and ""TenantId"" = @TenantId";
-
-            var expiredUtc = DateTime.UtcNow.AddDays(1);
+            //var expiredUtc = DateTime.UtcNow.AddDays(1);
 
             var parameters = new DynamicParameters();
-            parameters.Add("id", id);
-            parameters.Add("TenantId", TenantId);
-
-            using (var cn = _dbManager.CreateConnection())
-            {
-                var affected = await cn.ExecuteAsync(sql, parameters);
-                return affected > 0;
-            }
-        }
-
-        public async Task<Contact> GetCustomer(int TenantId, int id)
-        {
-            var sql = @"SELECT ""Name"", ""Address"", ""CityName"",""PostalCode"",""Email"",""Phone"",""Fax"",""Website"",""Npwp"",""GroupId"",""Notes"",""CreatedUid""  FROM ""Contact"" WHERE ""TenantId"" = @TenantId AND ""IsCustomer"" = TRUE ""id"" = @id";
-
-            var parameters = new DynamicParameters();
-            parameters.Add("TenantId", TenantId);
-            parameters.Add("id", id);
-
-            using (var cn = _dbManager.CreateConnection())
-            {
-                return await cn.QueryFirstOrDefaultAsync<Contact>(sql, parameters);
-            }
-        }
-
-        public async Task<List<Contact>> GetCustomerList(string? sortby, string? valsort, string? searchby, string? valsearch, int? jumlah_data, int? offset, int? TenantId)
-        {
-            string sqlsort = "";
-            string sqlsearch = "";
-            if (sortby != null && valsort != null)
-            {
-                sqlsort = @" order by """ + sortby + "\" " + valsort + "";
-            }
-            if (searchby != null && valsearch != null)
-            {
-                sqlsearch = @"AND """ + searchby + "\" = '" + valsearch + "'";
-            }
-
-            var sql = @"SELECT ""Name"", ""Address"", ""CityName"",""PostalCode"",""Email"",""Phone"",""Fax"",""Website"",""Npwp"",""GroupId"",""Notes"",""CreatedUid""  FROM ""Contact"" WHERE ""TenantId"" = @TenantId AND ""IsCustomer"" = TRUE " + sqlsearch + " " + sqlsort + " LIMIT @jumlah_data OFFSET @offset";
-
-            var parameters = new DynamicParameters();
-            parameters.Add("TenantId", TenantId);
-            parameters.Add("jumlah_data", jumlah_data);
-            parameters.Add("offset", offset);
-
-            using (var cn = _dbManager.CreateConnection())
-            {
-                return await cn.QueryFirstOrDefaultAsync<List<Contact>>(sql, parameters);
-            }
-        }
-
-        public async Task<bool> UpdateCustomer(contactpost customer, int UpdatedUid, int TenantId, int id)
-        {
-            var sql = @"UPDATE ""Contact"" SET ""TenantId"" = @TenantId,""Name"" = @Name, ""Address"" = @Address, ""CityName"" = @CityName,""PostalCode"" = @PostalCode,""Email"" = @Email,""Phone"" = @Phone,""Fax"" = @Fax,""Website"" = @Website,""Npwp"" = @Npwp,""GroupId"" = @GroupId,""Notes"" = @Notes,""UpdatedUid"" = @UpdatedUid,""UpdatedUtc"" = @UpdatedUtc WHERE ""id"" = @id";
-
-            var expiredUtc = DateTime.UtcNow.AddDays(1);
-
-            var parameters = new DynamicParameters();
-            parameters.Add("TenantId", TenantId);
+            parameters.Add("TenantId", customer.TenantId);
             parameters.Add("Name", customer.Name);
             parameters.Add("Address", customer.Address);
             parameters.Add("CityName", customer.CityName);
@@ -113,8 +27,31 @@
             parameters.Add("Npwp", customer.Npwp);
             parameters.Add("GroupId", customer.GroupId);
             parameters.Add("Notes", customer.Notes);
-            parameters.Add("UpdatedUid", UpdatedUid);
-            parameters.Add("UpdatedUtc", DateTime.UtcNow);
+            parameters.Add("CreatedUid", customer.CreatedUid);
+            parameters.Add("CreatedUtc", DateTime.UtcNow);
+
+            using (var cn = _dbManager.CreateConnection())
+            {
+                int affected = await cn.QueryFirstOrDefaultAsync<int>(sql, parameters);
+                Contact resultquery = new Contact();
+                GetCustomerQuery param = new GetCustomerQuery();
+                param.TenantId = customer.TenantId;
+                param.Id = affected;
+                resultquery = await GetCustomer(param);
+
+                return resultquery;
+            }
+        }
+
+        public async Task<bool> DeleteCustomer(DeleteCustomer request)
+        {
+            var sql = @"DELETE FROM ""Contact"" where IsCustomer = true, ""Id"" = @Id and ""TenantId"" = @TenantId";
+
+            var expiredUtc = DateTime.UtcNow.AddDays(1);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("Id", request.Id);
+            parameters.Add("TenantId", request.TenantId);
 
             using (var cn = _dbManager.CreateConnection())
             {
@@ -122,14 +59,96 @@
                 return affected > 0;
             }
         }
+
+        public async Task<Contact> GetCustomer(GetCustomerQuery request)
+        {
+            var sql = @"SELECT ""Id"", ""TenantId"",""Name"", ""Address"", ""CityName"",""PostalCode"",""Email"",""Phone"",""Fax"",""Website"",""Npwp"",""GroupId"",""Notes"",""CreatedUid""  FROM ""Contact"" WHERE ""TenantId"" = @TenantId AND ""IsCustomer"" = TRUE AND ""Id"" = @Id";
+
+            var parameters = new DynamicParameters();
+            parameters.Add("TenantId", request.TenantId);
+            parameters.Add("Id", request.Id);
+
+            using (var cn = _dbManager.CreateConnection())
+            {
+                return await cn.QueryFirstOrDefaultAsync<Contact>(sql, parameters);
+            }
+        }
+
+        public async Task<List<Contact>> GetCustomerList(GetCustomerListQuery request)
+        {
+            string sqlsort = "";
+            string sqlsearch = "";
+            if (request.sortby != null && request.valsort != null && request.sortby != "" && request.valsort != "")
+            {
+                sqlsort = @" order by """ + request.sortby + "\" " + request.valsort + "";
+            }
+            if (request.searchby != null && request.valsearch != null && request.searchby != "" && request.valsearch != "")
+            {
+                sqlsearch = @"AND """ + request.searchby + "\" = '" + request.valsearch + "'";
+            }
+
+            var sql = @"SELECT ""Id"", ""TenantId"", ""Name"", ""Address"", ""CityName"",""PostalCode"",""Email"",""Phone"",""Fax"",""Website"",""Npwp"",""GroupId"",""Notes"",""CreatedUid""  FROM ""Contact"" WHERE ""TenantId"" = @TenantId AND ""IsCustomer"" = TRUE " + sqlsearch + " " + sqlsort + " LIMIT @jumlah_data OFFSET @offset";
+
+            var parameters = new DynamicParameters();
+            parameters.Add("TenantId", request.TenantId);
+            parameters.Add("jumlah_data", request.jumlah_data);
+            parameters.Add("offset", request.offset);
+
+            using (var cn = _dbManager.CreateConnection())
+            {
+                List<Contact> result;
+                result = (await cn.QueryAsync<Contact>(sql, parameters).ConfigureAwait(false)).ToList();
+                return result;
+            }
+        }
+
+        public async Task<Contact> UpdateCustomer(UpdateCustomer customer)
+        {
+            var sql = @"UPDATE ""Contact"" SET ""Name"" = @Name, ""Address"" = @Address, ""CityName"" = @CityName,""PostalCode"" = @PostalCode,""Email"" = @Email,""Phone"" = @Phone,""Fax"" = @Fax,""Website"" = @Website,""Npwp"" = @Npwp,""GroupId"" = @GroupId,""Notes"" = @Notes,""UpdatedUid"" = @UpdatedUid,""UpdatedUtc"" = @UpdatedUtc WHERE ""Id"" = @Id AND ""TenantId"" = @TenantId";
+
+            var expiredUtc = DateTime.UtcNow.AddDays(1);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("Name", customer.Name);
+            parameters.Add("Address", customer.Address);
+            parameters.Add("CityName", customer.CityName);
+            parameters.Add("PostalCode", customer.PostalCode);
+            parameters.Add("Email", customer.Email);
+            parameters.Add("Phone", customer.Phone);
+            parameters.Add("Fax", customer.Fax);
+            parameters.Add("Website", customer.Website);
+            parameters.Add("Npwp", customer.Npwp);
+            parameters.Add("GroupId", customer.GroupId);
+            parameters.Add("Notes", customer.Notes);
+            parameters.Add("UpdatedUid", customer.UpdatedUid);
+            parameters.Add("UpdatedUtc", DateTime.UtcNow);
+            parameters.Add("TenantId", customer.TenantId);
+            parameters.Add("Id", customer.Id);
+
+            using (var cn = _dbManager.CreateConnection())
+            {
+                var affected = await cn.ExecuteAsync(sql, parameters);
+                Contact resultquery = new Contact();
+                if (affected > 0)
+                {
+                    GetCustomerQuery param = new GetCustomerQuery();
+                    param.TenantId = customer.TenantId;
+                    param.Id = customer.Id;
+                    resultquery = await GetCustomer(param);
+                    return resultquery;
+                }
+
+                return resultquery;
+            }
+        }
     }
     public interface ICustomerRepository
     {
-        Task<bool> CreateCustomer(contactpost customer, int TenantId, int CreatedUid);
-        Task<List<Contact>> GetCustomerList(string? sortby, string? valsort, string? searchby, string? valsearch, int? jumlah_data, int? offset, int? TenantId);
-        Task<Contact> GetCustomer(int TenantId, int id);
-        Task<bool> UpdateCustomer(contactpost customer, int UpdatedUid, int TenantId, int id);
-        Task<bool> DeleteCustomer(int id, int TenantId);
+        Task<Contact> CreateCustomer(AddCustomer customer);
+        Task<List<Contact>> GetCustomerList(GetCustomerListQuery request);
+        Task<Contact> GetCustomer(GetCustomerQuery request);
+        Task<Contact> UpdateCustomer(UpdateCustomer customer);
+        Task<bool> DeleteCustomer(DeleteCustomer request);
     }
     public class VendorRepository : BaseRepository, IVendorRepository
     {
@@ -137,15 +156,15 @@
         {
         }
 
-        public async Task<bool> CreateVendor(contactpost customer, int TenantId, int CreatedUid)
+        public async Task<Contact> CreateVendor(AddVendor customer)
         {
             var sql = @"INSERT INTO ""Contact"" (""TenantId"",""Name"", ""Address"", ""CityName"",""PostalCode"",""Email"",""Phone"",""Fax"",""Website"",""Npwp"",""GroupId"",""Notes"",""CreatedUid"",""CreatedUtc"", ""IsVendor"")
-            VALUES(@Name, @Address, @CityName,@PostalCode,@Email,@Phone,@Fax,@Website,@Npwp,@GroupId,@Notes,@CreatedUid,@CreatedUtc,TRUE)";
+            VALUES(@TenantId, @Name, @Address, @CityName,@PostalCode,@Email,@Phone,@Fax,@Website,@Npwp,@GroupId,@Notes,@CreatedUid,@CreatedUtc,TRUE) RETURNING ""Id""";
 
-            var expiredUtc = DateTime.UtcNow.AddDays(1);
+            //var expiredUtc = DateTime.UtcNow.AddDays(1);
 
             var parameters = new DynamicParameters();
-            parameters.Add("TenantId", TenantId);
+            parameters.Add("TenantId", customer.TenantId);
             parameters.Add("Name", customer.Name);
             parameters.Add("Address", customer.Address);
             parameters.Add("CityName", customer.CityName);
@@ -157,25 +176,31 @@
             parameters.Add("Npwp", customer.Npwp);
             parameters.Add("GroupId", customer.GroupId);
             parameters.Add("Notes", customer.Notes);
-            parameters.Add("CreatedUid", CreatedUid);
+            parameters.Add("CreatedUid", customer.CreatedUid);
             parameters.Add("CreatedUtc", DateTime.UtcNow);
 
             using (var cn = _dbManager.CreateConnection())
             {
-                var affected = await cn.ExecuteAsync(sql, parameters);
-                return affected > 0;
+                int affected = await cn.QueryFirstOrDefaultAsync<int>(sql, parameters);
+                Contact resultquery = new Contact();
+                GetVendorQuery param = new GetVendorQuery();
+                param.TenantId = customer.TenantId;
+                param.Id = affected;
+                resultquery = await GetVendor(param);
+
+                return resultquery;
             }
         }
 
-        public async Task<bool> DeleteVendor(int id, int TenantId)
+        public async Task<bool> DeleteVendor(DeleteVendor request)
         {
-            var sql = @"DELETE FROM ""Contact"" where ""Id"" = @id and ""TenantId"" = @TenantId";
+            var sql = @"DELETE FROM ""Contact"" where IsVendor = true, ""Id"" = @id and ""TenantId"" = @TenantId";
 
             var expiredUtc = DateTime.UtcNow.AddDays(1);
 
             var parameters = new DynamicParameters();
-            parameters.Add("id", id);
-            parameters.Add("TenantId", TenantId);
+            parameters.Add("id", request.Id);
+            parameters.Add("TenantId", request.TenantId);
 
             using (var cn = _dbManager.CreateConnection())
             {
@@ -184,13 +209,13 @@
             }
         }
 
-        public async Task<Contact> GetVendor(int TenantId, int id)
+        public async Task<Contact> GetVendor(GetVendorQuery request)
         {
-            var sql = @"SELECT ""Name"", ""Address"", ""CityName"",""PostalCode"",""Email"",""Phone"",""Fax"",""Website"",""Npwp"",""GroupId"",""Notes"",""CreatedUid""  FROM ""Contact"" WHERE ""TenantId"" = @TenantId AND ""IsVendor"" = TRUE ""id"" = @id";
+            var sql = @"SELECT  ""Id"", ""TenantId"", ""Name"", ""Address"", ""CityName"",""PostalCode"",""Email"",""Phone"",""Fax"",""Website"",""Npwp"",""GroupId"",""Notes"",""CreatedUid""  FROM ""Contact"" WHERE ""TenantId"" = @TenantId AND ""IsVendor"" = TRUE AND ""Id"" = @Id";
 
             var parameters = new DynamicParameters();
-            parameters.Add("TenantId", TenantId);
-            parameters.Add("id", id);
+            parameters.Add("TenantId", request.TenantId);
+            parameters.Add("Id", request.Id);
 
             using (var cn = _dbManager.CreateConnection())
             {
@@ -198,40 +223,41 @@
             }
         }
 
-        public async Task<List<Contact>> GetVendorList(string? sortby, string? valsort, string? searchby, string? valsearch, int? jumlah_data, int? offset, int? TenantId)
+        public async Task<List<Contact>> GetVendorList(GetVendorListQuery request)
         {
             string sqlsort = "";
             string sqlsearch = "";
-            if (sortby != null && valsort != null)
+            if (request.sortby != null && request.valsort != null)
             {
-                sqlsort = @" order by """ + sortby + "\" " + valsort + "";
+                sqlsort = @" order by """ + request.sortby + "\" " + request.valsort + "";
             }
-            if (searchby != null && valsearch != null)
+            if (request.searchby != null && request.valsearch != null)
             {
-                sqlsearch = @"AND """ + searchby + "\" = '" + valsearch + "'";
+                sqlsearch = @"AND """ + request.searchby + "\" = '" + request.valsearch + "'";
             }
 
-            var sql = @"SELECT ""Name"", ""Address"", ""CityName"",""PostalCode"",""Email"",""Phone"",""Fax"",""Website"",""Npwp"",""GroupId"",""Notes"",""CreatedUid""  FROM ""Contact"" WHERE ""TenantId"" = @TenantId AND ""IsVendor"" = TRUE " + sqlsearch + " " + sqlsort + " LIMIT @jumlah_data OFFSET @offset";
+            var sql = @"SELECT ""Id"", ""TenantId"", ""Name"", ""Address"", ""CityName"",""PostalCode"",""Email"",""Phone"",""Fax"",""Website"",""Npwp"",""GroupId"",""Notes"",""CreatedUid""  FROM ""Contact"" WHERE ""TenantId"" = @TenantId AND ""IsVendor"" = TRUE " + sqlsearch + " " + sqlsort + " LIMIT @jumlah_data OFFSET @offset";
 
             var parameters = new DynamicParameters();
-            parameters.Add("TenantId", TenantId);
-            parameters.Add("jumlah_data", jumlah_data);
-            parameters.Add("offset", offset);
+            parameters.Add("TenantId", request.TenantId);
+            parameters.Add("jumlah_data", request.jumlah_data);
+            parameters.Add("offset", request.offset);
 
             using (var cn = _dbManager.CreateConnection())
             {
-                return await cn.QueryFirstOrDefaultAsync<List<Contact>>(sql, parameters);
+                List<Contact> result;
+                result = (await cn.QueryAsync<Contact>(sql, parameters).ConfigureAwait(false)).ToList();
+                return result;
             }
         }
 
-        public async Task<bool> UpdateVendor(contactpost customer, int UpdatedUid, int TenantId, int id)
+        public async Task<Contact> UpdateVendor(UpdateVendor customer)
         {
-            var sql = @"UPDATE ""Contact"" SET ""TenantId"" = @TenantId,""Name"" = @Name, ""Address"" = @Address, ""CityName"" = @CityName,""PostalCode"" = @PostalCode,""Email"" = @Email,""Phone"" = @Phone,""Fax"" = @Fax,""Website"" = @Website,""Npwp"" = @Npwp,""GroupId"" = @GroupId,""Notes"" = @Notes,""UpdatedUid"" = @UpdatedUid,""UpdatedUtc"" = @UpdatedUtc WHERE ""id"" = @id";
+            var sql = @"UPDATE ""Contact"" SET ""Name"" = @Name, ""Address"" = @Address, ""CityName"" = @CityName,""PostalCode"" = @PostalCode,""Email"" = @Email,""Phone"" = @Phone,""Fax"" = @Fax,""Website"" = @Website,""Npwp"" = @Npwp,""GroupId"" = @GroupId,""Notes"" = @Notes,""UpdatedUid"" = @UpdatedUid,""UpdatedUtc"" = @UpdatedUtc WHERE ""Id"" = @Id AND ""TenantId"" = @TenantId";
 
             var expiredUtc = DateTime.UtcNow.AddDays(1);
 
             var parameters = new DynamicParameters();
-            parameters.Add("TenantId", TenantId);
             parameters.Add("Name", customer.Name);
             parameters.Add("Address", customer.Address);
             parameters.Add("CityName", customer.CityName);
@@ -243,23 +269,35 @@
             parameters.Add("Npwp", customer.Npwp);
             parameters.Add("GroupId", customer.GroupId);
             parameters.Add("Notes", customer.Notes);
-            parameters.Add("UpdatedUid", UpdatedUid);
+            parameters.Add("UpdatedUid", customer.UpdatedUid);
             parameters.Add("UpdatedUtc", DateTime.UtcNow);
+            parameters.Add("TenantId", customer.TenantId);
+            parameters.Add("Id", customer.Id);
 
             using (var cn = _dbManager.CreateConnection())
             {
                 var affected = await cn.ExecuteAsync(sql, parameters);
-                return affected > 0;
+                Contact resultquery = new Contact();
+                if (affected > 0)
+                {
+                    GetVendorQuery param = new GetVendorQuery();
+                    param.TenantId = customer.TenantId;
+                    param.Id = customer.Id;
+                    resultquery = await GetVendor(param);
+                    return resultquery;
+                }
+
+                return resultquery;
             }
         }
     }
     public interface IVendorRepository
     {
-        Task<bool> CreateVendor(contactpost customer, int TenantId, int CreatedUid);
-        Task<List<Contact>> GetVendorList(string? sortby, string? valsort, string? searchby, string? valsearch, int? jumlah_data, int? offset, int? TenantId);
-        Task<Contact> GetVendor(int TenantId, int id);
-        Task<bool> UpdateVendor(contactpost customer, int UpdatedUid, int TenantId, int id);
-        Task<bool> DeleteVendor(int id, int TenantId);
+        Task<Contact> CreateVendor(AddVendor customer);
+        Task<List<Contact>> GetVendorList(GetVendorListQuery request);
+        Task<Contact> GetVendor(GetVendorQuery request);
+        Task<Contact> UpdateVendor(UpdateVendor customer);
+        Task<bool> DeleteVendor(DeleteVendor request);
     }
 
     public class Contact
@@ -298,5 +336,22 @@
         public string Npwp { get; set; }
         public int GroupId { get; set; }
         public string Notes { get; set; }
+    }
+
+    public class getrequest
+    {
+        public string? sortby { get; set; }
+        public string? valsort { get; set; }
+        public string? searchby { get; set; }
+        public string? valsearch { get; set; }
+        public int? jumlah_data { get; set; }
+        public int? offset { get; set; }
+        public int? TenantId { get; set; }
+    }
+
+    public class customrespons 
+    { 
+        public string? status { get; set; }
+        public string? message { get; set; }
     }
 }

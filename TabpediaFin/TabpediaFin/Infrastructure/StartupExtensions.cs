@@ -23,6 +23,8 @@ public static class StartupExtensions
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<ICurrentUser, CurrentUser>();
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<IVendorRepository, VendorRepository>();
 
         return services;
     }

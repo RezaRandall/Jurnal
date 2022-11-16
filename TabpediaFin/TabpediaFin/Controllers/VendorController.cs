@@ -21,9 +21,17 @@ namespace TabpediaFin.Controllers
 
         [HttpGet("getlistvendor")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> getlistcustomer(string? sortby, string? valsort, string? searchby, string? valsearch, int? jumlah_data, int? offset)
+        public async Task<IActionResult> getlistvendor([FromQuery] string? sortby, [FromQuery] string? valsort, [FromQuery] string? searchby, [FromQuery] string? valsearch, [FromQuery] int? jumlah_data, [FromQuery] int? offset)
         {
-            var result = await _vendorRepository.GetVendorList(sortby, valsort, searchby, valsearch, jumlah_data, offset, _currentUser.TenantId);
+            GetVendorListQuery param = new GetVendorListQuery();
+            param.sortby = sortby;
+            param.valsort = valsort;
+            param.searchby = searchby;
+            param.valsearch = valsearch;
+            param.jumlah_data = jumlah_data;
+            param.offset = offset;
+            param.TenantId = _currentUser.TenantId;
+            var result = await _mediator.Send(param);
             return Ok(result);
         }
 
@@ -31,29 +39,48 @@ namespace TabpediaFin.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetCustomer(int id)
         {
-            var result = await _vendorRepository.GetVendor(_currentUser.TenantId, id);
+            GetVendorQuery param = new GetVendorQuery();
+            param.Id = id;
+            param.TenantId = _currentUser.TenantId;
+            var result = await _mediator.Send(param);
             return Ok(result);
         }
 
         [HttpPost("create")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> create([FromBody] contactpost customer)
+        public async Task<IActionResult> create([FromBody] AddVendor customer)
         {
-            var result = await _vendorRepository.CreateVendor(customer, _currentUser.TenantId, _currentUser.UserId);
+            customer.TenantId = _currentUser.TenantId;
+            customer.CreatedUid = _currentUser.UserId;
+            var result = await _mediator.Send(customer);
             return Ok(result);
         }
-        [HttpPut("update/{id:int}")]
-        public async Task<IActionResult> Put([FromBody] contactpost customer, int id)
+        [HttpPut("update")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> Put([FromBody] UpdateVendor customer)
         {
-            var result = await _vendorRepository.UpdateVendor(customer, _currentUser.TenantId, _currentUser.UserId, id);
+            customer.TenantId = _currentUser.TenantId;
+            customer.UpdatedUid = _currentUser.UserId;
+            var result = await _mediator.Send(customer);
+            return Ok(result);
+        }
 
-            return Ok(result);
-        }
         [HttpDelete("delete/{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var result = await _vendorRepository.DeleteVendor(id, _currentUser.TenantId);
-            return Ok(result);
+            customrespons response = new customrespons();
+            response.status = "failed";
+            response.message = "Data not found";
+            DeleteVendor param = new DeleteVendor();
+            param.Id = id;
+            param.TenantId = _currentUser.TenantId;
+            var result = await _mediator.Send(param);
+            if (result == true)
+            {
+                response.status = "success";
+                response.message = "contact vendor with id " + id + " was deleted";
+            }
+            return Ok(response);
         }
 
     }
