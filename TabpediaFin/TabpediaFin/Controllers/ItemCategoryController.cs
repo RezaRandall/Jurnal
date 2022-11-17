@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace TabpediaFin.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/itemcategory")]
     [ApiController]
-    public class ItemCategoryController : ControllerBase
+    public class ItemCategoryController : ApiControllerBase
     {
         private readonly IMediator _mediator;
         private readonly ICurrentUser _currentUser;
@@ -34,15 +34,12 @@ namespace TabpediaFin.Controllers
             return Ok(result);
         }
 
-        [HttpGet("getitemcategory/{id:int}")]
+        
+        [HttpGet("{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetItemCategory(int id)
         {
-            GetItemCategoryQuery param = new GetItemCategoryQuery();
-            param.Id = id;
-            param.TenantId = _currentUser.TenantId;
-            var result = await _mediator.Send(param);
-            return Ok(result);
+            return Result(await _mediator.Send(new QueryByIdDto<ItemCategoryDto>(id)));
         }
 
         [HttpPost("create")]

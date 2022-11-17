@@ -2,9 +2,10 @@
 {
     public class CustomerRepository : BaseRepository, ICustomerRepository
     {
-        public CustomerRepository(DbManager dbContext) : base(dbContext)
+        private readonly ICurrentUser _currentUser;
+        public CustomerRepository(DbManager dbContext, ICurrentUser currentUser) : base(dbContext)
         {
-
+            _currentUser = currentUser;
         }
 
         public async Task<Contact> CreateCustomer(AddCustomer customer)
@@ -34,10 +35,7 @@
             {
                 int affected = await cn.QueryFirstOrDefaultAsync<int>(sql, parameters);
                 Contact resultquery = new Contact();
-                GetCustomerQuery param = new GetCustomerQuery();
-                param.TenantId = customer.TenantId;
-                param.Id = affected;
-                resultquery = await GetCustomer(param);
+                resultquery = await GetCustomer(affected, _currentUser);
 
                 return resultquery;
             }
@@ -58,13 +56,13 @@
             }
         }
 
-        public async Task<Contact> GetCustomer(GetCustomerQuery request)
+        public async Task<Contact> GetCustomer(int id, ICurrentUser currentUser)
         {
             var sql = @"SELECT u.""FullName"" as editor, a.""FullName"" as creator, i.""Id"", i.""TenantId"",i.""Name"", i.""Address"", i.""CityName"",i.""PostalCode"",i.""Email"",i.""Phone"",i.""Fax"",i.""Website"",i.""Npwp"",i.""GroupId"",i.""Notes"",i.""CreatedUid"",i.""CreatedUtc"",i.""UpdatedUid"",i.""UpdatedUtc""  FROM ""Contact"" i LEFT JOIN ""AppUser"" a ON i.""CreatedUid"" = a.""Id"" LEFT JOIN ""AppUser"" u ON i.""UpdatedUid"" = a.""Id"" WHERE i.""TenantId"" = @TenantId AND i.""IsCustomer"" = TRUE AND i.""Id"" = @Id";
 
             var parameters = new DynamicParameters();
-            parameters.Add("TenantId", request.TenantId);
-            parameters.Add("Id", request.Id);
+            parameters.Add("TenantId", currentUser.TenantId);
+            parameters.Add("Id", id);
 
             using (var cn = _dbManager.CreateConnection())
             {
@@ -129,10 +127,8 @@
                 Contact resultquery = new Contact();
                 if (affected > 0)
                 {
-                    GetCustomerQuery param = new GetCustomerQuery();
-                    param.TenantId = customer.TenantId;
-                    param.Id = customer.Id;
-                    resultquery = await GetCustomer(param);
+                    
+                    resultquery = await GetCustomer(customer.Id, _currentUser);
                     return resultquery;
                 }
 
@@ -144,7 +140,7 @@
     {
         Task<Contact> CreateCustomer(AddCustomer customer);
         Task<List<Contact>> GetCustomerList(GetCustomerListQuery request);
-        Task<Contact> GetCustomer(GetCustomerQuery request);
+        Task<Contact> GetCustomer(int id, ICurrentUser currentUser);
         Task<Contact> UpdateCustomer(UpdateCustomer customer);
         Task<bool> DeleteCustomer(DeleteCustomer request);
     }

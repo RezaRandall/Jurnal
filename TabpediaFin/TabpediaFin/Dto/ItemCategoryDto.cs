@@ -1,5 +1,11 @@
 ﻿namespace TabpediaFin.Dto
 {
+    [Table("ItemCategory")]
+    public class ItemCategoryDto : BaseDto
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+    }
     public class GetItemCategoryListQuery : IRequest<List<ItemCategory>>
     {
         public string? sortby { get; set; } = string.Empty;
