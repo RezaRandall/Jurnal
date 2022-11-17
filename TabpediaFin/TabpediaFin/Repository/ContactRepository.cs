@@ -47,8 +47,6 @@
         {
             var sql = @"DELETE FROM ""Contact"" where IsCustomer = true, ""Id"" = @Id and ""TenantId"" = @TenantId";
 
-            var expiredUtc = DateTime.UtcNow.AddDays(1);
-
             var parameters = new DynamicParameters();
             parameters.Add("Id", request.Id);
             parameters.Add("TenantId", request.TenantId);
@@ -62,7 +60,7 @@
 
         public async Task<Contact> GetCustomer(GetCustomerQuery request)
         {
-            var sql = @"SELECT ""Id"", ""TenantId"",""Name"", ""Address"", ""CityName"",""PostalCode"",""Email"",""Phone"",""Fax"",""Website"",""Npwp"",""GroupId"",""Notes"",""CreatedUid""  FROM ""Contact"" WHERE ""TenantId"" = @TenantId AND ""IsCustomer"" = TRUE AND ""Id"" = @Id";
+            var sql = @"SELECT u.""FullName"" as editor, a.""FullName"" as creator, i.""Id"", i.""TenantId"",i.""Name"", i.""Address"", i.""CityName"",i.""PostalCode"",i.""Email"",i.""Phone"",i.""Fax"",i.""Website"",i.""Npwp"",i.""GroupId"",i.""Notes"",i.""CreatedUid"",i.""CreatedUtc"",i.""UpdatedUid"",i.""UpdatedUtc""  FROM ""Contact"" i LEFT JOIN ""AppUser"" a ON i.""CreatedUid"" = a.""Id"" LEFT JOIN ""AppUser"" u ON i.""UpdatedUid"" = a.""Id"" WHERE i.""TenantId"" = @TenantId AND i.""IsCustomer"" = TRUE AND i.""Id"" = @Id";
 
             var parameters = new DynamicParameters();
             parameters.Add("TenantId", request.TenantId);
@@ -87,7 +85,7 @@
                 sqlsearch = @"AND """ + request.searchby + "\" = '" + request.valsearch + "'";
             }
 
-            var sql = @"SELECT ""Id"", ""TenantId"", ""Name"", ""Address"", ""CityName"",""PostalCode"",""Email"",""Phone"",""Fax"",""Website"",""Npwp"",""GroupId"",""Notes"",""CreatedUid""  FROM ""Contact"" WHERE ""TenantId"" = @TenantId AND ""IsCustomer"" = TRUE " + sqlsearch + " " + sqlsort + " LIMIT @jumlah_data OFFSET @offset";
+            var sql = @"SELECT u.""FullName"" as editor, a.""FullName"" as creator, i.""Id"", i.""TenantId"", i.""Name"", i.""Address"", i.""CityName"",i.""PostalCode"",i.""Email"",i.""Phone"",i.""Fax"",i.""Website"",i.""Npwp"",i.""GroupId"",i.""Notes"",i.""CreatedUid"",i.""CreatedUtc"",i.""UpdatedUid"",i.""UpdatedUtc""  FROM ""Contact"" i LEFT JOIN ""AppUser"" a ON i.""CreatedUid"" = a.""Id"" LEFT JOIN ""AppUser"" u ON i.""UpdatedUid"" = a.""Id"" WHERE i.""TenantId"" = @TenantId AND i.""IsCustomer"" = TRUE " + sqlsearch + " " + sqlsort + " LIMIT @jumlah_data OFFSET @offset";
 
             var parameters = new DynamicParameters();
             parameters.Add("TenantId", request.TenantId);
@@ -211,7 +209,7 @@
 
         public async Task<Contact> GetVendor(GetVendorQuery request)
         {
-            var sql = @"SELECT  ""Id"", ""TenantId"", ""Name"", ""Address"", ""CityName"",""PostalCode"",""Email"",""Phone"",""Fax"",""Website"",""Npwp"",""GroupId"",""Notes"",""CreatedUid""  FROM ""Contact"" WHERE ""TenantId"" = @TenantId AND ""IsVendor"" = TRUE AND ""Id"" = @Id";
+            var sql = @"SELECT  u.""FullName"" as editor, a.""FullName"" as creator, i.""Id"", i.""TenantId"", i.""Name"", i.""Address"", i.""CityName"",i.""PostalCode"",i.""Email"",i.""Phone"",i.""Fax"",i.""Website"",i.""Npwp"",i.""GroupId"",i.""Notes"",i.""CreatedUid"",i.""CreatedUtc"",i.""UpdatedUid"",i.""UpdatedUtc""  FROM ""Contact"" i LEFT JOIN ""AppUser"" a ON i.""CreatedUid"" = a.""Id"" LEFT JOIN ""AppUser"" u ON i.""UpdatedUid"" = a.""Id""  WHERE i.""TenantId"" = @TenantId AND i.""IsVendor"" = TRUE AND i.""Id"" = @Id";
 
             var parameters = new DynamicParameters();
             parameters.Add("TenantId", request.TenantId);
@@ -229,14 +227,14 @@
             string sqlsearch = "";
             if (request.sortby != null && request.valsort != null)
             {
-                sqlsort = @" order by """ + request.sortby + "\" " + request.valsort + "";
+                sqlsort = @" order by i.""" + request.sortby + "\" " + request.valsort + "";
             }
             if (request.searchby != null && request.valsearch != null)
             {
-                sqlsearch = @"AND """ + request.searchby + "\" = '" + request.valsearch + "'";
+                sqlsearch = @"AND i.""" + request.searchby + "\" = '" + request.valsearch + "'";
             }
 
-            var sql = @"SELECT ""Id"", ""TenantId"", ""Name"", ""Address"", ""CityName"",""PostalCode"",""Email"",""Phone"",""Fax"",""Website"",""Npwp"",""GroupId"",""Notes"",""CreatedUid""  FROM ""Contact"" WHERE ""TenantId"" = @TenantId AND ""IsVendor"" = TRUE " + sqlsearch + " " + sqlsort + " LIMIT @jumlah_data OFFSET @offset";
+            var sql = @"SELECT u.""FullName"" as editor, a.""FullName"" as creator, i.""Id"", i.""TenantId"", i.""Name"", i.""Address"", i.""CityName"",i.""PostalCode"",i.""Email"",i.""Phone"",i.""Fax"",i.""Website"",i.""Npwp"",i.""GroupId"",i.""Notes"",i.""CreatedUid"",i.""CreatedUtc"",i.""UpdatedUid"",i.""UpdatedUtc""  FROM ""Contact"" i LEFT JOIN ""AppUser"" a ON i.""CreatedUid"" = a.""Id"" LEFT JOIN ""AppUser"" u ON i.""UpdatedUid"" = a.""Id"" WHERE i.""TenantId"" = @TenantId AND i.""IsVendor"" = TRUE " + sqlsearch + " " + sqlsort + " LIMIT @jumlah_data OFFSET @offset";
 
             var parameters = new DynamicParameters();
             parameters.Add("TenantId", request.TenantId);
@@ -319,10 +317,12 @@
         public bool IsEmployee { get; set; }
         public bool IsOther { get; set; }
         public string Notes { get; set; }
+        public string creator { get; set; }
+        public string editor { get; set; }
         public int CreatedUid { get; set; }
         public int UpdateUid { get; set; }
         public DateTime CreatedUtc { get; set; }
-        public DateTime UpdateUtc { get; set; }
+        public DateTime UpdatedUtc { get; set; }
     }
     public class contactpost {
         public string Name { get; set; }

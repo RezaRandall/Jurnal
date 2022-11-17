@@ -1,27 +1,28 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+
+// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace TabpediaFin.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CustomerController : ControllerBase
+    public class ItemCategoryController : ControllerBase
     {
         private readonly IMediator _mediator;
         private readonly ICurrentUser _currentUser;
-        public CustomerController(IMediator mediator, ICurrentUser currentUser)
+        public ItemCategoryController(IMediator mediator, ICurrentUser currentUser)
         {
             _mediator = mediator;
             _currentUser = currentUser;
         }
 
-        [HttpGet("getlistcustomer")]
+        [HttpGet("getlistitemcategory")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> getlistcustomer([FromQuery] string? sortby, [FromQuery] string? valsort, [FromQuery] string? searchby, [FromQuery] string? valsearch, [FromQuery] int? jumlah_data, [FromQuery] int? offset)
+        public async Task<IActionResult> getlistitemcategory([FromQuery] string? sortby, [FromQuery] string? valsort, [FromQuery] string? searchby, [FromQuery] string? valsearch, [FromQuery] int? jumlah_data, [FromQuery] int? offset)
         {
-            GetCustomerListQuery param = new GetCustomerListQuery();
+            GetItemCategoryListQuery param = new GetItemCategoryListQuery();
             param.sortby = sortby;
             param.valsort = valsort;
             param.searchby = searchby;
@@ -33,11 +34,11 @@ namespace TabpediaFin.Controllers
             return Ok(result);
         }
 
-        [HttpGet("getcustomer/{id:int}")]
+        [HttpGet("getitemcategory/{id:int}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetCustomer(int id)
+        public async Task<IActionResult> GetItemCategory(int id)
         {
-            GetCustomerQuery param = new GetCustomerQuery();
+            GetItemCategoryQuery param = new GetItemCategoryQuery();
             param.Id = id;
             param.TenantId = _currentUser.TenantId;
             var result = await _mediator.Send(param);
@@ -46,20 +47,11 @@ namespace TabpediaFin.Controllers
 
         [HttpPost("create")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> create([FromBody] contactpost request)
+        public async Task<IActionResult> create([FromBody] ItemCategory request)
         {
-            AddCustomer customer = new AddCustomer();
+            AddItemCategory customer = new AddItemCategory();
             customer.Name = request.Name;
-            customer.Address = request.Address;
-            customer.CityName = request.CityName;
-            customer.PostalCode = request.PostalCode;
-            customer.Email = request.Email;
-            customer.Phone = request.Phone;
-            customer.Fax = request.Fax;
-            customer.Website = request.Website;
-            customer.Npwp = request.Npwp;
-            customer.GroupId = request.GroupId;
-            customer.Notes = request.Notes;
+            customer.Description = request.Description;
             customer.TenantId = _currentUser.TenantId;
             customer.CreatedUid = _currentUser.UserId;
             var result = await _mediator.Send(customer);
@@ -68,21 +60,12 @@ namespace TabpediaFin.Controllers
 
         [HttpPut("update/{Id:int}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> Put(int Id, [FromBody] contactpost request)
+        public async Task<IActionResult> Put(int Id, [FromBody] ItemCategory request)
         {
-            UpdateCustomer customer = new UpdateCustomer();
+            UpdateItemCategory customer = new UpdateItemCategory();
             customer.Id = Id;
             customer.Name = request.Name;
-            customer.Address = request.Address;
-            customer.CityName = request.CityName;
-            customer.PostalCode = request.PostalCode;
-            customer.Email = request.Email;
-            customer.Phone = request.Phone;
-            customer.Fax = request.Fax;
-            customer.Website = request.Website;
-            customer.Npwp = request.Npwp;
-            customer.GroupId = request.GroupId;
-            customer.Notes = request.Notes;
+            customer.Description = request.Description;
             customer.TenantId = _currentUser.TenantId;
             customer.UpdatedUid = _currentUser.UserId;
             var result = await _mediator.Send(customer);
@@ -102,11 +85,9 @@ namespace TabpediaFin.Controllers
             if (result == true)
             {
                 response.status = "success";
-                response.message = "contact customer with id "+ id +" was deleted";
+                response.message = "Item Category with id " + id + " was deleted";
             }
             return Ok(response);
         }
-
-
     }
 }

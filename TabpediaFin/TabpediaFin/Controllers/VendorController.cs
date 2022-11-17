@@ -48,17 +48,42 @@ namespace TabpediaFin.Controllers
 
         [HttpPost("create")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> create([FromBody] AddVendor customer)
+        public async Task<IActionResult> create([FromBody] contactpost request)
         {
+            AddVendor customer = new AddVendor();
+            customer.Name = request.Name;
+            customer.Address = request.Address;
+            customer.CityName = request.CityName;
+            customer.PostalCode = request.PostalCode;
+            customer.Email = request.Email;
+            customer.Phone = request.Phone;
+            customer.Fax = request.Fax;
+            customer.Website = request.Website;
+            customer.Npwp = request.Npwp;
+            customer.GroupId = request.GroupId;
+            customer.Notes = request.Notes;
             customer.TenantId = _currentUser.TenantId;
             customer.CreatedUid = _currentUser.UserId;
             var result = await _mediator.Send(customer);
             return Ok(result);
         }
-        [HttpPut("update")]
+        [HttpPut("update/{Id:int}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> Put([FromBody] UpdateVendor customer)
+        public async Task<IActionResult> Put(int Id,[FromBody] contactpost request)
         {
+            UpdateVendor customer = new UpdateVendor();
+            customer.Id = Id;
+            customer.Name = request.Name;
+            customer.Address = request.Address;
+            customer.CityName = request.CityName;
+            customer.PostalCode = request.PostalCode;
+            customer.Email = request.Email;
+            customer.Phone = request.Phone;
+            customer.Fax = request.Fax;
+            customer.Website = request.Website;
+            customer.Npwp = request.Npwp;
+            customer.GroupId = request.GroupId;
+            customer.Notes = request.Notes;
             customer.TenantId = _currentUser.TenantId;
             customer.UpdatedUid = _currentUser.UserId;
             var result = await _mediator.Send(customer);

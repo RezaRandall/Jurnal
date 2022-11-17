@@ -36,11 +36,7 @@ namespace TabpediaFin.Dto
         public string Npwp { get; set; }
         public int GroupId { get; set; }
         public string Notes { get; set; }
-        [JsonIgnore]
-        [IgnoreDataMember]
         public int? CreatedUid { get; set; } = 0;
-        [JsonIgnore]
-        [IgnoreDataMember]
         public int? TenantId { get; set; } = 0;
     }
 
@@ -58,11 +54,7 @@ namespace TabpediaFin.Dto
         public string Npwp { get; set; }
         public int GroupId { get; set; }
         public string Notes { get; set; }
-        [JsonIgnore]
-        [IgnoreDataMember]
         public int? UpdatedUid { get; set; } = 0;
-        [JsonIgnore]
-        [IgnoreDataMember]
         public int? TenantId { get; set; } = 0;
     }
 }

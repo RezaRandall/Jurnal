@@ -25,6 +25,7 @@ public static class StartupExtensions
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IVendorRepository, VendorRepository>();
+        services.AddScoped<IItemCategoryRepository, ItemCategoryRepository>();
 
         return services;
     }
