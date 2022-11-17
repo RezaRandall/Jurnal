@@ -18,7 +18,7 @@ public class DbManager
         IDbConnection cn = new NpgsqlConnection(_connectionString);
 
         DefaultTypeMap.MatchNamesWithUnderscores = true;
-        // SimpleCRUD.SetDialect(SimpleCRUD.Dialect.PostgreSQL);
+        SimpleCRUD.SetDialect(SimpleCRUD.Dialect.PostgreSQL);
 
         return cn;
     }

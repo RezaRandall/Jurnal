@@ -14,3 +14,4 @@ global using TabpediaFin.Infrastructure.Security;
 global using TabpediaFin.Repository;
 global using System.Net;
 global using TabpediaFin.Infrastructure.Exceptions;
+global using Microsoft.AspNetCore.Mvc;

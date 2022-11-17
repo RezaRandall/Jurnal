@@ -3,6 +3,8 @@
 public abstract class BaseEntity<TId> : IEntity<TId>
 {
     public TId Id { get; protected set; } = default!;
+
+    public int TenantId { get; set; }
 }
 
 

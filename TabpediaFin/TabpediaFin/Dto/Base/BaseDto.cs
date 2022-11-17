@@ -1,6 +1,11 @@
 ﻿namespace TabpediaFin.Dto.Base;
 
-public class BaseDto
+public class BaseDto<TId>
+{
+    public TId Id { get; set; }
+}
+
+public class BaseDto : BaseDto<int>
 {
     public override string ToString()
     {

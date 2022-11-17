@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Dto;
 
-public class AuthenticateRequestDto : BaseDto, IRequest<AuthenticateResponseDto>
+public class AuthenticateRequestDto : IRequest<AuthenticateResponseDto>
 {
     public string Username { get; set; } = string.Empty;
 
