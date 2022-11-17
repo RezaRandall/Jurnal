@@ -12,3 +12,8 @@ public interface IQueryByIdHandler<T> : IRequestHandler<QueryByIdDto<T>, RowResp
 //public interface IQueryByIdHandler<T> : IQueryByIdHandler<int, RowResponse<T>>
 //{
 //}
+
+
+public interface IQueryPagedListHandler<T> : IRequestHandler<QueryPagedListDto<T>, PagedListResponse<T>>
+{
+}
