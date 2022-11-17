@@ -1,6 +1,7 @@
-﻿namespace TabpediaFin.Domain;
+﻿namespace TabpediaFin.Dto;
 
-public class PaymentMethod : BaseEntity
+[Table("PaymentMethod")]
+public class PaymentMethodDto : BaseDto
 {
     public string Name { get; set; } = string.Empty;
 

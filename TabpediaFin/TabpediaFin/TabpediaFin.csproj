@@ -33,6 +33,7 @@
 
   <ItemGroup>
     <Folder Include="Infrastructure\Cors\" />
+    <Folder Include="Infrastructure\Utility\" />
   </ItemGroup>
 
 </Project>
