@@ -56,15 +56,15 @@ builder.Services.AddCors();
 builder.Services.RegisterSettings(builder.Configuration);
 builder.Services.RegisterServices();
 builder.Services.RegisterRepositories();
-<<<<<<< HEAD
+
 builder.Services.AddScoped<IUnitMeasureRepository, UnitMeasureRepository>();
 builder.Services.AddScoped<IPaymentTermRepository, PaymentTermRepository>();
 //builder.Services.AddScoped<IProductRepository, ProductRepository>();
 //builder.Services.AddScoped<ICashAndBankRepository, CashAndBankRepository>();
-=======
+
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IVendorRepository, VendorRepository>();
->>>>>>> 5b062998cfc467d04c95c5e808b3b46b7bb1f908
+
 
 builder.Services.AddJwt();
 
