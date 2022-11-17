@@ -15,18 +15,40 @@
         }
     }
 
-    public class GetItemCategoryHandler : IRequestHandler<GetItemCategoryQuery, ItemCategory>
+    public class ItemCategoryFetchHandler : IQueryByIdHandler<ItemCategoryDto>
     {
-        private readonly IItemCategoryRepository _itemCategoryRepository;
-        public GetItemCategoryHandler(IItemCategoryRepository itemCategoryRepository)
+        private readonly DbManager _dbManager;
+        private readonly ICurrentUser _currentUser;
+
+        public ItemCategoryFetchHandler(DbManager dbManager, ICurrentUser currentUser)
         {
-            _itemCategoryRepository = itemCategoryRepository;
+            _dbManager = dbManager;
+            _currentUser = currentUser;
         }
 
-        public async Task<ItemCategory> Handle(GetItemCategoryQuery request, CancellationToken cancellationToken)
+        public async Task<RowResponse<ItemCategoryDto>> Handle(QueryByIdDto<ItemCategoryDto> request, CancellationToken cancellationToken)
         {
-            var result = await _itemCategoryRepository.GetItemCategory(request);
-            return result;
+            var response = new RowResponse<ItemCategoryDto>();
+
+            try
+            {
+                using (var cn = _dbManager.CreateConnection())
+                {
+                    var row = await cn.FetchAsync<ItemCategoryDto>(request.Id, _currentUser);
+
+                    response.IsOk = true;
+                    response.Row = row;
+                    response.ErrorMessage = string.Empty;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.IsOk = false;
+                response.Row = null;
+                response.ErrorMessage = ex.Message;
+            }
+
+            return response;
         }
     }
 

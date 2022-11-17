@@ -15,18 +15,57 @@
         }
     }
 
-    public class GetCustomerHandler : IRequestHandler<GetCustomerQuery, Contact>
+    //public class GetCustomerHandler : IRequestHandler<GetCustomerQuery, Contact>
+    //{
+    //    private readonly ICustomerRepository _customerRepository;
+    //    public GetCustomerHandler(ICustomerRepository customerRepository)
+    //    {
+    //        _customerRepository = customerRepository;
+    //    }
+
+    //    public async Task<Contact> Handle(GetCustomerQuery request, CancellationToken cancellationToken)
+    //    {
+    //        var result = await _customerRepository.GetCustomer(request);
+    //        return result;
+    //    }
+    //}
+    public class CustomerFetchHandler : IQueryByIdHandler<ContactDto>
     {
+        private readonly DbManager _dbManager;
+        private readonly ICurrentUser _currentUser;
         private readonly ICustomerRepository _customerRepository;
-        public GetCustomerHandler(ICustomerRepository customerRepository)
+
+        public CustomerFetchHandler(DbManager dbManager, ICurrentUser currentUser, ICustomerRepository customerRepository)
         {
+            _dbManager = dbManager;
+            _currentUser = currentUser;
             _customerRepository = customerRepository;
         }
 
-        public async Task<Contact> Handle(GetCustomerQuery request, CancellationToken cancellationToken)
+        public async Task<RowResponse<ContactDto>> Handle(QueryByIdDto<ContactDto> request, CancellationToken cancellationToken)
         {
-            var result = await _customerRepository.GetCustomer(request);
-            return result;
+            var response = new RowResponse<ContactDto>();
+
+            try
+            {
+                var value = await _customerRepository.GetCustomer(request.Id, _currentUser);
+                using (var cn = _dbManager.CreateConnection())
+                {
+                    var row = await cn.FetchAsync<ContactDto>(request.Id, _currentUser);
+
+                    response.IsOk = true;
+                    response.Row = row;
+                    response.ErrorMessage = string.Empty;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.IsOk = false;
+                response.Row = null;
+                response.ErrorMessage = ex.Message;
+            }
+
+            return response;
         }
     }
 

@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace TabpediaFin.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/customer")]
     [ApiController]
-    public class CustomerController : ControllerBase
+    public class CustomerController : ApiControllerBase
     {
         private readonly IMediator _mediator;
         private readonly ICurrentUser _currentUser;
@@ -33,15 +33,11 @@ namespace TabpediaFin.Controllers
             return Ok(result);
         }
 
-        [HttpGet("getcustomer/{id:int}")]
+        [HttpGet("{id:int}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetCustomer(int id)
         {
-            GetCustomerQuery param = new GetCustomerQuery();
-            param.Id = id;
-            param.TenantId = _currentUser.TenantId;
-            var result = await _mediator.Send(param);
-            return Ok(result);
+            return Result(await _mediator.Send(new QueryByIdDto<ContactDto>(id)));
         }
 
         [HttpPost("create")]
