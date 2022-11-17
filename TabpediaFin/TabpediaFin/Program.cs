@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Builder;
 using TabpediaFin.Infrastructure.OpenApi;
 using Microsoft.EntityFrameworkCore.Migrations.Internal;
 using TabpediaFin.Infrastructure.Migrator;
+using TabpediaFin.Repository;
 
 Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Verbose()
@@ -55,8 +56,15 @@ builder.Services.AddCors();
 builder.Services.RegisterSettings(builder.Configuration);
 builder.Services.RegisterServices();
 builder.Services.RegisterRepositories();
+
+builder.Services.AddScoped<IUnitMeasureRepository, UnitMeasureRepository>();
+builder.Services.AddScoped<IPaymentTermRepository, PaymentTermRepository>();
+//builder.Services.AddScoped<IProductRepository, ProductRepository>();
+//builder.Services.AddScoped<ICashAndBankRepository, CashAndBankRepository>();
+
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IVendorRepository, VendorRepository>();
+
 
 builder.Services.AddJwt();
 
