@@ -15,26 +15,56 @@ namespace TabpediaFin.Controllers
         {
             _mediator = mediator;
         }
+        
+        //[HttpGet()]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        //public async Task<IActionResult> GetCustomer([FromQuery] string? sortby, [FromQuery] string? valsort, [FromQuery] string? searchby, [FromQuery] string? valsearch, [FromQuery] int? jumlah_data, [FromQuery] int? offset)
+        //{
+        //    GetCustomerListQuery param = new GetCustomerListQuery();
+        //    param.sortby = sortby;
+        //    param.valsort = valsort;
+        //    param.searchby = searchby;
+        //    param.valsearch = valsearch;
+        //    param.jumlah_data = jumlah_data;
+        //    param.offset = offset;
 
-        [HttpGet("group/{id}")]
+        //    var result = await _mediator.Send(param);
+        //    return Ok(result);
+        //}
+        [HttpGet()]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetGroup(int id)
+        public async Task<IActionResult> GetCustomer([FromQuery] QueryPagedListDto<contactqueryDto> request)
         {
-            return Result(await _mediator.Send(new QueryByIdDto<ContactGroupDto>(id)));
+            return Result(await _mediator.Send(new QueryPagedListDto<contactqueryDto>(request)));
+        }
+        
+
+        [HttpGet("{id:int}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetCustomer(int id)
+        {
+            return Result(await _mediator.Send(new QueryByIdDto<ContactDto>(id)));
         }
 
-        [HttpGet("address/{id}")]
+        [HttpGet("contactaddress/{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetAddress(int id)
         {
             return Result(await _mediator.Send(new QueryByIdDto<ContactAddressDto>(id)));
         }
 
-        [HttpGet("person/{id}")]
+        [HttpGet("contactperson/{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetPerson(int id)
         {
             return Result(await _mediator.Send(new QueryByIdDto<ContactPersonDto>(id)));
+        }
+        enum contacttype
+        {
+            Customer,
+            Vendor,
+            Employee,
+            Other
         }
     }
 }
