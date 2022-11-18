@@ -63,17 +63,17 @@ namespace TabpediaFin.Handler
                     List<contactqueryDto> result;
                     result = (await cn.QueryAsync<contactqueryDto>(sql, parameters).ConfigureAwait(false)).ToList();
 
-                    response.Total = result.Count;
+                    response.RecordCount = result.Count;
 
                     response.IsOk = true;
-                    response.Data = result;
+                    response.List = result;
                     response.ErrorMessage = string.Empty;
                 }
             }
             catch (Exception ex)
             {
                 response.IsOk = false;
-                response.Data = null;
+                response.List = null;
                 response.ErrorMessage = ex.Message;
             }
 
