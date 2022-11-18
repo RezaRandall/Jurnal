@@ -8,7 +8,7 @@ namespace TabpediaFin.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UnitMeasuresController : ControllerBase
+public class UnitMeasuresController : ApiControllerBase
 {
     private readonly IMediator _mediator;
     private readonly ICurrentUser _currentUser;
@@ -31,15 +31,20 @@ public class UnitMeasuresController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("getUnitMeasure/{id:int}")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> GetUnitMeasureById(int id)
+    //[HttpGet("getUnitMeasure/{id:int}")]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //public async Task<IActionResult> GetUnitMeasureById(int id)
+    //{
+    //    GetUnitMeasureQuery param = new GetUnitMeasureQuery();
+    //    param.Id = id;
+    //    param.TenantId = _currentUser.TenantId;
+    //    var result = await _mediator.Send(param);
+    //    return Ok(result);
+    //}
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Get(int id)
     {
-        GetUnitMeasureQuery param = new GetUnitMeasureQuery();
-        param.Id = id;
-        param.TenantId = _currentUser.TenantId;
-        var result = await _mediator.Send(param);
-        return Ok(result);
+        return Result(await _mediator.Send(new QueryByIdDto<UnitMeasureDto>(id)));
     }
 
     [HttpPost("createUnitMeasure")]
@@ -67,8 +72,6 @@ public class UnitMeasuresController : ControllerBase
     public async Task<IActionResult> Delete(int id)
     {
         UnitMeasureRespons response = new UnitMeasureRespons();
-        //response.status = "failed";
-        //response.message = "Data not found";
         DeleteUnitMeasure param = new DeleteUnitMeasure();
         param.Id = id;
         param.TenantId = _currentUser.TenantId;

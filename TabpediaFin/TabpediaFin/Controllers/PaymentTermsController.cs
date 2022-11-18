@@ -35,7 +35,7 @@ public class PaymentTermController : ApiControllerBase
         return Result(await _mediator.Send(new QueryByIdDto<PaymentTermDto>(id)));
     }
 
-    [HttpPost("PaymentTerm")]
+    [HttpPost("createPaymentTerm")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> create([FromBody] AddPaymentTerm unitMeasure)
     {
@@ -60,8 +60,6 @@ public class PaymentTermController : ApiControllerBase
     public async Task<IActionResult> Delete(int id)
     {
         PaymentTermRespons response = new PaymentTermRespons();
-        //response.status = "failed";
-        //response.message = "Data not found";
         DeletePaymentTerm param = new DeletePaymentTerm();
         param.Id = id;
         param.TenantId = _currentUser.TenantId;

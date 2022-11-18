@@ -54,21 +54,6 @@ public class PaymentTermFetchHandler : IQueryByIdHandler<PaymentTermDto>
         }
     }
 
-    //public class GetPaymentTermHandler : IRequestHandler<GetPaymentTermQuery, PaymentTerm>
-    //{
-    //    private readonly IPaymentTermRepository _paymentTermRepository;
-    //    public GetPaymentTermHandler(IPaymentTermRepository paymentTermRepository)
-    //    {
-    //        _paymentTermRepository = paymentTermRepository;
-    //    }
-
-    //    public async Task<PaymentTerm> Handle(GetPaymentTermQuery request, CancellationToken cancellationToken)
-    //    {
-    //        var result = await _paymentTermRepository.GetPaymentTermById(request);
-    //        return result;
-    //    }
-    //}
-
     public class DeletePaymentTermHandler : IRequestHandler<DeletePaymentTerm, bool>
     {
         private readonly IPaymentTermRepository _paymentTermRepository;
