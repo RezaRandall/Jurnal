@@ -1,4 +1,4 @@
-﻿namespace TabpediaFin.Dto.Base;
+﻿namespace TabpediaFin.Dto.Common.Response;
 
 public class BaseResponse
 {

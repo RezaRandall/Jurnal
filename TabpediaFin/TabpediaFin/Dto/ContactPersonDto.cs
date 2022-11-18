@@ -10,5 +10,11 @@
         public string Fax { get; set; } = string.Empty;
         public string Others { get; set; } = string.Empty;
         public string Notes { get; set; } = string.Empty;
+        //public string creator { get; set; } = string.Empty;
+        //public string editor { get; set; } = string.Empty;
+        //public int CreatedUid { get; set; }
+        //public int UpdateUid { get; set; }
+        //public DateTime CreatedUtc { get; set; }
+        //public DateTime UpdatedUtc { get; set; }
     }
 }

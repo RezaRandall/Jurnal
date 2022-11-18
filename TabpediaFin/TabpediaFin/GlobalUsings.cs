@@ -15,3 +15,7 @@ global using TabpediaFin.Repository;
 global using System.Net;
 global using TabpediaFin.Infrastructure.Exceptions;
 global using Microsoft.AspNetCore.Mvc;
+global using TabpediaFin.Infrastructure.Attributes;
+global using TabpediaFin.Dto.Common.Response;
+global using TabpediaFin.Dto.Common.Request;
+global using TabpediaFin.Handler.Interfaces;

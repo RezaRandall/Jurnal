@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Controllers;
 
-[Route("payment-method")]
+[Route("api/payment-method")]
 public class PaymentMethodController : ApiControllerBase
 {
     private readonly IMediator _mediator;
@@ -8,6 +8,13 @@ public class PaymentMethodController : ApiControllerBase
     public PaymentMethodController(IMediator mediator)
     {
         _mediator = mediator;
+    }
+
+
+    [HttpGet("list")]
+    public async Task<IActionResult> GetList(int id)
+    {
+        return Result(await _mediator.Send(new QueryByIdDto<PaymentMethodDto>(id)));
     }
 
 
