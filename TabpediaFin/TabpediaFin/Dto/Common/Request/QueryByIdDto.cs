@@ -1,4 +1,4 @@
-﻿namespace TabpediaFin.Dto;
+﻿namespace TabpediaFin.Dto.Common.Request;
 
 public class QueryByIdDto<TId, TResponse> : IRequest<TResponse>
 {

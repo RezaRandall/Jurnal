@@ -1,4 +1,7 @@
-﻿namespace TabpediaFin.Handler
+﻿using TabpediaFin.Dto.Common.Request;
+using TabpediaFin.Handler.Interfaces;
+
+namespace TabpediaFin.Handler
 {
     public class GetListItemCategoryHandler : IRequestHandler<GetItemCategoryListQuery, List<ItemCategory>>
     {

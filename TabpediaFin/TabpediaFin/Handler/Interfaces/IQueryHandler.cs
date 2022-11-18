@@ -1,4 +1,4 @@
-﻿namespace TabpediaFin.Dto.Base;
+﻿namespace TabpediaFin.Handler.Interfaces;
 
 public interface IQueryByIdHandler<TId, TResponse> : IRequestHandler<QueryByIdDto<TId, TResponse>, TResponse>
 {
@@ -14,6 +14,3 @@ public interface IQueryByIdHandler<T> : IRequestHandler<QueryByIdDto<T>, RowResp
 //}
 
 
-public interface IQueryPagedListHandler<T> : IRequestHandler<QueryPagedListDto<T>, PagedListResponse<T>>
-{
-}

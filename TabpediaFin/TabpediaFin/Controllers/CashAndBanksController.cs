@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-
-namespace TabpediaFin.Controllers
+﻿namespace TabpediaFin.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

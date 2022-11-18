@@ -1,4 +1,4 @@
-﻿namespace TabpediaFin.Dto;
+﻿namespace TabpediaFin.Dto.Common.Request;
 
 public class QueryPagedListDto<T> : IRequest<PagedListResponse<T>>
 {
