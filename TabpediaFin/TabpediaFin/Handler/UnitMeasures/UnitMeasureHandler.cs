@@ -1,35 +1,12 @@
-﻿using static TabpediaFin.Dto.UnitMeasureDto;
-using static TabpediaFin.Repository.UnitMeasureRepository;
+﻿using TabpediaFin.Infrastructure.Security;
+//using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
-namespace TabpediaFin.Repository;
+namespace TabpediaFin.Handler.UnitMeasure;
 
-public class UnitMeasureRepository : BaseRepository, IUnitMeasureRepository
+public class UnitMeasureHandler : BaseRepository, IUnitMeasure
 {
-    public UnitMeasureRepository(DbManager dbContext) : base(dbContext)
-    {}
-
-    public async Task<List<UnitMeasure>> GetUnitMeasureList(GetUnitMeasureListQuery request)
-    {
-        string sqlsearch = "";
-        if (request.searchby != null && request.searchby != "")
-        {
-            sqlsearch = @"AND ""Name"" LIKE '%"+ request.searchby + "%' or \"Description\" LIKE '%"+ request.searchby + "%' ";
-        }
-
-        var sql = @"SELECT * FROM ""UnitMeasure"" WHERE ""TenantId"" = @TenantId " + sqlsearch + " " ;
-
-        var parameters = new DynamicParameters();
-        parameters.Add("TenantId", request.TenantId);
-
-        using (var cn = _dbManager.CreateConnection())
-        {
-            List<UnitMeasure> result;
-            result = (await cn.QueryAsync<UnitMeasure>(sql, parameters).ConfigureAwait(false)).ToList();
-            return result;
-        }
-    }
-
-
+    public UnitMeasureHandler(DbManager dbContext) : base(dbContext)
+    { }
     public async Task<UnitMeasure> GetUnitMeasureById(GetUnitMeasureQuery request)
     {
         var sql = @"SELECT *  FROM ""UnitMeasure"" WHERE ""TenantId"" = @TenantId AND ""Id"" = @Id";
@@ -44,7 +21,7 @@ public class UnitMeasureRepository : BaseRepository, IUnitMeasureRepository
         }
     }
 
-    public async Task<UnitMeasure> CreateUnitMeasure(AddUnitMeasure unitMeasure)
+    public async Task<UnitMeasure> CreateUnitMeasures(AddUnitMeasure unitMeasure)
     {
         var sql = @"INSERT INTO ""UnitMeasure"" 
                         (""TenantId"",""Name"", ""Description"",""CreatedUid"",""CreatedUtc"")
@@ -75,8 +52,8 @@ public class UnitMeasureRepository : BaseRepository, IUnitMeasureRepository
     public async Task<UnitMeasure> UpdateUnitMeasure(UpdateUnitMeasure unitMeasure)
     {
         var sql = @"UPDATE ""UnitMeasure"" 
-                        SET ""Name"" = @Name, ""Description"" = @Description,""UpdatedUid"" = @UpdatedUid,""UpdatedUtc"" = @UpdatedUtc 
-                        WHERE ""Id"" = @Id AND ""TenantId"" = @TenantId";
+                            SET ""Name"" = @Name, ""Description"" = @Description,""UpdatedUid"" = @UpdatedUid,""UpdatedUtc"" = @UpdatedUtc 
+                            WHERE ""Id"" = @Id AND ""TenantId"" = @TenantId";
 
         var expiredUtc = DateTime.UtcNow.AddDays(1);
 
@@ -123,6 +100,52 @@ public class UnitMeasureRepository : BaseRepository, IUnitMeasureRepository
     }
 
 
+
+
+    public class AddUnitMeasureHandler : IRequestHandler<AddUnitMeasure, UnitMeasure>
+    {
+        private readonly IUnitMeasure _unitMeasure;
+        public AddUnitMeasureHandler(IUnitMeasure unitMeasure)
+        {
+            _unitMeasure = unitMeasure;
+        }
+
+        async Task<UnitMeasure> IRequestHandler<AddUnitMeasure, UnitMeasure>.Handle(AddUnitMeasure request, CancellationToken cancellationToken)
+        {
+            var result = await _unitMeasure.CreateUnitMeasures(request);
+            return result;
+        }
+    }
+
+    public class UpdateUnitMeasureHandler : IRequestHandler<UpdateUnitMeasure, UnitMeasure>
+    {
+        private readonly IUnitMeasure _unitMeasure;
+        public UpdateUnitMeasureHandler(IUnitMeasure unitMeasure)
+        {
+            _unitMeasure = unitMeasure;
+        }
+
+        async Task<UnitMeasure> IRequestHandler<UpdateUnitMeasure, UnitMeasure>.Handle(UpdateUnitMeasure request, CancellationToken cancellationToken)
+        {
+            var result = await _unitMeasure.UpdateUnitMeasure(request);
+            return result;
+        }
+    }
+
+    public class DeleteUnitMeasureHandler : IRequestHandler<DeleteUnitMeasure, bool>
+    {
+        private readonly IUnitMeasure _unitMeasure;
+        public DeleteUnitMeasureHandler(IUnitMeasure unitMeasure)
+        {
+            _unitMeasure = unitMeasure;
+        }
+
+        public async Task<bool> Handle(DeleteUnitMeasure request, CancellationToken cancellationToken)
+        {
+            var result = await _unitMeasure.DeleteUnitMeasure(request);
+            return result;
+        }
+    }
 }
 public class UnitMeasure
 {
@@ -143,11 +166,11 @@ public class UnitMeasureRespons
 }
 
 
-public interface IUnitMeasureRepository
+public interface IUnitMeasure
 {
-    Task<UnitMeasure> CreateUnitMeasure(AddUnitMeasure customer);
-    Task<List<UnitMeasure>> GetUnitMeasureList(GetUnitMeasureListQuery request);
+    Task<UnitMeasure> CreateUnitMeasures(AddUnitMeasure customer);
     Task<UnitMeasure> GetUnitMeasureById(GetUnitMeasureQuery request);
     Task<UnitMeasure> UpdateUnitMeasure(UpdateUnitMeasure customer);
     Task<bool> DeleteUnitMeasure(DeleteUnitMeasure request);
 }
+

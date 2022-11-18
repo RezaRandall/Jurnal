@@ -1,27 +1,72 @@
 ﻿using System.Runtime.Serialization;
-using static TabpediaFin.Repository.UnitMeasureRepository;
+using TabpediaFin.Handler.UnitMeasure;
+//using UnitMeasure = TabpediaFin.Repository.UnitMeasure;
+//using static TabpediaFin.Repository.UnitMeasureRepository;
 
 namespace TabpediaFin.Dto;
 
 [Table("UnitMeasure")]
-public class UnitMeasureDto : BaseDto
+
+public class UnitMeasureDto
 {
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
+    protected UnitMeasureDto()
+    {
+    }
+
+    public UnitMeasureDto(
+        int id,
+        int tenantId,
+        string name,
+        string description,
+        int createdUid,
+        DateTime createdUtc,
+        int updatedUid,
+        DateTime updatedUtc
+
+        )
+    {
+        Id = id;
+        TenantId = tenantId;
+        Name = name;
+        Description = description;
+        CreatedUid = createdUid;
+        CreatedUtc = createdUtc;
+        UpdatedUid = updatedUid;
+        UpdatedUtc = updatedUtc;
+    }
+
+    public int Id { get; set; }
+    public int TenantId { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public int CreatedUid { get; set; }
+    public DateTime CreatedUtc { get; set; }
+    public int UpdatedUid { get; set; }
+    public DateTime UpdatedUtc { get; set; }
 }
 
-public class GetUnitMeasureListQuery : IRequest<List<UnitMeasure>>
-{
-    public string? searchby { get; set; } = string.Empty;
-    [JsonIgnore]
-    public int? TenantId { get; set; } = 0;
-}
+
+//public class UnitMeasureDto : BaseDto
+//{
+//    public string Name { get; set; } = string.Empty;
+//    public string Description { get; set; } = string.Empty;
+//}
+
+//public class GetUnitMeasureListQuery : IRequest<List<UnitMeasure>>
+//{
+//    public string? searchby { get; set; } = string.Empty;
+//    [JsonIgnore]
+//    public int? TenantId { get; set; } = 0;
+//}
 
 public class GetUnitMeasureQuery : IRequest<UnitMeasure>
 {
     public int? Id { get; set; } = 0;
     public int? TenantId { get; set; } = 0;
 }
+
+
+
 public class DeleteUnitMeasure : IRequest<bool>
 {
     public int? Id { get; set; } = 0;

@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using TabpediaFin.Handler.Product;
+using TabpediaFin.Handler.UnitMeasure;
 using static TabpediaFin.Dto.UnitMeasureDto;
 
 namespace TabpediaFin.Controllers;
@@ -16,17 +18,11 @@ public class PaymentTermController : ApiControllerBase
         _currentUser = currentUser;
     }
 
-    [HttpGet("getAllListPaymentTerm")]
+    [HttpGet("GetListPaymentTerm")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> getAllListPaymentTerm(
-         [FromQuery] string? searchby
-        )
+    public async Task<List<PaymentTermDto>> Get()
     {
-        GetPaymentTermListQuery param = new GetPaymentTermListQuery();
-        param.searchby = searchby;
-        param.TenantId = _currentUser.TenantId;
-        var result = await _mediator.Send(param);
-        return Ok(result);
+        return await _mediator.Send(new PaymentTermList.Query());
     }
 
     [HttpGet("{id}")]
@@ -34,6 +30,31 @@ public class PaymentTermController : ApiControllerBase
     {
         return Result(await _mediator.Send(new QueryByIdDto<PaymentTermDto>(id)));
     }
+
+
+
+
+
+
+
+    //[HttpGet("getAllListPaymentTerm")]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //public async Task<IActionResult> getAllListPaymentTerm(
+    //     [FromQuery] string? searchby
+    //    )
+    //{
+    //    GetPaymentTermListQuery param = new GetPaymentTermListQuery();
+    //    param.searchby = searchby;
+    //    param.TenantId = _currentUser.TenantId;
+    //    var result = await _mediator.Send(param);
+    //    return Ok(result);
+    //}
+
+    //[HttpGet("{id}")]
+    //public async Task<IActionResult> Get(int id)
+    //{
+    //    return Result(await _mediator.Send(new QueryByIdDto<PaymentTermDto>(id)));
+    //}
 
     [HttpPost("createPaymentTerm")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]

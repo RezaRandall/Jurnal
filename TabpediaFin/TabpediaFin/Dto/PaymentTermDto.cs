@@ -1,24 +1,76 @@
 ﻿using System.Runtime.Serialization;
+using TabpediaFin.Handler.Product;
 
 namespace TabpediaFin.Dto;
 
 [Table("PaymentTerm")]
-public class PaymentTermDto : BaseDto
+public class PaymentTermDto
 {
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public int? TermDays { get; set; } = 0;
-    public bool IsActive { get; set; } = true;
+    protected PaymentTermDto()
+    {
+    }
+
+    public PaymentTermDto(
+        int id,
+        int tenantId,
+        string name,
+        string description,
+        int termDays,
+        bool isActive,
+        int createdUid,
+        DateTime createdUtc,
+        int updatedUid,
+        DateTime updatedUtc
+
+        )
+    {
+        Id = id;
+        TenantId = tenantId;
+        Name = name;
+        Description = description;
+        TermDays = termDays;
+        IsActive = isActive;
+        CreatedUid = createdUid;
+        CreatedUtc = createdUtc;
+        UpdatedUid = updatedUid;
+        UpdatedUtc = updatedUtc;
+    }
+
+    public int Id { get; set; }
+    public int TenantId { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public int TermDays { get; set; }
+    public bool IsActive { get; set; }
+    public int CreatedUid { get; set; }
+    public DateTime CreatedUtc { get; set; }
+    public int UpdatedUid { get; set; }
+    public DateTime UpdatedUtc { get; set; }
 }
-public class GetPaymentTermQuery : IRequest<UnitMeasure>
+
+
+
+
+
+
+
+//public class PaymentTermDto : BaseDto
+//{
+//    public string Name { get; set; } = string.Empty;
+//    public string Description { get; set; } = string.Empty;
+//    public int? TermDays { get; set; } = 0;
+//    public bool IsActive { get; set; } = true;
+//}
+
+//public class GetPaymentTermListQuery : IRequest<List<PaymentTerm>>
+//{
+//    public string? searchby { get; set; } = string.Empty;
+//    [JsonIgnore]
+//    public int? TenantId { get; set; } = 0;
+//}
+public class GetPaymentTermQuery : IRequest<PaymentTerm>
 {
     public int? Id { get; set; } = 0;
-    public int? TenantId { get; set; } = 0;
-}
-public class GetPaymentTermListQuery : IRequest<List<PaymentTerm>>
-{
-    public string? searchby { get; set; } = string.Empty;
-    [JsonIgnore]
     public int? TenantId { get; set; } = 0;
 }
 public class DeletePaymentTerm : IRequest<bool>

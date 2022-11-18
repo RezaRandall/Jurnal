@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TabpediaFin.Handler.UnitMeasure;
 using static TabpediaFin.Dto.UnitMeasureDto;
 
 namespace TabpediaFin.Controllers;
@@ -18,34 +19,32 @@ public class UnitMeasuresController : ApiControllerBase
         _currentUser = currentUser;
     }
 
-    [HttpGet("getListUnitMeasures")]
+    [HttpGet]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> getListUnitMeasures(
-         [FromQuery] string? searchby
-        )
+    public async Task<List<UnitMeasureDto>> Get()
     {
-        GetUnitMeasureListQuery param = new GetUnitMeasureListQuery();
-        param.searchby = searchby;
-        param.TenantId = _currentUser.TenantId;
-        var result = await _mediator.Send(param);
-        return Ok(result);
+        return await _mediator.Send(new UnitMeasureList.Query());
     }
 
-    //[HttpGet("getUnitMeasure/{id:int}")]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    //public async Task<IActionResult> GetUnitMeasureById(int id)
-    //{
-    //    GetUnitMeasureQuery param = new GetUnitMeasureQuery();
-    //    param.Id = id;
-    //    param.TenantId = _currentUser.TenantId;
-    //    var result = await _mediator.Send(param);
-    //    return Ok(result);
-    //}
     [HttpGet("{id}")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
         return Result(await _mediator.Send(new QueryByIdDto<UnitMeasureDto>(id)));
     }
+
+    //[HttpGet("getListUnitMeasures")]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //public async Task<IActionResult> getListUnitMeasures(
+    //     [FromQuery] string? searchby
+    //    )
+    //{
+    //    GetUnitMeasureListQuery param = new GetUnitMeasureListQuery();
+    //    param.searchby = searchby;
+    //    param.TenantId = _currentUser.TenantId;
+    //    var result = await _mediator.Send(param);
+    //    return Ok(result);
+    //}
 
     [HttpPost("createUnitMeasure")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -81,7 +80,7 @@ public class UnitMeasuresController : ApiControllerBase
             response.status = "success";
             response.message = "unit measure with id " + id + " was deleted";
         }
-        else 
+        else
         {
             response.status = "failed";
             response.message = "Data not found";

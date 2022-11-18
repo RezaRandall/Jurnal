@@ -19,4 +19,9 @@ public class FinContext : DbContext
         optionsBuilder.UseLoggerFactory(_loggerFactory);
     }
 
+    public async Task<int> SaveChangesAsync()
+    {
+        return await base.SaveChangesAsync();
+    }
+
 }
