@@ -2,6 +2,17 @@
 
 namespace TabpediaFin.Dto
 {
+    public class GetContactDto : IRequest<List<Contact>>
+    {
+        public string? sortby { get; set; } = string.Empty;
+        public string? valsort { get; set; } = string.Empty;
+        public string? searchby { get; set; } = string.Empty;
+        public string? valsearch { get; set; } = string.Empty;
+        public int? jumlah_data { get; set; } = 5;
+        public int? offset { get; set; } = 0;
+        [JsonIgnore]
+        public int? TenantId { get; set; } = 0;
+    }
     public class GetCustomerListQuery : IRequest<List<Contact>> {
         public string? sortby { get; set; } = string.Empty;
         public string? valsort { get; set; } = string.Empty;
