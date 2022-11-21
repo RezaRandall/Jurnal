@@ -18,6 +18,7 @@ namespace TabpediaFin.Controllers
         }
 
         [HttpPost("list")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<ContactGroupListDto> request)
         {
             return Result(await _mediator.Send(request));
@@ -39,6 +40,7 @@ namespace TabpediaFin.Controllers
         }
 
         [HttpPut]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Update([FromBody] ContactGroupUpdateDto command)
         {
             return Result(await _mediator.Send(command));

@@ -20,6 +20,7 @@ namespace TabpediaFin.Controllers
         }
 
         [HttpPost("list")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<ItemCategoryListDto> request)
         {
             return Result(await _mediator.Send(request));
@@ -41,12 +42,14 @@ namespace TabpediaFin.Controllers
         }
 
         [HttpPut]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Update([FromBody] ItemCategoryUpdateDto command)
         {
             return Result(await _mediator.Send(command));
         }
 
         [HttpDelete("delete/{id:int}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Delete(int id)
         {
             customrespons response = new customrespons();

@@ -91,6 +91,19 @@ namespace TabpediaFin.Controllers
         {
             return Result(await _mediator.Send(new QueryByIdDto<ContactFetchDto>(id)));
         }
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> InsertContact([FromBody] ContactUpdateDto command)
+        {
+            return Result(await _mediator.Send(command));
+        }
+
+        [HttpPut]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> UpdateContact([FromBody] ContactInsertDto command)
+        {
+            return Result(await _mediator.Send(command));
+        }
 
         [HttpGet("contactaddress/{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -106,6 +119,7 @@ namespace TabpediaFin.Controllers
         }
 
         [HttpPut("contactaddress")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> UpdateAddress([FromBody] ContactAddressUpdateDto command)
         {
             return Result(await _mediator.Send(command));
@@ -125,6 +139,7 @@ namespace TabpediaFin.Controllers
         }
 
         [HttpPut("contactperson")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> UpdatePerson([FromBody] ContactPersonUpdateDto command)
         {
             return Result(await _mediator.Send(command));
