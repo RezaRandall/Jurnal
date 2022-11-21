@@ -99,6 +99,26 @@ public class UnitMeasureHandler : BaseRepository, IUnitMeasure
         }
     }
 
+    public async Task<List<UnitMeasure>> GetUnitMeasureList(GetUnitMeasureListQuery request)
+    {
+        string sqlsearch = "";
+        if (request.searchby != null && request.searchby != "")
+        {
+            sqlsearch = @"AND ""Name"" ILIKE '%" + request.searchby + "%' or \"Description\" ILIKE '%" + request.searchby + "%' ";
+        }
+
+        var sql = @"SELECT * FROM ""UnitMeasure"" WHERE ""TenantId"" = @TenantId " + sqlsearch + " ";
+
+        var parameters = new DynamicParameters();
+        parameters.Add("TenantId", request.TenantId);
+
+        using (var cn = _dbManager.CreateConnection())
+        {
+            List<UnitMeasure> result;
+            result = (await cn.QueryAsync<UnitMeasure>(sql, parameters).ConfigureAwait(false)).ToList();
+            return result;
+        }
+    }
 
 
 
@@ -146,7 +166,26 @@ public class UnitMeasureHandler : BaseRepository, IUnitMeasure
             return result;
         }
     }
+
+    public class GetListUnitMeasureHandler : IRequestHandler<GetUnitMeasureListQuery, List<UnitMeasure>>
+    {
+        private readonly IUnitMeasure _unitMeasure;
+        public GetListUnitMeasureHandler(IUnitMeasure unitMeasure)
+        {
+            _unitMeasure = unitMeasure;
+        }
+
+        public async Task<List<UnitMeasure>> Handle(GetUnitMeasureListQuery request, CancellationToken cancellationToken)
+        {
+            var result = await _unitMeasure.GetUnitMeasureList(request);
+            return result;
+        }
+    }
+
+
 }
+
+
 public class UnitMeasure
 {
     public int Id { get; set; }
@@ -171,6 +210,7 @@ public interface IUnitMeasure
     Task<UnitMeasure> CreateUnitMeasures(AddUnitMeasure customer);
     Task<UnitMeasure> GetUnitMeasureById(GetUnitMeasureQuery request);
     Task<UnitMeasure> UpdateUnitMeasure(UpdateUnitMeasure customer);
+    Task<List<UnitMeasure>> GetUnitMeasureList(GetUnitMeasureListQuery request);
     Task<bool> DeleteUnitMeasure(DeleteUnitMeasure request);
 }
 

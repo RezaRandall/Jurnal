@@ -52,9 +52,21 @@ public class UnitMeasureDto
 //    public string Description { get; set; } = string.Empty;
 //}
 
+public class GetUnitMeasureListQuery : IRequest<List<UnitMeasure>>
+{
+    public string? searchby { get; set; } = string.Empty;
+    [JsonIgnore]
+    public int? TenantId { get; set; } = 0;
+}
+
 //public class GetUnitMeasureListQuery : IRequest<List<UnitMeasure>>
 //{
+//    public string? sortby { get; set; } = string.Empty;
+//    public string? valsort { get; set; } = string.Empty;
 //    public string? searchby { get; set; } = string.Empty;
+//    public string? valsearch { get; set; } = string.Empty;
+//    public int? jumlah_data { get; set; } = 5;
+//    public int? offset { get; set; } = 0;
 //    [JsonIgnore]
 //    public int? TenantId { get; set; } = 0;
 //}

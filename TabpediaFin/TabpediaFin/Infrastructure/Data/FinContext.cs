@@ -21,6 +21,7 @@ public class FinContext : DbContext
     }
 
     public DbSet<PaymentMethod> PaymentMethod { get; set; }
+    public DbSet<Item> Item { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

@@ -15,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Npgsql;
 using TabpediaFin.Handler.UnitMeasure;
 using TabpediaFin.Handler.Product;
+using TabpediaFin.Handler.Item;
 
 Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Verbose()

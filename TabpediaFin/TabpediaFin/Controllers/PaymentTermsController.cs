@@ -6,7 +6,8 @@ using static TabpediaFin.Dto.UnitMeasureDto;
 
 namespace TabpediaFin.Controllers;
 
-[Route("payment-term")]
+[Route("api/[controller]")]
+[ApiController]
 public class PaymentTermController : ApiControllerBase
 {
     private readonly IMediator _mediator;
@@ -18,7 +19,7 @@ public class PaymentTermController : ApiControllerBase
         _currentUser = currentUser;
     }
 
-    [HttpGet("GetListPaymentTerm")]
+    [HttpGet("list")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<List<PaymentTermDto>> Get()
     {
@@ -30,12 +31,6 @@ public class PaymentTermController : ApiControllerBase
     {
         return Result(await _mediator.Send(new QueryByIdDto<PaymentTermDto>(id)));
     }
-
-
-
-
-
-
 
     //[HttpGet("getAllListPaymentTerm")]
     //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -56,7 +51,7 @@ public class PaymentTermController : ApiControllerBase
     //    return Result(await _mediator.Send(new QueryByIdDto<PaymentTermDto>(id)));
     //}
 
-    [HttpPost("createPaymentTerm")]
+    [HttpPost("create")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> create([FromBody] AddPaymentTerm unitMeasure)
     {
@@ -66,7 +61,7 @@ public class PaymentTermController : ApiControllerBase
         return Ok(result);
     }
 
-    [HttpPut("updatePaymentTerm")]
+    [HttpPut("update")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Put([FromBody] UpdatePaymentTerm unitMeasure)
     {
@@ -76,7 +71,7 @@ public class PaymentTermController : ApiControllerBase
         return Ok(result);
     }
 
-    [HttpDelete("deletePaymentTerm/{id:int}")]
+    [HttpDelete("delete/{id:int}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Delete(int id)
     {

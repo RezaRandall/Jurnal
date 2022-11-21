@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using TabpediaFin.Handler.UnitMeasure;
-using static TabpediaFin.Dto.UnitMeasureDto;
 
 namespace TabpediaFin.Controllers;
 
@@ -19,12 +16,12 @@ public class UnitMeasuresController : ApiControllerBase
         _currentUser = currentUser;
     }
 
-    [HttpGet]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<List<UnitMeasureDto>> Get()
-    {
-        return await _mediator.Send(new UnitMeasureList.Query());
-    }
+    //[HttpGet]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //public async Task<List<UnitMeasureDto>> Get()
+    //{
+    //    return await _mediator.Send(new UnitMeasureList.Query());
+    //}
 
     [HttpGet("{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -33,20 +30,35 @@ public class UnitMeasuresController : ApiControllerBase
         return Result(await _mediator.Send(new QueryByIdDto<UnitMeasureDto>(id)));
     }
 
-    //[HttpGet("getListUnitMeasures")]
+    [HttpGet("list")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> getListUnitMeasures(
+         [FromQuery] string? searchby
+        )
+    {
+        GetUnitMeasureListQuery param = new GetUnitMeasureListQuery();
+        param.searchby = searchby;
+        param.TenantId = _currentUser.TenantId;
+        var result = await _mediator.Send(param);
+        return Ok(result);
+    }
+    //[HttpGet("getListUnitMeasure")]
     //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    //public async Task<IActionResult> getListUnitMeasures(
-    //     [FromQuery] string? searchby
-    //    )
+    //public async Task<IActionResult> getListUnitMeasure([FromQuery] string? sortby, [FromQuery] string? valsort, [FromQuery] string? searchby, [FromQuery] string? valsearch, [FromQuery] int? jumlah_data, [FromQuery] int? offset)
     //{
     //    GetUnitMeasureListQuery param = new GetUnitMeasureListQuery();
+    //    param.sortby = sortby;
+    //    param.valsort = valsort;
     //    param.searchby = searchby;
+    //    param.valsearch = valsearch;
+    //    param.jumlah_data = jumlah_data;
+    //    param.offset = offset;
     //    param.TenantId = _currentUser.TenantId;
     //    var result = await _mediator.Send(param);
     //    return Ok(result);
     //}
 
-    [HttpPost("createUnitMeasure")]
+    [HttpPost("create")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> create([FromBody] AddUnitMeasure unitMeasure)
     {
@@ -56,7 +68,7 @@ public class UnitMeasuresController : ApiControllerBase
         return Ok(result);
     }
 
-    [HttpPut("updateUnitMeasure")]
+    [HttpPut("update")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Put([FromBody] UpdateUnitMeasure unitMeasure)
     {
@@ -66,7 +78,7 @@ public class UnitMeasuresController : ApiControllerBase
         return Ok(result);
     }
 
-    [HttpDelete("deleteUnitMeasure/{id:int}")]
+    [HttpDelete("delete/{id:int}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Delete(int id)
     {
