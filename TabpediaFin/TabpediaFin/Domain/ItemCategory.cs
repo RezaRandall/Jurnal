@@ -1,9 +1,9 @@
-﻿namespace TabpediaFin.Dto
+﻿namespace TabpediaFin.Domain
 {
-    [Table("Tag")]
-    public class TagDto : BaseDto
+    public class ItemCategory : BaseEntity
     {
         public string Name { get; set; } = string.Empty;
+
         public string Description { get; set; } = string.Empty;
     }
 }

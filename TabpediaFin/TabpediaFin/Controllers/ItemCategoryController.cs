@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TabpediaFin.Handler.ItemCategoryHandler;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -18,55 +19,31 @@ namespace TabpediaFin.Controllers
             _currentUser = currentUser;
         }
 
-        [HttpGet("getlistitemcategory")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> getlistitemcategory([FromQuery] string? sortby, [FromQuery] string? valsort, [FromQuery] string? searchby, [FromQuery] string? valsearch, [FromQuery] int? jumlah_data, [FromQuery] int? offset)
+        [HttpPost("list")]
+        public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<ItemCategoryListDto> request)
         {
-            GetItemCategoryListQuery param = new GetItemCategoryListQuery();
-            param.sortby = sortby;
-            param.valsort = valsort;
-            param.searchby = searchby;
-            param.valsearch = valsearch;
-            param.jumlah_data = jumlah_data;
-            param.offset = offset;
-            param.TenantId = _currentUser.TenantId;
-            var result = await _mediator.Send(param);
-            return Ok(result);
+            return Result(await _mediator.Send(request));
         }
 
-        
+
         [HttpGet("{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetItemCategory(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            return Result(await _mediator.Send(new QueryByIdDto<ItemCategoryDto>(id)));
+            return Result(await _mediator.Send(new QueryByIdDto<ItemCategoryFetchDto>(id)));
         }
 
-        [HttpPost("create")]
+        [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> create([FromBody] ItemCategory request)
+        public async Task<IActionResult> Insert([FromBody] ItemCategoryInsertDto command)
         {
-            AddItemCategory customer = new AddItemCategory();
-            customer.Name = request.Name;
-            customer.Description = request.Description;
-            customer.TenantId = _currentUser.TenantId;
-            customer.CreatedUid = _currentUser.UserId;
-            var result = await _mediator.Send(customer);
-            return Ok(result);
+            return Result(await _mediator.Send(command));
         }
 
-        [HttpPut("update/{Id:int}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> Put(int Id, [FromBody] ItemCategory request)
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] ItemCategoryUpdateDto command)
         {
-            UpdateItemCategory customer = new UpdateItemCategory();
-            customer.Id = Id;
-            customer.Name = request.Name;
-            customer.Description = request.Description;
-            customer.TenantId = _currentUser.TenantId;
-            customer.UpdatedUid = _currentUser.UserId;
-            var result = await _mediator.Send(customer);
-            return Ok(result);
+            return Result(await _mediator.Send(command));
         }
 
         [HttpDelete("delete/{id:int}")]

@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TabpediaFin.Handler.ContactAddressHandler;
+using TabpediaFin.Handler.ContactHandler;
+using TabpediaFin.Handler.ContactPersonHandler;
 
 namespace TabpediaFin.Controllers
 {
@@ -16,26 +19,18 @@ namespace TabpediaFin.Controllers
             _mediator = mediator;
         }
         
-        //[HttpGet()]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        //public async Task<IActionResult> GetCustomer([FromQuery] string? sortby, [FromQuery] string? valsort, [FromQuery] string? searchby, [FromQuery] string? valsearch, [FromQuery] int? jumlah_data, [FromQuery] int? offset)
-        //{
-        //    GetCustomerListQuery param = new GetCustomerListQuery();
-        //    param.sortby = sortby;
-        //    param.valsort = valsort;
-        //    param.searchby = searchby;
-        //    param.valsearch = valsearch;
-        //    param.jumlah_data = jumlah_data;
-        //    param.offset = offset;
-
-        //    var result = await _mediator.Send(param);
-        //    return Ok(result);
-        //}
-        [HttpPost("list")]
+        [HttpPost("list/{contacttype}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetCustomer([FromBody] QueryPagedListDto<contactqueryDto> request)
+        public async Task<IActionResult> GetCustomer(contacttypeenum contacttype, [FromBody] QueryPagedListDto<contactlistDto> request)
         {
-            return Result(await _mediator.Send(request));
+            QueryPagedListContactDto<contactlistDto> reqsend = new QueryPagedListContactDto<contactlistDto>();
+            reqsend.PageSize = request.PageSize;
+            reqsend.PageNum = request.PageNum;
+            reqsend.Search = request.Search;
+            reqsend.SortBy = request.SortBy;
+            reqsend.SortDesc = request.SortDesc;
+            reqsend.contacttype = contacttype.ToString();
+            return Result(await _mediator.Send(reqsend));
         }
         
 
@@ -43,28 +38,28 @@ namespace TabpediaFin.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetCustomer(int id)
         {
-            return Result(await _mediator.Send(new QueryByIdDto<ContactDto>(id)));
+            return Result(await _mediator.Send(new QueryByIdDto<ContactFetchDto>(id)));
         }
 
         [HttpGet("contactaddress/{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetAddress(int id)
         {
-            return Result(await _mediator.Send(new QueryByIdDto<ContactAddressDto>(id)));
+            return Result(await _mediator.Send(new QueryByIdDto<ContactAddressFetchDto>(id)));
         }
 
         [HttpGet("contactperson/{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetPerson(int id)
         {
-            return Result(await _mediator.Send(new QueryByIdDto<ContactPersonDto>(id)));
+            return Result(await _mediator.Send(new QueryByIdDto<ContactPersonFetchDto>(id)));
         }
-        enum contacttype
+        public enum contacttypeenum
         {
-            Customer,
-            Vendor,
-            Employee,
-            Other
+            customer,
+            vendor,
+            employee,
+            other
         }
     }
 }

@@ -1,28 +1,23 @@
-﻿using TabpediaFin.Dto.Common.Request;
-using TabpediaFin.Handler.Interfaces;
-
-namespace TabpediaFin.Handler
+﻿namespace TabpediaFin.Handler.TagHandler
 {
-    public class ContactGroupFetchHandler : IQueryByIdHandler<ContactGroupDto>
+    public class TagFetchHandler : IQueryByIdHandler<TagFetchDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
-
-        public ContactGroupFetchHandler(DbManager dbManager, ICurrentUser currentUser)
+        public TagFetchHandler(DbManager dbManager, ICurrentUser currentUser)
         {
             _dbManager = dbManager;
             _currentUser = currentUser;
         }
-
-        public async Task<RowResponse<ContactGroupDto>> Handle(QueryByIdDto<ContactGroupDto> request, CancellationToken cancellationToken)
+        public async Task<RowResponse<TagFetchDto>> Handle(QueryByIdDto<TagFetchDto> request, CancellationToken cancellationToken)
         {
-            var response = new RowResponse<ContactGroupDto>();
+            var response = new RowResponse<TagFetchDto>();
 
             try
             {
                 using (var cn = _dbManager.CreateConnection())
                 {
-                    var row = await cn.FetchAsync<ContactGroupDto>(request.Id, _currentUser);
+                    var row = await cn.FetchAsync<TagFetchDto>(request.Id, _currentUser);
 
                     response.IsOk = true;
                     response.Row = row;
@@ -38,5 +33,12 @@ namespace TabpediaFin.Handler
 
             return response;
         }
+    }
+
+    [Table("Tag")]
+    public class TagFetchDto : BaseDto
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
     }
 }
