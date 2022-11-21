@@ -67,9 +67,6 @@ builder.Services.AddScoped<IPaymentTerm, PaymentTermHandler>();
 //builder.Services.AddScoped<IProductRepository, ProductRepository>();
 //builder.Services.AddScoped<ICashAndBankRepository, CashAndBankRepository>();
 
-builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
-builder.Services.AddScoped<IVendorRepository, VendorRepository>();
-
 builder.Services.AddScoped<IDbConnection>(db => new NpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddJwt();

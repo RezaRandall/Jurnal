@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TabpediaFin.Handler.AddressTypeHandler;
 
 namespace TabpediaFin.Controllers
 {
@@ -17,11 +18,18 @@ namespace TabpediaFin.Controllers
         }
 
 
+        [HttpPost("list")]
+        public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<AddressTypeListDto> request)
+        {
+            return Result(await _mediator.Send(request));
+        }
+
+
         [HttpGet("{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Get(int id)
         {
-            return Result(await _mediator.Send(new QueryByIdDto<AddressTypeDto>(id)));
+            return Result(await _mediator.Send(new QueryByIdDto<AddressTypeFetchDto>(id)));
         }
     }
 }
