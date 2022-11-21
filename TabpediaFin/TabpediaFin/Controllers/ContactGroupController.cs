@@ -30,5 +30,18 @@ namespace TabpediaFin.Controllers
         {
             return Result(await _mediator.Send(new QueryByIdDto<ContactGroupFetchDto>(id)));
         }
+
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> Insert([FromBody] ContactGroupInsertDto command)
+        {
+            return Result(await _mediator.Send(command));
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] ContactGroupUpdateDto command)
+        {
+            return Result(await _mediator.Send(command));
+        }
     }
 }

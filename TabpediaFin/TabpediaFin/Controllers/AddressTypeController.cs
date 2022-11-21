@@ -31,5 +31,17 @@ namespace TabpediaFin.Controllers
         {
             return Result(await _mediator.Send(new QueryByIdDto<AddressTypeFetchDto>(id)));
         }
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> Insert([FromBody] AddressTypeInsertDto command)
+        {
+            return Result(await _mediator.Send(command));
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] AddressTypeUpdateDto command)
+        {
+            return Result(await _mediator.Send(command));
+        }
     }
 }

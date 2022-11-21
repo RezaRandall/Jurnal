@@ -98,12 +98,36 @@ namespace TabpediaFin.Controllers
         {
             return Result(await _mediator.Send(new QueryByIdDto<ContactAddressFetchDto>(id)));
         }
+        [HttpPost("contactaddress")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> InsertAddress([FromBody] ContactAddressInsertDto command)
+        {
+            return Result(await _mediator.Send(command));
+        }
+
+        [HttpPut("contactaddress")]
+        public async Task<IActionResult> UpdateAddress([FromBody] ContactAddressUpdateDto command)
+        {
+            return Result(await _mediator.Send(command));
+        }
 
         [HttpGet("contactperson/{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetPerson(int id)
         {
             return Result(await _mediator.Send(new QueryByIdDto<ContactPersonFetchDto>(id)));
+        }
+        [HttpPost("contactperson")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> InsertPerson([FromBody] ContactPersonInsertDto command)
+        {
+            return Result(await _mediator.Send(command));
+        }
+
+        [HttpPut("contactperson")]
+        public async Task<IActionResult> UpdatePerson([FromBody] ContactPersonUpdateDto command)
+        {
+            return Result(await _mediator.Send(command));
         }
         public enum contacttypeenum
         {

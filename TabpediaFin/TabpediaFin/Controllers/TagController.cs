@@ -30,5 +30,17 @@ namespace TabpediaFin.Controllers
         {
             return Result(await _mediator.Send(new QueryByIdDto<TagFetchDto>(id)));
         }
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> Insert([FromBody] TagInsertDto command)
+        {
+            return Result(await _mediator.Send(command));
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] TagUpdateDto command)
+        {
+            return Result(await _mediator.Send(command));
+        }
     }
 }
