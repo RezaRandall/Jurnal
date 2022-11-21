@@ -18,10 +18,9 @@ namespace TabpediaFin.Controllers
         {
             _mediator = mediator;
         }
-        
-        [HttpPost("list/{contacttype}")]
+        [HttpPost("list")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetCustomer(contacttypeenum contacttype, [FromBody] QueryPagedListDto<contactlistDto> request)
+        public async Task<IActionResult> GetAll([FromBody] QueryPagedListDto<contactlistDto> request)
         {
             QueryPagedListContactDto<contactlistDto> reqsend = new QueryPagedListContactDto<contactlistDto>();
             reqsend.PageSize = request.PageSize;
@@ -29,10 +28,62 @@ namespace TabpediaFin.Controllers
             reqsend.Search = request.Search;
             reqsend.SortBy = request.SortBy;
             reqsend.SortDesc = request.SortDesc;
-            reqsend.contacttype = contacttype.ToString();
             return Result(await _mediator.Send(reqsend));
         }
-        
+
+        [HttpPost("customer/list")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetCustomer([FromBody] QueryPagedListDto<contactlistDto> request)
+        {
+            QueryPagedListContactDto<contactlistDto> reqsend = new QueryPagedListContactDto<contactlistDto>();
+            reqsend.PageSize = request.PageSize;
+            reqsend.PageNum = request.PageNum;
+            reqsend.Search = request.Search;
+            reqsend.SortBy = request.SortBy;
+            reqsend.SortDesc = request.SortDesc;
+            reqsend.contacttype = "customer";
+            return Result(await _mediator.Send(reqsend));
+        }
+        [HttpPost("vendor/list")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetVendor([FromBody] QueryPagedListDto<contactlistDto> request)
+        {
+            QueryPagedListContactDto<contactlistDto> reqsend = new QueryPagedListContactDto<contactlistDto>();
+            reqsend.PageSize = request.PageSize;
+            reqsend.PageNum = request.PageNum;
+            reqsend.Search = request.Search;
+            reqsend.SortBy = request.SortBy;
+            reqsend.SortDesc = request.SortDesc;
+            reqsend.contacttype = "vendor";
+            return Result(await _mediator.Send(reqsend));
+        }
+        [HttpPost("employee/list")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetEmployee([FromBody] QueryPagedListDto<contactlistDto> request)
+        {
+            QueryPagedListContactDto<contactlistDto> reqsend = new QueryPagedListContactDto<contactlistDto>();
+            reqsend.PageSize = request.PageSize;
+            reqsend.PageNum = request.PageNum;
+            reqsend.Search = request.Search;
+            reqsend.SortBy = request.SortBy;
+            reqsend.SortDesc = request.SortDesc;
+            reqsend.contacttype = "employee";
+            return Result(await _mediator.Send(reqsend));
+        }
+        [HttpPost("other/list")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetOther([FromBody] QueryPagedListDto<contactlistDto> request)
+        {
+            QueryPagedListContactDto<contactlistDto> reqsend = new QueryPagedListContactDto<contactlistDto>();
+            reqsend.PageSize = request.PageSize;
+            reqsend.PageNum = request.PageNum;
+            reqsend.Search = request.Search;
+            reqsend.SortBy = request.SortBy;
+            reqsend.SortDesc = request.SortDesc;
+            reqsend.contacttype = "other";
+            return Result(await _mediator.Send(reqsend));
+        }
+
 
         [HttpGet("{id:int}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
