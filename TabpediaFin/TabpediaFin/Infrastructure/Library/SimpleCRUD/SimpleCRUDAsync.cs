@@ -167,39 +167,39 @@ namespace Dapper
         /// <param name="transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>Gets a list of entities with optional exact match where conditions</returns>
-        public static Task<IEnumerable<T>> GetListPagedAsync<T>(this IDbConnection connection, int pageNumber, int rowsPerPage, string conditions, string orderby, object parameters = null, IDbTransaction transaction = null, int? commandTimeout = null)
-        {
-            if (string.IsNullOrEmpty(_getPagedListSql))
-                throw new Exception("GetListPage is not supported with the current SQL Dialect");
+        //public static Task<IEnumerable<T>> GetListPagedAsync<T>(this IDbConnection connection, int pageNumber, int rowsPerPage, string conditions, string orderby, object parameters = null, IDbTransaction transaction = null, int? commandTimeout = null)
+        //{
+        //    if (string.IsNullOrEmpty(_getPagedListSql))
+        //        throw new Exception("GetListPage is not supported with the current SQL Dialect");
 
-            var currenttype = typeof(T);
-            var idProps = GetIdProperties(currenttype).ToList();
-            if (!idProps.Any())
-                throw new ArgumentException("Entity must have at least one [Key] property");
+        //    var currenttype = typeof(T);
+        //    var idProps = GetIdProperties(currenttype).ToList();
+        //    if (!idProps.Any())
+        //        throw new ArgumentException("Entity must have at least one [Key] property");
 
-            var name = GetTableName(currenttype);
-            var sb = new StringBuilder();
-            var query = _getPagedListSql;
-            if (string.IsNullOrEmpty(orderby))
-            {
-                orderby = GetColumnName(idProps.First());
-            }
+        //    var name = GetTableName(currenttype);
+        //    var sb = new StringBuilder();
+        //    var query = _getPagedListSql;
+        //    if (string.IsNullOrEmpty(orderby))
+        //    {
+        //        orderby = GetColumnName(idProps.First());
+        //    }
 
-            //create a new empty instance of the type to get the base properties
-            BuildSelect(sb, GetScaffoldableProperties<T>().ToArray());
-            query = query.Replace("{SelectColumns}", sb.ToString());
-            query = query.Replace("{TableName}", name);
-            query = query.Replace("{PageNumber}", pageNumber.ToString());
-            query = query.Replace("{RowsPerPage}", rowsPerPage.ToString());
-            query = query.Replace("{OrderBy}", orderby);
-            query = query.Replace("{WhereClause}", conditions);
-            query = query.Replace("{Offset}", ((pageNumber - 1) * rowsPerPage).ToString());
+        //    //create a new empty instance of the type to get the base properties
+        //    BuildSelect(sb, GetScaffoldableProperties<T>().ToArray());
+        //    query = query.Replace("{SelectColumns}", sb.ToString());
+        //    query = query.Replace("{TableName}", name);
+        //    query = query.Replace("{PageNumber}", pageNumber.ToString());
+        //    query = query.Replace("{RowsPerPage}", rowsPerPage.ToString());
+        //    query = query.Replace("{OrderBy}", orderby);
+        //    query = query.Replace("{WhereClause}", conditions);
+        //    query = query.Replace("{Offset}", ((pageNumber - 1) * rowsPerPage).ToString());
 
-            if (Debugger.IsAttached)
-                Trace.WriteLine(String.Format("GetListPaged<{0}>: {1}", currenttype, query));
+        //    if (Debugger.IsAttached)
+        //        Trace.WriteLine(String.Format("GetListPaged<{0}>: {1}", currenttype, query));
 
-            return connection.QueryAsync<T>(query, parameters, transaction, commandTimeout);
-        }
+        //    return connection.QueryAsync<T>(query, parameters, transaction, commandTimeout);
+        //}
 
         /// <summary>
         /// <para>Inserts a row into the database asynchronously</para>

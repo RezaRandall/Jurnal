@@ -31,11 +31,10 @@ namespace TabpediaFin.Controllers
         //    var result = await _mediator.Send(param);
         //    return Ok(result);
         //}
-        [HttpGet()]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetCustomer([FromQuery] QueryPagedListDto<contactqueryDto> request)
+        [HttpPost("list")]
+        public async Task<IActionResult> GetCustomer([FromBody] QueryPagedListDto<contactqueryDto> request)
         {
-            return Result(await _mediator.Send(new QueryPagedListDto<contactqueryDto>(request)));
+            return Result(await _mediator.Send(request));
         }
         
 

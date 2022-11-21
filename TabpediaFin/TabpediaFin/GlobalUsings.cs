@@ -19,3 +19,7 @@ global using TabpediaFin.Infrastructure.Attributes;
 global using TabpediaFin.Dto.Common.Response;
 global using TabpediaFin.Dto.Common.Request;
 global using TabpediaFin.Handler.Interfaces;
+global using TabpediaFin.Infrastructure.Utility;
+global using TabpediaFin.Domain;
+global using Microsoft.EntityFrameworkCore;
+global using TabpediaFin.Handler.PaymentMethodHandler;

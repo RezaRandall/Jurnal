@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 using System.Text;
+using TabpediaFin.Infrastructure.Security;
 
 namespace Dapper;
 
@@ -15,15 +16,15 @@ public static partial class SimpleCRUD
         var idProps = GetIdProperties(currenttype).ToList();
 
         if (!idProps.Any())
-            throw new ArgumentException("Fetch<T> only supports an entity with a [Key] or Id property");
+            throw new ArgumentException("FetchAsync<T> only supports an entity with a [Key] or Id property");
 
         //var hasTenantIdProperty = HasTenantIdProperty(currenttype);
         //if (!hasTenantIdProperty)
-        //    throw new ArgumentException("Fetch<T> only supports an entity with a TenantId property");
+        //    throw new ArgumentException("FetchAsync<T> only supports an entity with a TenantId property");
 
         int tenantId = currentUser.TenantId;
         if (tenantId == 0)
-            throw new ArgumentException("Fetch<T> only supports an entity with a TenantId");
+            throw new ArgumentException("FetchAsync<T> only supports an entity with a TenantId");
 
         var name = GetTableName(currenttype);
         var sb = new StringBuilder();
@@ -57,6 +58,59 @@ public static partial class SimpleCRUD
         return query.FirstOrDefault();
     }
 
+
+    public static Task<IEnumerable<T>> FetchListPagedAsync<T>(this IDbConnection connection, int pageNumber, int rowsPerPage, string conditions, string orderby, ICurrentUser currentUser, DynamicParameters parameters = null, IDbTransaction transaction = null, int? commandTimeout = null)
+    {
+        if (string.IsNullOrEmpty(_getPagedListSql))
+            throw new Exception("GetListPage is not supported with the current SQL Dialect");
+
+        var currenttype = typeof(T);
+        var idProps = GetIdProperties(currenttype).ToList();
+        if (!idProps.Any())
+            throw new ArgumentException("Entity must have at least one [Key] property");
+
+        int tenantId = currentUser.TenantId;
+        if (tenantId == 0)
+            throw new ArgumentException("FetchListPagedAsync<T> only supports an entity with a TenantId");
+
+        var name = GetTableName(currenttype);
+        var sb = new StringBuilder();
+        var query = _getPagedListSql;
+        if (string.IsNullOrEmpty(orderby))
+        {
+            orderby = GetColumnName(idProps.First());
+        }
+
+        conditions= conditions ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(conditions))
+        {
+            conditions += @" WHERE ";
+        }
+        else
+        {
+            conditions += @" AND ";
+        }
+
+        conditions += @" ""TenantId"" = @TenantId ";
+
+        parameters = parameters ?? new DynamicParameters();
+        parameters.Add("TenantId", tenantId);
+
+        //create a new empty instance of the type to get the base properties
+        BuildSelect(sb, GetScaffoldableProperties<T>().ToArray());
+        query = query.Replace("{SelectColumns}", sb.ToString());
+        query = query.Replace("{TableName}", name);
+        query = query.Replace("{PageNumber}", pageNumber.ToString());
+        query = query.Replace("{RowsPerPage}", rowsPerPage.ToString());
+        query = query.Replace("{OrderBy}", orderby);
+        query = query.Replace("{WhereClause}", conditions);
+        query = query.Replace("{Offset}", ((pageNumber - 1) * rowsPerPage).ToString());
+
+        if (Debugger.IsAttached)
+            Trace.WriteLine(String.Format("GetListPaged<{0}>: {1}", currenttype, query));
+
+        return connection.QueryAsync<T>(query, parameters, transaction, commandTimeout);
+    }
 
 
     private static bool HasTenantIdProperty(Type type)
