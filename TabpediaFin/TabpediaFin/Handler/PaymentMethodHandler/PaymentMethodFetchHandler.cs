@@ -1,8 +1,4 @@
-﻿using TabpediaFin.Dto.Common;
-using TabpediaFin.Dto.Common.Request;
-using TabpediaFin.Handler.Interfaces;
-
-namespace TabpediaFin.Handler.PaymentMethod;
+﻿namespace TabpediaFin.Handler.PaymentMethodHandler;
 
 public class PaymentMethodFetchHandler : IQueryByIdHandler<PaymentMethodDto>
 {
@@ -40,4 +36,17 @@ public class PaymentMethodFetchHandler : IQueryByIdHandler<PaymentMethodDto>
 
         return response;
     }
+}
+
+
+[Table("PaymentMethod")]
+public class PaymentMethodDto : BaseDto
+{
+    [Searchable]
+    public string Name { get; set; } = string.Empty;
+
+    [Searchable]
+    public string Description { get; set; } = string.Empty;
+
+    public bool IsActive { get; set; } = true;
 }

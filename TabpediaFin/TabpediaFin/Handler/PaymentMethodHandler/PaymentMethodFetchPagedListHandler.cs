@@ -1,8 +1,6 @@
-﻿using TabpediaFin.Infrastructure.Utility;
+﻿namespace TabpediaFin.Handler.PaymentMethodHandler;
 
-namespace TabpediaFin.Handler.PaymentMethod;
-
-public class PaymentMethodFetchPagedListHandler : IQueryPagedListHandler<PaymentMethodDto>
+public class PaymentMethodFetchPagedListHandler : IQueryPagedListHandler<PaymentMethodListDto>
 {
     private readonly DbManager _dbManager;
     private readonly ICurrentUser _currentUser;
@@ -14,12 +12,12 @@ public class PaymentMethodFetchPagedListHandler : IQueryPagedListHandler<Payment
     }
 
 
-    public async Task<PagedListResponse<PaymentMethodDto>> Handle(QueryPagedListDto<PaymentMethodDto> request, CancellationToken cancellationToken)
+    public async Task<PagedListResponse<PaymentMethodListDto>> Handle(QueryPagedListDto<PaymentMethodListDto> request, CancellationToken cancellationToken)
     {
         if (request.PageNum == 0) { request.PageNum = 1; }
         if (request.PageSize == 0) { request.PageSize = 10; }
 
-        var result = new PagedListResponse<PaymentMethodDto>();
+        var result = new PagedListResponse<PaymentMethodListDto>();
 
         try
         {
@@ -29,7 +27,7 @@ public class PaymentMethodFetchPagedListHandler : IQueryPagedListHandler<Payment
             if (!string.IsNullOrWhiteSpace(request.Search))
             {
                 sqlWhere += SqlHelper.GenerateWhere<PaymentMethodDto>();
-                parameters.Add("Search", request.Search.Trim().ToLowerInvariant());
+                parameters.Add("Search", $"%{request.Search.Trim().ToLowerInvariant()}%");
             }
 
             var orderby = string.Empty;
@@ -42,17 +40,18 @@ public class PaymentMethodFetchPagedListHandler : IQueryPagedListHandler<Payment
             {
                 cn.Open();
 
-                var list = await cn.GetListPagedAsync<PaymentMethodDto>(pageNumber: request.PageNum
+                var list = await cn.FetchListPagedAsync<PaymentMethodListDto>(pageNumber: request.PageNum
                     , rowsPerPage: request.PageSize
                     , conditions: sqlWhere
                     , orderby: orderby
+                    , currentUser: _currentUser
                     , parameters: parameters);
 
-                int recordCount = await cn.RecordCountAsync<PaymentMethodDto>(sqlWhere, parameters);
+                int recordCount = await cn.RecordCountAsync<PaymentMethodListDto>(sqlWhere, parameters);
 
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.List = list?.AsList() ?? new List<PaymentMethodDto>();
+                result.List = list?.AsList() ?? new List<PaymentMethodListDto>();
                 result.RecordCount = recordCount;
             }
         }
@@ -64,4 +63,18 @@ public class PaymentMethodFetchPagedListHandler : IQueryPagedListHandler<Payment
 
         return result;
     }
+}
+
+
+
+[Table("PaymentMethod")]
+public class PaymentMethodListDto : BaseDto
+{
+    [Searchable]
+    public string Name { get; set; } = string.Empty;
+
+    [Searchable]
+    public string Description { get; set; } = string.Empty;
+
+    public bool IsActive { get; set; } = true;
 }
