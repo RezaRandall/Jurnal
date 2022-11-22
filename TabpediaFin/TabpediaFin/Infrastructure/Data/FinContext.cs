@@ -22,6 +22,8 @@ public class FinContext : DbContext
 
     public DbSet<PaymentMethod> PaymentMethod { get; set; }
     public DbSet<Item> Item { get; set; }
+    public DbSet<UnitMeasure> UnitMeasure { get; set; }
+    public DbSet<PaymentTerms> PaymentTerm { get; set; }
     public DbSet<ItemCategory> ItemCategory { get; set; }
     public DbSet<Tag> Tag { get; set; }
     public DbSet<AddressType> AddressType { get; set; }

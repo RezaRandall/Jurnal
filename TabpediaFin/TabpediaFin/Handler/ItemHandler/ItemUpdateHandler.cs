@@ -12,7 +12,7 @@ public class ItemUpdateHandler : IRequestHandler<ItemUpdateDto, RowResponse<Item
         _context = db;
     }
 
-    public class CommandValidator : AbstractValidator<ItemInsertDto>
+    public class CommandValidator : AbstractValidator<ItemUpdateDto>
     {
         public CommandValidator()
         {

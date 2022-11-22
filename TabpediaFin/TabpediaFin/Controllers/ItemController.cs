@@ -1,5 +1,7 @@
-﻿using TabpediaFin.Handler.Item;
-using TabpediaFin.Handler.UnitMeasure;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using TabpediaFin.Handler.ContactHandler;
+using TabpediaFin.Handler.Item;
 
 namespace TabpediaFin.Controllers;
 
@@ -14,83 +16,42 @@ public class ItemController : ApiControllerBase
     }
 
     [HttpPost("/item/list")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<ItemListDto> request)
     {
         return Result(await _mediator.Send(request));
     }
 
     [HttpGet("/item{id}")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
         return Result(await _mediator.Send(new QueryByIdDto<ItemDto>(id)));
     }
 
     [HttpPost("/item/create")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Insert([FromBody] ItemInsertDto command)
     {
         return Result(await _mediator.Send(command));
     }
 
     [HttpPut("/item/update")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Update([FromBody] ItemUpdateDto command)
     {
         return Result(await _mediator.Send(command));
     }
 
-    //[HttpDelete("/item/delete/{id}")]
-    //public async Task<IActionResult> Delete(int id)
-    //{
-    //    //return Result(await _mediator.Send(command));
-    //    //UnitMeasureRespons response = new UnitMeasureRespons();
-    //    var response = new RowResponse<ItemDto>();
-    //    ItemDeleteDto param = new ItemDeleteDto();
-    //    param.Id = id;
-    //    //param.TenantId = _currentUser.TenantId;
-    //    var result = await _mediator.Send(param);
-    //    if (result == true)
-    //    {
-    //        response.status = "success";
-    //        response.message = "unit measure with id " + id + " was deleted";
-    //    }
-    //    else
-    //    {
-    //        response.status = "failed";
-    //        response.message = "Data not found";
-    //    }
-    //    return Ok(response);
-    //}
-
-    //[HttpDelete("{id}")]
-    //public async Task Delete(int id)
-    //{
-    //    await _mediator.Send(new ItemDeleteHandler.Command(id));
-    //}
-
     [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> Delete(int id)
     {
-        await _mediator.Send(new ItemDeleteHandler.Command { Id = id });
-        return Ok();
+
+        ItemDeleteDto command = new ItemDeleteDto();
+        command.Id = id;
+        return Result(await _mediator.Send(command));
     }
-
-    //[HttpDelete("{id}")]
-    //public async Task<ActionResult> Delete(int id)
-    //{
-    //    var response = new RowResponse<ItemDto>();
-    //    var result = await _mediator.Send(new ItemDeleteHandler.Command { Id = id });
-
-    //    if (result == null)
-    //    {
-    //        response.IsOk = false;
-    //        response.ErrorMessage = "Data not found";
-    //    }
-    //    else
-    //    {
-    //        response.IsOk = true;
-    //        response.ErrorMessage = "item with id " + id + " was deleted";
-    //    }
-    //    return Ok(response);
-    //}
 
 
 }

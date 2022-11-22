@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using TabpediaFin.Handler.UnitMeasure;
+using TabpediaFin.Handler.UnitMeasures;
 
 namespace TabpediaFin.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/unit-measure")]
 [ApiController]
 public class UnitMeasuresController : ApiControllerBase
 {
@@ -16,89 +16,45 @@ public class UnitMeasuresController : ApiControllerBase
         _currentUser = currentUser;
     }
 
-    //[HttpGet]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    //public async Task<List<UnitMeasureDto>> Get()
-    //{
-    //    return await _mediator.Send(new UnitMeasureList.Query());
-    //}
+    [HttpPost("/unit-measure/list")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<UnitMeasureListDto> request)
+    {
+        return Result(await _mediator.Send(request));
+    }
 
-    [HttpGet("{id}")]
+    [HttpGet("/unit-measure{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
         return Result(await _mediator.Send(new QueryByIdDto<UnitMeasureDto>(id)));
     }
 
-    [HttpGet("list")]
+    [HttpPost("/unit-measure/create")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> getListUnitMeasures(
-         [FromQuery] string? searchby
-        )
+    public async Task<IActionResult> Insert([FromBody] UnitMeasureInsertDto command)
     {
-        GetUnitMeasureListQuery param = new GetUnitMeasureListQuery();
-        param.searchby = searchby;
-        param.TenantId = _currentUser.TenantId;
-        var result = await _mediator.Send(param);
-        return Ok(result);
-    }
-    //[HttpGet("getListUnitMeasure")]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    //public async Task<IActionResult> getListUnitMeasure([FromQuery] string? sortby, [FromQuery] string? valsort, [FromQuery] string? searchby, [FromQuery] string? valsearch, [FromQuery] int? jumlah_data, [FromQuery] int? offset)
-    //{
-    //    GetUnitMeasureListQuery param = new GetUnitMeasureListQuery();
-    //    param.sortby = sortby;
-    //    param.valsort = valsort;
-    //    param.searchby = searchby;
-    //    param.valsearch = valsearch;
-    //    param.jumlah_data = jumlah_data;
-    //    param.offset = offset;
-    //    param.TenantId = _currentUser.TenantId;
-    //    var result = await _mediator.Send(param);
-    //    return Ok(result);
-    //}
-
-    [HttpPost("create")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> create([FromBody] AddUnitMeasure unitMeasure)
-    {
-        unitMeasure.TenantId = _currentUser.TenantId;
-        unitMeasure.CreatedUid = _currentUser.UserId;
-        var result = await _mediator.Send(unitMeasure);
-        return Ok(result);
+        return Result(await _mediator.Send(command));
     }
 
-    [HttpPut("update")]
+    [HttpPut("/unit-measure/update")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> Put([FromBody] UpdateUnitMeasure unitMeasure)
+    public async Task<IActionResult> Update([FromBody] UnitMeasureUpdateDto command)
     {
-        unitMeasure.TenantId = _currentUser.TenantId;
-        unitMeasure.UpdatedUid = _currentUser.UserId;
-        var result = await _mediator.Send(unitMeasure);
-        return Ok(result);
+        return Result(await _mediator.Send(command));
     }
 
-    [HttpDelete("delete/{id:int}")]
+    [HttpDelete("{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Delete(int id)
     {
-        UnitMeasureRespons response = new UnitMeasureRespons();
-        DeleteUnitMeasure param = new DeleteUnitMeasure();
-        param.Id = id;
-        param.TenantId = _currentUser.TenantId;
-        var result = await _mediator.Send(param);
-        if (result == true)
-        {
-            response.status = "success";
-            response.message = "unit measure with id " + id + " was deleted";
-        }
-        else
-        {
-            response.status = "failed";
-            response.message = "Data not found";
-        }
-        return Ok(response);
+
+        UnitMeasureDeleteDto command = new UnitMeasureDeleteDto();
+        command.Id = id;
+        return Result(await _mediator.Send(command));
     }
+
+
 
 
 }

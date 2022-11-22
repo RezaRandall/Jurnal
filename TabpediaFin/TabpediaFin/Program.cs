@@ -13,8 +13,6 @@ using TabpediaFin.Infrastructure.Migrator;
 using TabpediaFin.Repository;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
-using TabpediaFin.Handler.UnitMeasure;
-using TabpediaFin.Handler.Product;
 using TabpediaFin.Handler.Item;
 
 Log.Logger = new LoggerConfiguration()
@@ -62,10 +60,6 @@ builder.Services.RegisterSettings(builder.Configuration);
 builder.Services.RegisterServices();
 builder.Services.RegisterRepositories();
 
-builder.Services.AddScoped<IUnitMeasure, UnitMeasureHandler>();
-builder.Services.AddScoped<IPaymentTerm, PaymentTermHandler>();
-//builder.Services.AddScoped<IProductRepository, ProductRepository>();
-//builder.Services.AddScoped<ICashAndBankRepository, CashAndBankRepository>();
 
 builder.Services.AddScoped<IDbConnection>(db => new NpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
 

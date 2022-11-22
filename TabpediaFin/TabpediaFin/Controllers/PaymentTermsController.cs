@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using TabpediaFin.Handler.Product;
-using TabpediaFin.Handler.UnitMeasure;
-using static TabpediaFin.Dto.UnitMeasureDto;
+using TabpediaFin.Dto;
+using TabpediaFin.Handler.PaymentTerm;
+using TabpediaFin.Handler.UnitMeasures;
 
 namespace TabpediaFin.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/payment-terms")]
 [ApiController]
 public class PaymentTermController : ApiControllerBase
 {
@@ -19,78 +19,42 @@ public class PaymentTermController : ApiControllerBase
         _currentUser = currentUser;
     }
 
-    [HttpGet("list")]
+    [HttpPost("/payment-terms/list")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<List<PaymentTermDto>> Get()
+    public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<PaymentTermListDto> request)
     {
-        return await _mediator.Send(new PaymentTermList.Query());
+        return Result(await _mediator.Send(request));
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("/payment-terms{id}")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
         return Result(await _mediator.Send(new QueryByIdDto<PaymentTermDto>(id)));
     }
 
-    //[HttpGet("getAllListPaymentTerm")]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    //public async Task<IActionResult> getAllListPaymentTerm(
-    //     [FromQuery] string? searchby
-    //    )
-    //{
-    //    GetPaymentTermListQuery param = new GetPaymentTermListQuery();
-    //    param.searchby = searchby;
-    //    param.TenantId = _currentUser.TenantId;
-    //    var result = await _mediator.Send(param);
-    //    return Ok(result);
-    //}
-
-    //[HttpGet("{id}")]
-    //public async Task<IActionResult> Get(int id)
-    //{
-    //    return Result(await _mediator.Send(new QueryByIdDto<PaymentTermDto>(id)));
-    //}
-
-    [HttpPost("create")]
+    [HttpPost("/payment-terms/create")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> create([FromBody] AddPaymentTerm unitMeasure)
+    public async Task<IActionResult> Insert([FromBody] PaymentTermInsertDto command)
     {
-        unitMeasure.TenantId = _currentUser.TenantId;
-        unitMeasure.CreatedUid = _currentUser.UserId;
-        var result = await _mediator.Send(unitMeasure);
-        return Ok(result);
+        return Result(await _mediator.Send(command));
     }
 
-    [HttpPut("update")]
+    [HttpPut("/payment-terms/update")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> Put([FromBody] UpdatePaymentTerm unitMeasure)
+    public async Task<IActionResult> Update([FromBody] PaymentTermUpdateDto command)
     {
-        unitMeasure.TenantId = _currentUser.TenantId;
-        unitMeasure.UpdatedUid = _currentUser.UserId;
-        var result = await _mediator.Send(unitMeasure);
-        return Ok(result);
+        return Result(await _mediator.Send(command));
     }
 
-    [HttpDelete("delete/{id:int}")]
+    [HttpDelete("{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Delete(int id)
     {
-        PaymentTermRespons response = new PaymentTermRespons();
-        DeletePaymentTerm param = new DeletePaymentTerm();
-        param.Id = id;
-        param.TenantId = _currentUser.TenantId;
-        var result = await _mediator.Send(param);
-        if (result == true)
-        {
-            response.status = "success";
-            response.message = "payment term with id " + id + " was deleted";
-        }
-        else
-        {
-            response.status = "failed";
-            response.message = "Data not found";
-        }
-        return Ok(response);
+
+        PaymentTermDeleteDto command = new PaymentTermDeleteDto();
+        command.Id = id;
+        return Result(await _mediator.Send(command));
     }
 
 }
