@@ -47,59 +47,98 @@ namespace TabpediaFin.Handler.Item;
 //    public int Id { get; set; } = 0;
 //}
 
+//public class ItemDeleteHandler
+//{
+//    public class Command : IRequest
+//    {
+//        public Command(int id)
+//        {
+//            Id = id;
+//        }
+
+//        public int Id { get; set; }
+//    }
+
+//    public class CommandValidator : AbstractValidator<ItemDeleteHandler.Command>
+//    {
+//        public CommandValidator()
+//        {
+//            RuleFor(x => x.Id).NotNull().NotEmpty();
+//        }
+//    }
+
+//    public class Handler : IRequestHandler<Command, Unit>
+//    {
+//        private readonly FinContext _context;
+
+//        public Handler(FinContext db)
+//        {
+//            _context = db;
+//        }
+
+//        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+//        {
+//            var expense = await _context.Item.FirstOrDefaultAsync(
+//                x => x.Id == request.Id,
+//                cancellationToken);
+
+//            if (expense == null)
+//            {
+//                throw new Exception("Not Found");
+//            }
+
+//            await _context.SaveChangesAsync(cancellationToken);
+//            return Unit.Value;
+//        }
+//    }
+
+//}
+
+
+
 public class ItemDeleteHandler
 {
     public class Command : IRequest
     {
-        public Command(int id)
-        {
-            Id = id;
-        }
-
         public int Id { get; set; }
     }
 
-    public class CommandValidator : AbstractValidator<ItemDeleteHandler.Command>
+    public class Validator : AbstractValidator<Command>
     {
-        public CommandValidator()
+        public Validator()
         {
-            RuleFor(x => x.Id).NotNull().NotEmpty();
+            RuleFor(c => c.Id).GreaterThan(0);
         }
     }
 
-    public class Handler : IRequestHandler<Command, Unit>
+
+    public class CommandHandler : IRequestHandler<Command, Unit>
     {
-        private readonly FinContext _context;
-
-        public Handler(FinContext db)
+        private readonly FinContext _db;
+        public CommandHandler(FinContext db) => _db = db;
+        public async Task<Unit> Handle(Command req, CancellationToken cancellationToken)
         {
-            _context = db;
-        }
+            var response = new RowResponse<ItemDto>();
 
-        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
-        {
-            var expense = await _context.Item.FirstOrDefaultAsync(
-                x => x.Id == request.Id,
-                cancellationToken);
-
-            if (expense == null)
+            var itemData = await _db.Item.FindAsync(req.Id);
+            if (itemData == null)
             {
-                throw new Exception("Not Found");
+                response.IsOk = false;
+                response.ErrorMessage = "Data not found";
+                return Unit.Value;
             }
-
-            await _context.SaveChangesAsync(cancellationToken);
+            else 
+            {
+                response.IsOk = true;
+                response.ErrorMessage = "Item with id " + req.Id + " has been deleted" ;
+            }
+            
+            _db.Item.Remove(itemData);
+            await _db.SaveChangesAsync(cancellationToken);
             return Unit.Value;
+
         }
     }
-
-
-
-
-
 }
 
-//[Table("Item")]
-//public class ItemDeleteDto : IRequest<RowResponse<ItemDto>>
-//{
-//    public int Id { get; set; } = 0;
-//}
+

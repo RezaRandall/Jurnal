@@ -31,7 +31,6 @@ public class ItemController : ApiControllerBase
         return Result(await _mediator.Send(command));
     }
 
-
     [HttpPut("/item/update")]
     public async Task<IActionResult> Update([FromBody] ItemUpdateDto command)
     {
@@ -61,11 +60,37 @@ public class ItemController : ApiControllerBase
     //    return Ok(response);
     //}
 
+    //[HttpDelete("{id}")]
+    //public async Task Delete(int id)
+    //{
+    //    await _mediator.Send(new ItemDeleteHandler.Command(id));
+    //}
+
     [HttpDelete("{id}")]
-    public async Task Delete(int id)
+    public async Task<ActionResult> Delete(int id)
     {
-        await _mediator.Send(new ItemDeleteHandler.Command(id));
+        await _mediator.Send(new ItemDeleteHandler.Command { Id = id });
+        return Ok();
     }
+
+    //[HttpDelete("{id}")]
+    //public async Task<ActionResult> Delete(int id)
+    //{
+    //    var response = new RowResponse<ItemDto>();
+    //    var result = await _mediator.Send(new ItemDeleteHandler.Command { Id = id });
+
+    //    if (result == null)
+    //    {
+    //        response.IsOk = false;
+    //        response.ErrorMessage = "Data not found";
+    //    }
+    //    else
+    //    {
+    //        response.IsOk = true;
+    //        response.ErrorMessage = "item with id " + id + " was deleted";
+    //    }
+    //    return Ok(response);
+    //}
 
 
 }
