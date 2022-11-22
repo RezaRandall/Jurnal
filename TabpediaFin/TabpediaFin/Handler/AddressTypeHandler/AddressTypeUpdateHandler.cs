@@ -3,10 +3,11 @@
 public class AddressTypeUpdateHandler : IRequestHandler<AddressTypeUpdateDto, RowResponse<AddressTypeFetchDto>>
 {
     private readonly FinContext _context;
-
-    public AddressTypeUpdateHandler(FinContext db)
+    private readonly ICurrentUser _currentUser;
+    public AddressTypeUpdateHandler(FinContext db, ICurrentUser currentUser)
     {
         _context = db;
+        _currentUser = currentUser;
     }
 
     public async Task<RowResponse<AddressTypeFetchDto>> Handle(AddressTypeUpdateDto request, CancellationToken cancellationToken)
@@ -15,7 +16,7 @@ public class AddressTypeUpdateHandler : IRequestHandler<AddressTypeUpdateDto, Ro
 
         try
         {
-            var AddressType = await _context.AddressType.FirstAsync(x => x.Id == request.Id, cancellationToken);
+            var AddressType = await _context.AddressType.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
             AddressType.Name = request.Name;
             AddressType.Description = request.Description;
 
@@ -23,6 +24,7 @@ public class AddressTypeUpdateHandler : IRequestHandler<AddressTypeUpdateDto, Ro
 
             var row = new AddressTypeFetchDto()
             {
+                Id = request.Id,
                 Name = AddressType.Name,
                 Description = AddressType.Description,
             };

@@ -44,5 +44,15 @@ namespace TabpediaFin.Controllers
         {
             return Result(await _mediator.Send(command));
         }
+
+        [HttpDelete("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> Delete(int id)
+        {
+
+            TagDeleteDto command = new TagDeleteDto();
+            command.Id = id;
+            return Result(await _mediator.Send(command));
+        }
     }
 }

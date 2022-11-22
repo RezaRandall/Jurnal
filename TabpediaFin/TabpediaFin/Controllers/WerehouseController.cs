@@ -2,24 +2,25 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using TabpediaFin.Handler.ContactGroupHandler;
+using TabpediaFin.Handler.WarehouseHandler;
 
 namespace TabpediaFin.Controllers
 {
-    [Route("api/contactgroup")]
+    [Route("api/warehouse")]
     [ApiController]
-    public class ContactGroupController :ApiControllerBase
+    public class WarehouseController : ApiControllerBase
     {
         private readonly IMediator _mediator;
 
-        public ContactGroupController(IMediator mediator)
+        public WarehouseController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
+
         [HttpPost("list")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<ContactGroupListDto> request)
+        public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<WarehouseListDto> request)
         {
             return Result(await _mediator.Send(request));
         }
@@ -29,19 +30,18 @@ namespace TabpediaFin.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Get(int id)
         {
-            return Result(await _mediator.Send(new QueryByIdDto<ContactGroupFetchDto>(id)));
+            return Result(await _mediator.Send(new QueryByIdDto<WarehouseFetchDto>(id)));
         }
-
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> Insert([FromBody] ContactGroupInsertDto command)
+        public async Task<IActionResult> Insert([FromBody] WarehouseInsertDto command)
         {
             return Result(await _mediator.Send(command));
         }
 
         [HttpPut]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> Update([FromBody] ContactGroupUpdateDto command)
+        public async Task<IActionResult> Update([FromBody] WarehouseUpdateDto command)
         {
             return Result(await _mediator.Send(command));
         }
@@ -51,7 +51,7 @@ namespace TabpediaFin.Controllers
         public async Task<IActionResult> Delete(int id)
         {
 
-            ContactGroupDeleteDto command = new ContactGroupDeleteDto();
+            WarehouseDeleteDto command = new WarehouseDeleteDto();
             command.Id = id;
             return Result(await _mediator.Send(command));
         }

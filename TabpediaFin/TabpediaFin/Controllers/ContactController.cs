@@ -93,15 +93,24 @@ namespace TabpediaFin.Controllers
         }
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> InsertContact([FromBody] ContactUpdateDto command)
+        public async Task<IActionResult> InsertContact([FromBody] ContactInsertDto command)
         {
             return Result(await _mediator.Send(command));
         }
 
         [HttpPut]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> UpdateContact([FromBody] ContactInsertDto command)
+        public async Task<IActionResult> UpdateContact([FromBody] ContactUpdateDto command)
         {
+            return Result(await _mediator.Send(command));
+        }
+        [HttpDelete("contact/{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> DeleteContact(int id)
+        {
+
+            ContactDeleteDto command = new ContactDeleteDto();
+            command.Id = id;
             return Result(await _mediator.Send(command));
         }
 
@@ -124,6 +133,15 @@ namespace TabpediaFin.Controllers
         {
             return Result(await _mediator.Send(command));
         }
+        [HttpDelete("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> DeleteContactAddress(int id)
+        {
+
+            ContactAddressDeleteDto command = new ContactAddressDeleteDto();
+            command.Id = id;
+            return Result(await _mediator.Send(command));
+        }
 
         [HttpGet("contactperson/{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -142,6 +160,15 @@ namespace TabpediaFin.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> UpdatePerson([FromBody] ContactPersonUpdateDto command)
         {
+            return Result(await _mediator.Send(command));
+        }
+        [HttpDelete("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> DeleteContactPerson(int id)
+        {
+
+            ContactPersonDeleteDto command = new ContactPersonDeleteDto();
+            command.Id = id;
             return Result(await _mediator.Send(command));
         }
         public enum contacttypeenum

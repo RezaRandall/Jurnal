@@ -3,10 +3,12 @@
 public class ContactAddressUpdateHandler : IRequestHandler<ContactAddressUpdateDto, RowResponse<ContactAddressFetchDto>>
 {
     private readonly FinContext _context;
+    private readonly ICurrentUser _currentUser;
 
-    public ContactAddressUpdateHandler(FinContext db)
+    public ContactAddressUpdateHandler(FinContext db, ICurrentUser currentUser)
     {
         _context = db;
+        _currentUser = currentUser;
     }
 
     public async Task<RowResponse<ContactAddressFetchDto>> Handle(ContactAddressUpdateDto request, CancellationToken cancellationToken)
@@ -15,7 +17,8 @@ public class ContactAddressUpdateHandler : IRequestHandler<ContactAddressUpdateD
 
         try
         {
-            var ContactAddress = await _context.ContactAddress.FirstAsync(x => x.Id == request.Id, cancellationToken);
+            var ContactAddress = await _context.ContactAddress.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
+            ContactAddress.ContactId = request.ContactId;
             ContactAddress.AddressName = request.AddressName;
             ContactAddress.Address = request.Address;
             ContactAddress.CityName = request.CityName;
@@ -29,6 +32,8 @@ public class ContactAddressUpdateHandler : IRequestHandler<ContactAddressUpdateD
 
             var row = new ContactAddressFetchDto()
             {
+                Id = request.Id,
+                ContactId = ContactAddress.ContactId,
                 AddressName = ContactAddress.AddressName,
                 Address = ContactAddress.Address,
                 CityName = ContactAddress.CityName,

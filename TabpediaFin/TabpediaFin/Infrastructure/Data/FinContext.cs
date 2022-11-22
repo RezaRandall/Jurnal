@@ -25,10 +25,11 @@ public class FinContext : DbContext
     public DbSet<ItemCategory> ItemCategory { get; set; }
     public DbSet<Tag> Tag { get; set; }
     public DbSet<AddressType> AddressType { get; set; }
+    public DbSet<Contact> Contact { get; set; }
     public DbSet<ContactGroup> ContactGroup { get; set; }
     public DbSet<ContactAddress> ContactAddress { get; set; }
     public DbSet<ContactPerson> ContactPerson { get; set; }
-
+    public DbSet<Warehouse> Warehouse { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

@@ -17,6 +17,7 @@ public class ContactAddressInsertHandler : IRequestHandler<ContactAddressInsertD
 
         var ContactAddress = new ContactAddress()
         {
+            ContactId = request.ContactId,
             AddressName = request.AddressName,
             Address = request.Address,
             CityName = request.CityName,
@@ -34,6 +35,7 @@ public class ContactAddressInsertHandler : IRequestHandler<ContactAddressInsertD
             var row = new ContactAddressFetchDto()
             {
                 Id = ContactAddress.Id,
+                ContactId = ContactAddress.ContactId,
                 AddressName = ContactAddress.AddressName,
                 Address = ContactAddress.Address,
                 CityName = ContactAddress.CityName,

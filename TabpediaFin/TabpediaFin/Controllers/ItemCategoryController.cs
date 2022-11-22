@@ -48,23 +48,14 @@ namespace TabpediaFin.Controllers
             return Result(await _mediator.Send(command));
         }
 
-        [HttpDelete("delete/{id:int}")]
+        [HttpDelete("{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Delete(int id)
         {
-            customrespons response = new customrespons();
-            response.status = "failed";
-            response.message = "Data not found";
-            DeleteCustomer param = new DeleteCustomer();
-            param.Id = id;
-            param.TenantId = _currentUser.TenantId;
-            var result = await _mediator.Send(param);
-            if (result == true)
-            {
-                response.status = "success";
-                response.message = "Item Category with id " + id + " was deleted";
-            }
-            return Ok(response);
+
+            ItemCategoryDeleteDto command = new ItemCategoryDeleteDto();
+            command.Id = id;
+            return Result(await _mediator.Send(command));
         }
     }
 }

@@ -3,10 +3,12 @@
 public class ContactPersonUpdateHandler : IRequestHandler<ContactPersonUpdateDto, RowResponse<ContactPersonFetchDto>>
 {
     private readonly FinContext _context;
+    private readonly ICurrentUser _currentUser;
 
-    public ContactPersonUpdateHandler(FinContext db)
+    public ContactPersonUpdateHandler(FinContext db, ICurrentUser currentUser)
     {
         _context = db;
+        _currentUser = currentUser;
     }
 
     public async Task<RowResponse<ContactPersonFetchDto>> Handle(ContactPersonUpdateDto request, CancellationToken cancellationToken)
@@ -15,7 +17,7 @@ public class ContactPersonUpdateHandler : IRequestHandler<ContactPersonUpdateDto
 
         try
         {
-            var ContactPerson = await _context.ContactPerson.FirstAsync(x => x.Id == request.Id, cancellationToken);
+            var ContactPerson = await _context.ContactPerson.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
             ContactPerson.ContactId = request.ContactId;
             ContactPerson.Name = request.Name;
             ContactPerson.Email = request.Email;
@@ -29,6 +31,7 @@ public class ContactPersonUpdateHandler : IRequestHandler<ContactPersonUpdateDto
 
             var row = new ContactPersonFetchDto()
             {
+                Id = request.Id,
                 ContactId = ContactPerson.ContactId,
                 Name = ContactPerson.Name,
                 Email = ContactPerson.Email,

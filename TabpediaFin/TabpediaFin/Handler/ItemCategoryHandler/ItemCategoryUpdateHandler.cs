@@ -3,10 +3,12 @@
 public class ItemCategoryUpdateHandler : IRequestHandler<ItemCategoryUpdateDto, RowResponse<ItemCategoryFetchDto>>
 {
     private readonly FinContext _context;
+    private readonly ICurrentUser _currentUser;
 
-    public ItemCategoryUpdateHandler(FinContext db)
+    public ItemCategoryUpdateHandler(FinContext db, ICurrentUser currentUser)
     {
         _context = db;
+        _currentUser = currentUser;
     }
 
     public async Task<RowResponse<ItemCategoryFetchDto>> Handle(ItemCategoryUpdateDto request, CancellationToken cancellationToken)
@@ -15,7 +17,7 @@ public class ItemCategoryUpdateHandler : IRequestHandler<ItemCategoryUpdateDto, 
 
         try
         {
-            var ItemCategory = await _context.ItemCategory.FirstAsync(x => x.Id == request.Id, cancellationToken);
+            var ItemCategory = await _context.ItemCategory.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
             ItemCategory.Name = request.Name;
             ItemCategory.Description = request.Description;
 
@@ -23,6 +25,7 @@ public class ItemCategoryUpdateHandler : IRequestHandler<ItemCategoryUpdateDto, 
 
             var row = new ItemCategoryFetchDto()
             {
+                Id = request.Id,
                 Name = ItemCategory.Name,
                 Description = ItemCategory.Description,
             };

@@ -3,10 +3,12 @@
 public class TagUpdateHandler : IRequestHandler<TagUpdateDto, RowResponse<TagFetchDto>>
 {
     private readonly FinContext _context;
+    private readonly ICurrentUser _currentUser;
 
-    public TagUpdateHandler(FinContext db)
+    public TagUpdateHandler(FinContext db, ICurrentUser currentUser)
     {
         _context = db;
+        _currentUser = currentUser;
     }
 
     public async Task<RowResponse<TagFetchDto>> Handle(TagUpdateDto request, CancellationToken cancellationToken)
@@ -15,7 +17,7 @@ public class TagUpdateHandler : IRequestHandler<TagUpdateDto, RowResponse<TagFet
 
         try
         {
-            var Tag = await _context.Tag.FirstAsync(x => x.Id == request.Id, cancellationToken);
+            var Tag = await _context.Tag.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
             Tag.Name = request.Name;
             Tag.Description = request.Description;
 
@@ -23,6 +25,7 @@ public class TagUpdateHandler : IRequestHandler<TagUpdateDto, RowResponse<TagFet
 
             var row = new TagFetchDto()
             {
+                Id = request.Id,
                 Name = Tag.Name,
                 Description = Tag.Description,
             };

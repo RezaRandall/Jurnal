@@ -3,10 +3,12 @@
 public class ContactGroupUpdateHandler : IRequestHandler<ContactGroupUpdateDto, RowResponse<ContactGroupFetchDto>>
 {
     private readonly FinContext _context;
+    private readonly ICurrentUser _currentUser;
 
-    public ContactGroupUpdateHandler(FinContext db)
+    public ContactGroupUpdateHandler(FinContext db, ICurrentUser currentUser)
     {
         _context = db;
+        _currentUser = currentUser;
     }
 
     public async Task<RowResponse<ContactGroupFetchDto>> Handle(ContactGroupUpdateDto request, CancellationToken cancellationToken)
@@ -15,7 +17,7 @@ public class ContactGroupUpdateHandler : IRequestHandler<ContactGroupUpdateDto, 
 
         try
         {
-            var ContactGroup = await _context.ContactGroup.FirstAsync(x => x.Id == request.Id, cancellationToken);
+            var ContactGroup = await _context.ContactGroup.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
             ContactGroup.Name = request.Name;
             ContactGroup.Description = request.Description;
 
@@ -23,6 +25,7 @@ public class ContactGroupUpdateHandler : IRequestHandler<ContactGroupUpdateDto, 
 
             var row = new ContactGroupFetchDto()
             {
+                Id = request.Id,
                 Name = ContactGroup.Name,
                 Description = ContactGroup.Description,
             };
