@@ -133,7 +133,7 @@ namespace TabpediaFin.Controllers
         {
             return Result(await _mediator.Send(command));
         }
-        [HttpDelete("{id}")]
+        [HttpDelete("contactaddress/{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> DeleteContactAddress(int id)
         {
@@ -162,7 +162,7 @@ namespace TabpediaFin.Controllers
         {
             return Result(await _mediator.Send(command));
         }
-        [HttpDelete("{id}")]
+        [HttpDelete("contactperson/{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> DeleteContactPerson(int id)
         {
