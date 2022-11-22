@@ -20,10 +20,18 @@
                 using (var cn = _dbManager.CreateConnection())
                 {
                     var row = await cn.FetchAsync<ItemDto>(request.Id, _currentUser);
-
-                    response.IsOk = true;
-                    response.Row = row;
-                    response.ErrorMessage = string.Empty;
+                    if (row == null)
+                    {
+                        response.IsOk = false;
+                        response.Row = row;
+                        response.ErrorMessage = "Data not found";
+                    }
+                    else 
+                    {
+                        response.IsOk = true;
+                        response.Row = row;
+                        response.ErrorMessage = string.Empty;
+                    }
                 }
             }
             catch (Exception ex)
