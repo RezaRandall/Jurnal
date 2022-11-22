@@ -16,15 +16,24 @@
             try
             {
                 var Contact = await _context.Contact.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-                if (Contact != null)
-                {
-                    _context.Contact.Attach(Contact);
-                    _context.Contact.Remove(Contact);
-                    _context.SaveChanges();
-                }
-
+                
+                _context.Contact.Attach(Contact);
+                _context.Contact.Remove(Contact);
                 await _context.SaveChangesAsync(cancellationToken);
 
+                List<ContactAddress> ContactAddress = _context.ContactAddress.Where<ContactAddress>(x => x.ContactId == request.Id && x.TenantId == _currentUser.TenantId).ToList();
+                if(ContactAddress.Count > 0)
+                {
+                    _context.ContactAddress.RemoveRange(ContactAddress);
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+
+                List<ContactPerson> ContactPerson = _context.ContactPerson.Where<ContactPerson>(x => x.ContactId == request.Id && x.TenantId == _currentUser.TenantId).ToList();
+                if (ContactPerson.Count > 0)
+                {
+                    _context.ContactPerson.RemoveRange(ContactPerson);
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
                 result.Row = true;

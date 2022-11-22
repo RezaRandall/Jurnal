@@ -23,7 +23,7 @@ public class ContactAddressInsertHandler : IRequestHandler<ContactAddressInsertD
             CityName = request.CityName,
             PostalCode = request.PostalCode,
             AddressTypeId = request.AddressTypeId,
-            AddresType = request.AddresType,
+            //AddresType = request.AddresType,
             Notes = request.Notes,
         };
 
@@ -41,7 +41,7 @@ public class ContactAddressInsertHandler : IRequestHandler<ContactAddressInsertD
                 CityName = ContactAddress.CityName,
                 PostalCode = ContactAddress.PostalCode,
                 AddressTypeId = ContactAddress.AddressTypeId,
-                AddresType = ContactAddress.AddresType,
+                //AddresType = ContactAddress.AddresType,
                 Notes = ContactAddress.Notes,
             };
 

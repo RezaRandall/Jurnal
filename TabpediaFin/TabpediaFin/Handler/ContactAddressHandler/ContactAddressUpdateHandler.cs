@@ -24,7 +24,7 @@ public class ContactAddressUpdateHandler : IRequestHandler<ContactAddressUpdateD
             ContactAddress.CityName = request.CityName;
             ContactAddress.PostalCode = request.PostalCode;
             ContactAddress.AddressTypeId = request.AddressTypeId;
-            ContactAddress.AddresType = request.AddresType;
+            //ContactAddress.AddresType = request.AddresType;
             ContactAddress.Notes = request.Notes;
 
 
@@ -39,7 +39,7 @@ public class ContactAddressUpdateHandler : IRequestHandler<ContactAddressUpdateD
                 CityName = ContactAddress.CityName,
                 PostalCode = ContactAddress.PostalCode,
                 AddressTypeId = ContactAddress.AddressTypeId,
-                AddresType = ContactAddress.AddresType,
+                //AddresType = ContactAddress.AddresType,
                 Notes = ContactAddress.Notes,
             };
 

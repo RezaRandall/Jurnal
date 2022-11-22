@@ -6,20 +6,24 @@ namespace TabpediaFin.Handler.ContactHandler
     public class ContactUpdateHandler : IRequestHandler<ContactUpdateDto, RowResponse<ContactFetchDto>>
     {
         private readonly FinContext _context;
+        private readonly ICurrentUser _currentUser;
 
-        public ContactUpdateHandler(FinContext db)
+        public ContactUpdateHandler(FinContext db, ICurrentUser currentUser)
         {
             _context = db;
+            _currentUser = currentUser;
         }
         public async Task<RowResponse<ContactFetchDto>> Handle(ContactUpdateDto request, CancellationToken cancellationToken)
         {
             var result = new RowResponse<ContactFetchDto>();
             int contactidresult;
-            List<ContactAddressFetchDto> ContactAddress = new List<ContactAddressFetchDto>();
-            List<ContactPersonFetchDto> ContactPerson = new List<ContactPersonFetchDto>();
+            List<ContactAddress> ContactAddress = new List<ContactAddress>();
+            List<ContactPerson> ContactPerson = new List<ContactPerson>();
+            List<ContactAddressFetchDto> ContactAddressFetchDto = new List<ContactAddressFetchDto>();
+            List<ContactPersonFetchDto> ContactPersonFetchDto = new List<ContactPersonFetchDto>();
             try
             {
-                var Contact = await _context.Contact.FirstAsync(x => x.Id == request.Id, cancellationToken);
+                var Contact = await _context.Contact.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
                 Contact.Name = request.Name;
                 Contact.Address = request.Address;
                 Contact.CityName = request.CityName;
@@ -40,11 +44,66 @@ namespace TabpediaFin.Handler.ContactHandler
                 contactidresult = request.Id;
                 if (request.ContactAddressList.Count > 0)
                 {
-
+                    foreach (ContactAddressUpdateDto item in request.ContactAddressList)
+                    {
+                        ContactAddress.Add(new ContactAddress
+                        {
+                            Id = item.Id,
+                            ContactId = contactidresult,
+                            AddressName = item.AddressName,
+                            Address = item.Address,
+                            CityName = item.CityName,
+                            PostalCode = item.PostalCode,
+                            AddressTypeId = item.AddressTypeId,
+                            //AddresType = item.AddresType,
+                            Notes = item.Notes,
+                        });
+                        ContactAddressFetchDto.Add(new ContactAddressFetchDto
+                        {
+                            Id = item.Id,
+                            ContactId = contactidresult,
+                            AddressName = item.AddressName,
+                            Address = item.Address,
+                            CityName = item.CityName,
+                            PostalCode = item.PostalCode,
+                            AddressTypeId = item.AddressTypeId,
+                            Notes = item.Notes,
+                        });
+                    }
+                    _context.ContactAddress.UpdateRange(ContactAddress);
                 }
                 if (request.ContactPersonList.Count > 0)
                 {
-                    
+                    foreach (ContactPersonUpdateDto item in request.ContactPersonList)
+                    {
+                        ContactPerson.Add(new ContactPerson
+                        {
+                            Id = item.Id,
+                            ContactId = contactidresult,
+                            Name = item.Name,
+                            Email = item.Email,
+                            Phone = item.Phone,
+                            Fax = item.Fax,
+                            Others = item.Others,
+                            Notes = item.Notes,
+                        });
+                        ContactPersonFetchDto.Add(new ContactPersonFetchDto
+                        {
+                            Id = item.Id,
+                            ContactId = contactidresult,
+                            Name = item.Name,
+                            Email = item.Email,
+                            Phone = item.Phone,
+                            Fax = item.Fax,
+                            Others = item.Others,
+                            Notes = item.Notes,
+                        });
+                    }
+                    _context.ContactPerson.UpdateRange(ContactPerson);
+                }
+                if (ContactPerson.Count > 0 || ContactAddress.Count > 0)
+                {
+                    await _context.SaveChangesAsync(cancellationToken);
                 }
 
                 var row = new ContactFetchDto()
@@ -65,6 +124,8 @@ namespace TabpediaFin.Handler.ContactHandler
                     IsEmployee = Contact.IsEmployee,
                     IsOther = Contact.IsOther,
                     Notes = Contact.Notes,
+                    ContactAddressList = ContactAddressFetchDto,
+                    ContactPersonList = ContactPersonFetchDto,
                 };
 
                 result.IsOk = true;
@@ -99,8 +160,8 @@ namespace TabpediaFin.Handler.ContactHandler
         public bool IsEmployee { get; set; }
         public bool IsOther { get; set; }
         public string Notes { get; set; } = string.Empty;
-        public List<ContactAddressFetchDto> ContactAddressList { get; set; }
-        public List<ContactPersonFetchDto> ContactPersonList { get; set; }
+        public List<ContactAddressUpdateDto> ContactAddressList { get; set; }
+        public List<ContactPersonUpdateDto> ContactPersonList { get; set; }
 
     }
 }

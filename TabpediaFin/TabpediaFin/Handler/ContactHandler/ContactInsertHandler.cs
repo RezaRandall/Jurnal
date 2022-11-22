@@ -34,8 +34,10 @@ namespace TabpediaFin.Handler.ContactHandler
                 IsOther = request.IsOther,
                 Notes = request.Notes,
             };
-            List<ContactAddressFetchDto> ContactAddress = new List<ContactAddressFetchDto>();
-            List<ContactPersonFetchDto> ContactPerson = new List<ContactPersonFetchDto>();
+            List<ContactAddress> ContactAddress = new List<ContactAddress>();
+            List<ContactPerson> ContactPerson = new List<ContactPerson>();
+            List<ContactAddressFetchDto> ContactAddressFetchDto = new List<ContactAddressFetchDto>();
+            List<ContactPersonFetchDto> ContactPersonFetchDto = new List<ContactPersonFetchDto>();
 
             try
             {
@@ -46,7 +48,7 @@ namespace TabpediaFin.Handler.ContactHandler
                 {
                     foreach (ContactAddressInsertDto item in request.ContactAddressList)
                     {
-                        ContactAddress.Add(new ContactAddressFetchDto
+                        ContactAddress.Add(new ContactAddress
                         {
                             ContactId = contactidresult,
                             AddressName = item.AddressName,
@@ -54,16 +56,39 @@ namespace TabpediaFin.Handler.ContactHandler
                             CityName = item.CityName,
                             PostalCode = item.PostalCode,
                             AddressTypeId = item.AddressTypeId,
-                            AddresType = item.AddresType,
+                            //AddresType = item.AddresType,
+                            Notes = item.Notes,
+                        });
+                        ContactAddressFetchDto.Add(new ContactAddressFetchDto
+                        {
+                            ContactId = contactidresult,
+                            AddressName = item.AddressName,
+                            Address = item.Address,
+                            CityName = item.CityName,
+                            PostalCode = item.PostalCode,
+                            AddressTypeId = item.AddressTypeId,
+                            //AddresType = item.AddresType,
                             Notes = item.Notes,
                         });
                     }
+
+                    await _context.ContactAddress.AddRangeAsync(ContactAddress, cancellationToken);
                 }
                 if (request.ContactPersonList.Count > 0)
                 {
                     foreach (ContactPersonInsertDto item in request.ContactPersonList)
                     {
-                        ContactPerson.Add(new ContactPersonFetchDto
+                        ContactPerson.Add(new ContactPerson
+                        {
+                            ContactId = contactidresult,
+                            Name = item.Name,
+                            Email = item.Email,
+                            Phone = item.Phone,
+                            Fax = item.Fax,
+                            Others = item.Others,
+                            Notes = item.Notes,
+                        });
+                        ContactPersonFetchDto.Add(new ContactPersonFetchDto
                         {
                             ContactId = contactidresult,
                             Name = item.Name,
@@ -74,7 +99,14 @@ namespace TabpediaFin.Handler.ContactHandler
                             Notes = item.Notes,
                         });
                     }
+                    await _context.ContactPerson.AddRangeAsync(ContactPerson, cancellationToken);
                 }
+
+                if(ContactPerson.Count > 0 || ContactAddress.Count > 0)
+                {
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+
                 var row = new ContactFetchDto()
                 {
                     Id = Contact.Id,
@@ -93,8 +125,8 @@ namespace TabpediaFin.Handler.ContactHandler
                     IsEmployee = Contact.IsEmployee,
                     IsOther = Contact.IsOther,
                     Notes = Contact.Notes,
-                    ContactAddressList = ContactAddress,
-                    ContactPersonList = ContactPerson,
+                    ContactAddressList = ContactAddressFetchDto,
+                    ContactPersonList = ContactPersonFetchDto,
                 };
 
                 result.IsOk = true;

@@ -16,12 +16,9 @@
             try
             {
                 var ContactPerson = await _context.ContactPerson.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-                if (ContactPerson != null)
-                {
-                    _context.ContactPerson.Attach(ContactPerson);
-                    _context.ContactPerson.Remove(ContactPerson);
-                    _context.SaveChanges();
-                }
+
+                _context.ContactPerson.Attach(ContactPerson);
+                _context.ContactPerson.Remove(ContactPerson);
 
                 await _context.SaveChangesAsync(cancellationToken);
 

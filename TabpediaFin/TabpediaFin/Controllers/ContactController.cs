@@ -104,7 +104,7 @@ namespace TabpediaFin.Controllers
         {
             return Result(await _mediator.Send(command));
         }
-        [HttpDelete("contact/{id}")]
+        [HttpDelete("{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> DeleteContact(int id)
         {

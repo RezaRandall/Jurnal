@@ -16,13 +16,9 @@
             try
             {
                 var AddressType = await _context.AddressType.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-                if (AddressType != null)
-                {
-                    _context.AddressType.Attach(AddressType);
-                    _context.AddressType.Remove(AddressType);
-                    _context.SaveChanges();
-                }
 
+                _context.AddressType.Attach(AddressType);
+                _context.AddressType.Remove(AddressType);
                 await _context.SaveChangesAsync(cancellationToken);
 
                 result.IsOk = true;

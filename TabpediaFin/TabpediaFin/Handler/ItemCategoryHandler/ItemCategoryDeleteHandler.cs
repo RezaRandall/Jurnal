@@ -16,12 +16,9 @@
             try
             {
                 var ItemCategory = await _context.ItemCategory.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-                if (ItemCategory != null)
-                {
-                    _context.ItemCategory.Attach(ItemCategory);
-                    _context.ItemCategory.Remove(ItemCategory);
-                    _context.SaveChanges();
-                }
+                
+                _context.ItemCategory.Attach(ItemCategory);
+                _context.ItemCategory.Remove(ItemCategory);
 
                 await _context.SaveChangesAsync(cancellationToken);
 

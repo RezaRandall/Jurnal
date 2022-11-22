@@ -16,12 +16,9 @@
             try
             {
                 var ContactGroup = await _context.ContactGroup.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-                if (ContactGroup != null)
-                {
-                    _context.ContactGroup.Attach(ContactGroup);
-                    _context.ContactGroup.Remove(ContactGroup);
-                    _context.SaveChanges();
-                }
+                
+                _context.ContactGroup.Attach(ContactGroup);
+                _context.ContactGroup.Remove(ContactGroup);
 
                 await _context.SaveChangesAsync(cancellationToken);
 

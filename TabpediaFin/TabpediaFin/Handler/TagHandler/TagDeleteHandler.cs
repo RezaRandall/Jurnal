@@ -16,12 +16,9 @@
             try
             {
                 var Tag = await _context.Tag.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-                if (Tag != null)
-                {
-                    _context.Tag.Attach(Tag);
-                    _context.Tag.Remove(Tag);
-                    _context.SaveChanges();
-                }
+
+                _context.Tag.Attach(Tag);
+                _context.Tag.Remove(Tag);
 
                 await _context.SaveChangesAsync(cancellationToken);
 

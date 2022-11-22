@@ -16,12 +16,9 @@
             try
             {
                 var Warehouse = await _context.Warehouse.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-                if (Warehouse != null)
-                {
-                    _context.Warehouse.Attach(Warehouse);
-                    _context.Warehouse.Remove(Warehouse);
-                    _context.SaveChanges();
-                }
+
+                _context.Warehouse.Attach(Warehouse);
+                _context.Warehouse.Remove(Warehouse);
 
                 await _context.SaveChangesAsync(cancellationToken);
 
