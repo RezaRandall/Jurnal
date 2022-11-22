@@ -54,7 +54,15 @@ builder.Services.AddControllers(options =>
 
 builder.Services.AddFluentValidationAutoValidation();
 
-builder.Services.AddCors();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllAllowPolicy",
+        builder => builder.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .WithExposedHeaders("Token-Expired")
+        );
+});
 
 builder.Services.RegisterSettings(builder.Configuration);
 builder.Services.RegisterServices();
@@ -80,12 +88,7 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
-app.UseCors(
-    builder =>
-        builder.AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .WithExposedHeaders("Token-Expired"));
+app.UseCors("AllAllowPolicy");
 
 app.UseAuthorization();
 
