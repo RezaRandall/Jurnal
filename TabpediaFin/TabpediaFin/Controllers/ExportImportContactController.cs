@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
+using TabpediaFin.Handler.ContactHandler;
 using TabpediaFin.Handler.ExportImportContactHandler;
 
 namespace TabpediaFin.Controllers
@@ -10,10 +11,11 @@ namespace TabpediaFin.Controllers
     public class ExportImportContactController : ApiControllerBase
     {
         private readonly IMediator _mediator;
-
-        public ExportImportContactController(IMediator mediator)
+        private readonly Microsoft.AspNetCore.Hosting.IHostingEnvironment _hostingEnvironment;
+        public ExportImportContactController(IMediator mediator, Microsoft.AspNetCore.Hosting.IHostingEnvironment hostingEnvironment)
         {
             _mediator = mediator;
+            this._hostingEnvironment = hostingEnvironment;
         }
 
         [HttpPost("readexcel")]
@@ -29,15 +31,18 @@ namespace TabpediaFin.Controllers
             return Result(await _mediator.Send(command));
         }
         [HttpGet("export")]
-        public async Task<IActionResult> ExportV2(CancellationToken cancellationToken)
+        public async Task<IActionResult> Export(CancellationToken cancellationToken)
         {
-            // query data from database  
+            QueryPagedListContactDto<contactlistDto> reqsend = new QueryPagedListContactDto<contactlistDto>();
+            reqsend.PageSize = int.MaxValue;
+            reqsend.PageNum = 0;
+            reqsend.Search = "";
+            reqsend.SortBy = "";
+            reqsend.SortDesc = false;
+            var result = await _mediator.Send(reqsend);
             await Task.Yield();
-            var list = new List<UserInfo>()
-            {
-                new UserInfo { UserName = "catcher", Age = 18 },
-                new UserInfo { UserName = "james", Age = 20 },
-            };
+            var list = new List<contactlistDto>();
+            list = result.List;
             var stream = new MemoryStream();
 
             using (var package = new ExcelPackage(stream))
@@ -53,11 +58,59 @@ namespace TabpediaFin.Controllers
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
         }
 
-        public class UserInfo
+        [HttpGet("exportv2")]
+        public async Task<DemoResponse<string>> Exportv2(CancellationToken cancellationToken)
         {
-            public string UserName { get; set; }
+            string folder = "../TabpediaFin/excelexport";
+            string excelName = $"UserList-{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.xlsx";
+            string downloadUrl = string.Format("{0}://{1}/{2}", Request.Scheme, Request.Host, excelName);
+            FileInfo file = new FileInfo(Path.Combine(folder, excelName));
+            if (file.Exists)
+            {
+                file.Delete();
+                file = new FileInfo(Path.Combine(folder, excelName));
+            }
 
-            public int Age { get; set; }
+            QueryPagedListContactDto<contactlistDto> reqsend = new QueryPagedListContactDto<contactlistDto>();
+            reqsend.PageSize = int.MaxValue;
+            reqsend.PageNum = 0;
+            reqsend.Search = "";
+            reqsend.SortBy = "";
+            reqsend.SortDesc = false;
+            var result = await _mediator.Send(reqsend);
+            await Task.Yield();
+            var list = new List<contactlistDto>();
+            list = result.List;
+            
+            await Task.Yield();
+
+            using (var package = new ExcelPackage(file))
+            {
+                var workSheet = package.Workbook.Worksheets.Add("Sheet1");
+                workSheet.Cells.LoadFromCollection(list, true);
+                package.Save();
+            }
+
+            return DemoResponse<string>.GetResult(0, "OK", downloadUrl);
+        }
+
+        public class DemoResponse<T>
+        {
+            public int Code { get; set; }
+
+            public string Msg { get; set; }
+
+            public T Data { get; set; }
+
+            public static DemoResponse<T> GetResult(int code, string msg, T data = default(T))
+            {
+                return new DemoResponse<T>
+                {
+                    Code = code,
+                    Msg = msg,
+                    Data = data
+                };
+            }
         }
 
     }
