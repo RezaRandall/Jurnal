@@ -69,6 +69,6 @@ public class UnitMeasureListDto : BaseDto
 {
     [Searchable]
     public string Name { get; set; } = string.Empty;
-    [Searchable]
+    //[Searchable]
     public string Description { get; set; } = string.Empty;
 }
