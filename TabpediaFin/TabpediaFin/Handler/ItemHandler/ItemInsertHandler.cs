@@ -131,27 +131,27 @@ public class ItemInsertHandler : IRequestHandler<ItemInsertDto, RowResponse<Item
         _context = db;
     }
 
-    public class CommandValidator : AbstractValidator<ItemInsertDto>
-    {
-        public CommandValidator()
-        {
-            RuleFor(x => x.Name).NotNull().NotEmpty();
-            RuleFor(x => x.Description).MaximumLength(100); ;
-            RuleFor(x => x.Code).NotNull().NotEmpty();
-            RuleFor(x => x.Barcode).NotNull().NotEmpty();
-            RuleFor(x => x.UnitMeasureId).NotNull().NotEmpty();
-            RuleFor(x => x.AverageCost).NotNull().NotEmpty();
-            RuleFor(x => x.Cost).NotNull().NotEmpty();
-            RuleFor(x => x.Price).NotNull().NotEmpty();
-            RuleFor(x => x.IsSales).NotNull().NotEmpty();
-            RuleFor(x => x.IsPurchase).NotNull().NotEmpty();
-            RuleFor(x => x.IsStock).NotNull().NotEmpty();
-            RuleFor(x => x.StockMin).NotNull().NotEmpty();
-            RuleFor(x => x.IsArchived).NotNull().NotEmpty();
-            RuleFor(x => x.ImageFileName).NotNull().NotEmpty();
-            RuleFor(x => x.Notes).MaximumLength(100);
-        }
-    }
+    //public class CommandValidator : AbstractValidator<ItemInsertDto>
+    //{
+    //    public CommandValidator()
+    //    {
+    //        RuleFor(x => x.Name).NotNull().NotEmpty();
+    //        RuleFor(x => x.Description).MaximumLength(100); ;
+    //        RuleFor(x => x.Code).NotNull().NotEmpty();
+    //        RuleFor(x => x.Barcode).NotNull().NotEmpty();
+    //        RuleFor(x => x.UnitMeasureId).NotNull().NotEmpty();
+    //        RuleFor(x => x.AverageCost).NotNull().NotEmpty();
+    //        RuleFor(x => x.Cost).NotNull().NotEmpty();
+    //        RuleFor(x => x.Price).NotNull().NotEmpty();
+    //        RuleFor(x => x.IsSales).NotNull().NotEmpty();
+    //        RuleFor(x => x.IsPurchase).NotNull().NotEmpty();
+    //        RuleFor(x => x.IsStock).NotNull().NotEmpty();
+    //        RuleFor(x => x.StockMin).NotNull().NotEmpty();
+    //        RuleFor(x => x.IsArchived).NotNull().NotEmpty();
+    //        RuleFor(x => x.ImageFileName).NotNull().NotEmpty();
+    //        RuleFor(x => x.Notes).MaximumLength(100);
+    //    }
+    //}
 
     public async Task<RowResponse<ItemDto>> Handle(ItemInsertDto req, CancellationToken cancellationToken)
     {
