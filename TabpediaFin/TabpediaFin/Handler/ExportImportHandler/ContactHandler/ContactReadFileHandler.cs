@@ -69,7 +69,7 @@ namespace TabpediaFin.Handler.ExportImportContactHandler
                                 IsVendor = bool.Parse(sheetRow.GetCell(11).StringCellValue),
                                 IsEmployee = bool.Parse(sheetRow.GetCell(12).StringCellValue),
                                 IsOther = bool.Parse(sheetRow.GetCell(13).StringCellValue),
-                                Notes = sheetRow.GetCell(0).StringCellValue,
+                                Notes = sheetRow.GetCell(14).StringCellValue,
                             });
                         }
                     }
