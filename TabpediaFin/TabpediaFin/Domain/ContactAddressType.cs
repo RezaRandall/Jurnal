@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Domain
 {
-    public class AddressType : BaseEntity
+    public class ContactAddressType : BaseEntity
     {
         public string Name { get; set; } = string.Empty;
 

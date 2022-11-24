@@ -1,23 +1,23 @@
-﻿namespace TabpediaFin.Handler.AddressTypeHandler
+﻿namespace TabpediaFin.Handler.TaxHandler
 {
-    public class ItemCategoryFetchHandler : IQueryByIdHandler<AddressTypeFetchDto>
+    public class AddressTypeFetchHandler : IQueryByIdHandler<TaxFetchDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
-        public ItemCategoryFetchHandler(DbManager dbManager, ICurrentUser currentUser)
+        public AddressTypeFetchHandler(DbManager dbManager, ICurrentUser currentUser)
         {
             _dbManager = dbManager;
             _currentUser = currentUser;
         }
-        public async Task<RowResponse<AddressTypeFetchDto>> Handle(QueryByIdDto<AddressTypeFetchDto> request, CancellationToken cancellationToken)
+        public async Task<RowResponse<TaxFetchDto>> Handle(QueryByIdDto<TaxFetchDto> request, CancellationToken cancellationToken)
         {
-            var response = new RowResponse<AddressTypeFetchDto>();
+            var response = new RowResponse<TaxFetchDto>();
 
             try
             {
                 using (var cn = _dbManager.CreateConnection())
                 {
-                    var row = await cn.FetchAsync<AddressTypeFetchDto>(request.Id, _currentUser);
+                    var row = await cn.FetchAsync<TaxFetchDto>(request.Id, _currentUser);
 
                     response.IsOk = true;
                     response.Row = row;
@@ -35,10 +35,11 @@
         }
     }
 
-    [Table("AddressType")]
-    public class AddressTypeFetchDto : BaseDto
+    [Table("Tax")]
+    public class TaxFetchDto : BaseDto
     {
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public double RatePercent { get; set; }
     }
 }

@@ -1,21 +1,21 @@
-﻿using TabpediaFin.Handler.AddressTypeHandler;
+﻿using TabpediaFin.Handler.ContactAddressTypeHandler;
 
-namespace TabpediaFin.Handler.AddressTypeHandler;
+namespace TabpediaFin.Handler.ContactAddressTypeHandler;
 
-public class AddressTypeInsertHandler : IRequestHandler<AddressTypeInsertDto, RowResponse<AddressTypeFetchDto>>
+public class ContactAddressTypeInsertHandler : IRequestHandler<ContactAddressTypeInsertDto, RowResponse<ContactAddressTypeFetchDto>>
 {
     private readonly FinContext _context;
 
-    public AddressTypeInsertHandler(FinContext db)
+    public ContactAddressTypeInsertHandler(FinContext db)
     {
         _context = db;
     }
 
-    public async Task<RowResponse<AddressTypeFetchDto>> Handle(AddressTypeInsertDto request, CancellationToken cancellationToken)
+    public async Task<RowResponse<ContactAddressTypeFetchDto>> Handle(ContactAddressTypeInsertDto request, CancellationToken cancellationToken)
     {
-        var result = new RowResponse<AddressTypeFetchDto>();
+        var result = new RowResponse<ContactAddressTypeFetchDto>();
 
-        var AddressType = new AddressType()
+        var AddressType = new ContactAddressType()
         {
             Name = request.Name,
             Description = request.Description,
@@ -23,10 +23,10 @@ public class AddressTypeInsertHandler : IRequestHandler<AddressTypeInsertDto, Ro
 
         try
         {
-            await _context.AddressType.AddAsync(AddressType, cancellationToken);
+            await _context.ContactAddressType.AddAsync(AddressType, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
 
-            var row = new AddressTypeFetchDto()
+            var row = new ContactAddressTypeFetchDto()
             {
                 Id = AddressType.Id,
                 Name = AddressType.Name,
@@ -49,7 +49,7 @@ public class AddressTypeInsertHandler : IRequestHandler<AddressTypeInsertDto, Ro
 
 
 
-public class AddressTypeInsertDto : IRequest<RowResponse<AddressTypeFetchDto>>
+public class ContactAddressTypeInsertDto : IRequest<RowResponse<ContactAddressTypeFetchDto>>
 {
     public string Name { get; set; } = string.Empty;
 

@@ -1,21 +1,21 @@
-﻿namespace TabpediaFin.Handler.AddressTypeHandler
+﻿namespace TabpediaFin.Handler.TaxHandler
 {
-    public class ItemCategoryListHandler : IQueryPagedListHandler<AddressTypeListDto>
+    public class AddressTypeListHandler : IQueryPagedListHandler<TaxListDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
 
-        public ItemCategoryListHandler(DbManager dbManager, ICurrentUser currentUser)
+        public AddressTypeListHandler(DbManager dbManager, ICurrentUser currentUser)
         {
             _dbManager = dbManager;
             _currentUser = currentUser;
         }
-        public async Task<PagedListResponse<AddressTypeListDto>> Handle(QueryPagedListDto<AddressTypeListDto> request, CancellationToken cancellationToken)
+        public async Task<PagedListResponse<TaxListDto>> Handle(QueryPagedListDto<TaxListDto> request, CancellationToken cancellationToken)
         {
             if (request.PageNum == 0) { request.PageNum = 1; }
             if (request.PageSize == 0) { request.PageSize = 10; }
 
-            var result = new PagedListResponse<AddressTypeListDto>();
+            var result = new PagedListResponse<TaxListDto>();
 
             try
             {
@@ -24,7 +24,7 @@
 
                 if (!string.IsNullOrWhiteSpace(request.Search))
                 {
-                    sqlWhere += SqlHelper.GenerateWhere<AddressTypeListDto>();
+                    sqlWhere += SqlHelper.GenerateWhere<TaxListDto>();
                     parameters.Add("Search", $"%{request.Search.Trim().ToLowerInvariant()}%");
                 }
 
@@ -38,18 +38,18 @@
                 {
                     cn.Open();
 
-                    var list = await cn.FetchListPagedAsync<AddressTypeListDto>(pageNumber: request.PageNum
+                    var list = await cn.FetchListPagedAsync<TaxListDto>(pageNumber: request.PageNum
                         , rowsPerPage: request.PageSize
                         , conditions: sqlWhere
                         , orderby: orderby
                         , currentUser: _currentUser
                         , parameters: parameters);
 
-                    int recordCount = await cn.RecordCountAsync<AddressTypeListDto>(sqlWhere, parameters);
+                    int recordCount = await cn.RecordCountAsync<TaxListDto>(sqlWhere, parameters);
 
                     result.IsOk = true;
                     result.ErrorMessage = string.Empty;
-                    result.List = list?.AsList() ?? new List<AddressTypeListDto>();
+                    result.List = list?.AsList() ?? new List<TaxListDto>();
                     result.RecordCount = recordCount;
                 }
             }
@@ -62,13 +62,16 @@
             return result;
         }
     }
-    [Table("AddressType")]
-    public class AddressTypeListDto : BaseDto
+    [Table("Tax")]
+    public class TaxListDto : BaseDto
     {
         [Searchable]
         public string Name { get; set; } = string.Empty;
 
         [Searchable]
         public string Description { get; set; } = string.Empty;
+
+        [Searchable]
+        public double RatePercent { get; set; }
     }
 }
