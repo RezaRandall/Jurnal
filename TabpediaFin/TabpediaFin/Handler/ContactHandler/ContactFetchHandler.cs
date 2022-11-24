@@ -30,7 +30,7 @@ namespace TabpediaFin.Handler.ContactHandler
 
                     if (result != null)
                     {
-                        var sqladdress = @"SELECT at.""Name"" as AddresType, i.""Id"", i.""ContactId"", i.""AddressName"",i.""Address"",i.""CityName"",i.""PostalCode"",i.""AddressTypeId"",i.""Notes""  FROM ""ContactAddress"" i LEFT JOIN ""AddressType"" at ON i.""AddressTypeId"" = at.""Id"" WHERE i.""TenantId"" = @TenantId AND i.""ContactId"" = @ContactId";
+                        var sqladdress = @"SELECT at.""Name"" as AddresType, i.""Id"", i.""ContactId"", i.""AddressName"",i.""Address"",i.""CityName"",i.""PostalCode"",i.""AddressTypeId"",i.""Notes""  FROM ""ContactAddress"" i LEFT JOIN ""ContactAddressType"" at ON i.""AddressTypeId"" = at.""Id"" WHERE i.""TenantId"" = @TenantId AND i.""ContactId"" = @ContactId";
 
                         var parametersub = new DynamicParameters();
                         parametersub.Add("TenantId", _currentUser.TenantId);

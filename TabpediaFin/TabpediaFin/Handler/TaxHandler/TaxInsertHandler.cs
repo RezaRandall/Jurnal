@@ -1,21 +1,21 @@
 ﻿using TabpediaFin.Handler.TaxHandler;
 
-namespace TabpediaFin.Handler.TagHandler;
+namespace TabpediaFin.Handler.TaxHandler;
 
-public class TagInsertHandler : IRequestHandler<TagInsertDto, RowResponse<TagFetchDto>>
+public class TaxInsertHandler : IRequestHandler<TaxInsertDto, RowResponse<TaxFetchDto>>
 {
     private readonly FinContext _context;
 
-    public TagInsertHandler(FinContext db)
+    public TaxInsertHandler(FinContext db)
     {
         _context = db;
     }
 
-    public async Task<RowResponse<TagFetchDto>> Handle(TagInsertDto request, CancellationToken cancellationToken)
+    public async Task<RowResponse<TaxFetchDto>> Handle(TaxInsertDto request, CancellationToken cancellationToken)
     {
-        var result = new RowResponse<TagFetchDto>();
+        var result = new RowResponse<TaxFetchDto>();
 
-        var Tag = new Tag()
+        var Tax = new Tax()
         {
             Name = request.Name,
             Description = request.Description,
@@ -23,14 +23,15 @@ public class TagInsertHandler : IRequestHandler<TagInsertDto, RowResponse<TagFet
 
         try
         {
-            await _context.Tag.AddAsync(Tag, cancellationToken);
+            await _context.Tax.AddAsync(Tax, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
 
-            var row = new TagFetchDto()
+            var row = new TaxFetchDto()
             {
-                Id = Tag.Id,
-                Name = Tag.Name,
-                Description = Tag.Description,
+                Id = Tax.Id,
+                Name = Tax.Name,
+                Description = Tax.Description,
+                RatePercent = Tax.RatePercent,
             };
 
             result.IsOk = true;
@@ -49,10 +50,12 @@ public class TagInsertHandler : IRequestHandler<TagInsertDto, RowResponse<TagFet
 
 
 
-public class TagInsertDto : IRequest<RowResponse<TagFetchDto>>
+public class TaxInsertDto : IRequest<RowResponse<TaxFetchDto>>
 {
     public string Name { get; set; } = string.Empty;
 
     public string Description { get; set; } = string.Empty;
+    
+    public double RatePercent { get; set; }
 
 }

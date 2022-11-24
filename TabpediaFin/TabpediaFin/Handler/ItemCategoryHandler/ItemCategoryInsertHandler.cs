@@ -1,4 +1,4 @@
-﻿using TabpediaFin.Handler.AddressTypeHandler;
+﻿using TabpediaFin.Handler.ItemCategoryHandler;
 
 namespace TabpediaFin.Handler.ItemCategoryHandler;
 

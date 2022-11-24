@@ -26,7 +26,8 @@ public class FinContext : DbContext
     public DbSet<PaymentTerms> PaymentTerm { get; set; }
     public DbSet<ItemCategory> ItemCategory { get; set; }
     public DbSet<Tag> Tag { get; set; }
-    public DbSet<AddressType> AddressType { get; set; }
+    public DbSet<Tax> Tax { get; set; }
+    public DbSet<ContactAddressType> ContactAddressType { get; set; }
     public DbSet<Contact> Contact { get; set; }
     public DbSet<ContactGroup> ContactGroup { get; set; }
     public DbSet<ContactAddress> ContactAddress { get; set; }
