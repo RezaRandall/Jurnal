@@ -1,12 +1,10 @@
 ﻿namespace TabpediaFin.Handler.ItemUnitMeasureHandler;
 
-//public class ItemUnitMeasureFetchDto : IQueryByIdHandler<ContactAddressFetchDto>
-//{
+public class ItemUnitMeasureUpdateHandler
+{
+}
 
-//}
-
-[Table("ItemUnitMeasure")]
-public class ItemUnitMeasureFetchDto : BaseDto
+public class ItemUnitMeasureUpdateDto : IRequest<RowResponse<ItemUnitMeasureFetchDto>>
 {
     public int UnitMeasureId { get; set; } = 0;
     public int ItemId { get; set; } = 0;
