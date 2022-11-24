@@ -1,6 +1,4 @@
-﻿using TabpediaFin.Handler.UnitMeasures;
-
-namespace TabpediaFin.Handler.PaymentTerm;
+﻿namespace TabpediaFin.Handler.PaymentTerm;
 
 public class PaymentTermsPagedListHandler : IQueryPagedListHandler<PaymentTermListDto>
 {
@@ -71,7 +69,7 @@ public class PaymentTermListDto : BaseDto
 {
     [Searchable]
     public string Name { get; set; } = string.Empty;
-    [Searchable]
+    //[Searchable]
     public string Description { get; set; } = string.Empty;
     public int TermDays { get; set; } = 0;
     public bool IsActive { get; set; } = true;

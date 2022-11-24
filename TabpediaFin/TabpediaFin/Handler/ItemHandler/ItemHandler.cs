@@ -1,4 +1,9 @@
-﻿namespace TabpediaFin.Handler.Item
+﻿using TabpediaFin.Handler.ContactAddressHandler;
+using TabpediaFin.Handler.ContactPersonHandler;
+using TabpediaFin.Handler.ItemItemCategoryHandler;
+using TabpediaFin.Handler.ItemUnitMeasureHandler;
+
+namespace TabpediaFin.Handler.Item
 {
     public class ItemHandler : IQueryByIdHandler<ItemDto>
     {
@@ -64,4 +69,7 @@ public class ItemDto : BaseDto
     public bool IsArchived { get; set; } = true;
     public string ImageFileName { get; set; } = string.Empty;
     public string Notes { get; set; } = string.Empty;
+
+    public List<ItemItemCategoryFetchDto> ItemItemCategoryList { get; set; }
+    public List<ItemUnitMeasureFetchDto> ItemUnitMeasureList { get; set; }
 }

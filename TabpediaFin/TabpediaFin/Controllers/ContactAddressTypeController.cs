@@ -2,17 +2,17 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using TabpediaFin.Handler.AddressTypeHandler;
+using TabpediaFin.Handler.ContactAddressTypeHandler;
 
 namespace TabpediaFin.Controllers
 {
     [Route("api/addresstype")]
     [ApiController]
-    public class AddressTypeController : ApiControllerBase
+    public class ContactAddressTypeController : ApiControllerBase
     {
         private readonly IMediator _mediator;
 
-        public AddressTypeController(IMediator mediator)
+        public ContactAddressTypeController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -20,7 +20,7 @@ namespace TabpediaFin.Controllers
 
         [HttpPost("list")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<AddressTypeListDto> request)
+        public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<ContactAddressTypeListDto> request)
         {
             return Result(await _mediator.Send(request));
         }
@@ -30,18 +30,18 @@ namespace TabpediaFin.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Get(int id)
         {
-            return Result(await _mediator.Send(new QueryByIdDto<AddressTypeFetchDto>(id)));
+            return Result(await _mediator.Send(new QueryByIdDto<ContactAddressTypeFetchDto>(id)));
         }
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> Insert([FromBody] AddressTypeInsertDto command)
+        public async Task<IActionResult> Insert([FromBody] ContactAddressTypeInsertDto command)
         {
             return Result(await _mediator.Send(command));
         }
 
         [HttpPut]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> Update([FromBody] AddressTypeUpdateDto command)
+        public async Task<IActionResult> Update([FromBody] ContactAddressTypeUpdateDto command)
         {
             return Result(await _mediator.Send(command));
         }
@@ -51,7 +51,7 @@ namespace TabpediaFin.Controllers
         public async Task<IActionResult> Delete(int id)
         {
 
-            AddressTypeDeleteDto command = new AddressTypeDeleteDto();
+            ContactAddressTypeDeleteDto command = new ContactAddressTypeDeleteDto();
             command.Id = id;
             return Result(await _mediator.Send(command));
         }

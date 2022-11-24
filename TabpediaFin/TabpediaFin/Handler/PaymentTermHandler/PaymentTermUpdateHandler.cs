@@ -31,6 +31,8 @@ public class PaymentTermUpdateHandler : IRequestHandler<PaymentTermUpdateDto, Ro
             var paymentTerm = await _context.PaymentTerm.FirstAsync(x => x.Id == req.Id, cancellationToken);
             paymentTerm.Name = req.Name;
             paymentTerm.Description = req.Description;
+            paymentTerm.TermDays = req.TermDays;
+            paymentTerm.IsActive = req.IsActive;
 
             await _context.SaveChangesAsync(cancellationToken);
 

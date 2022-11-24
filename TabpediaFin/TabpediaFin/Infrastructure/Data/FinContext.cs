@@ -23,10 +23,13 @@ public class FinContext : DbContext
     public DbSet<PaymentMethod> PaymentMethod { get; set; }
     public DbSet<Item> Item { get; set; }
     public DbSet<UnitMeasure> UnitMeasure { get; set; }
+    public DbSet<ItemUnitMeasure> ItemUnitMeasure { get; set; }
+    public DbSet<ItemItemCategory> ItemItemCategory { get; set; }
     public DbSet<PaymentTerms> PaymentTerm { get; set; }
     public DbSet<ItemCategory> ItemCategory { get; set; }
     public DbSet<Tag> Tag { get; set; }
-    public DbSet<AddressType> AddressType { get; set; }
+    public DbSet<Tax> Tax { get; set; }
+    public DbSet<ContactAddressType> ContactAddressType { get; set; }
     public DbSet<Contact> Contact { get; set; }
     public DbSet<ContactGroup> ContactGroup { get; set; }
     public DbSet<ContactAddress> ContactAddress { get; set; }

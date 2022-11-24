@@ -26,19 +26,19 @@
 
                     if (request.contacttype == "customer")
                     {
-                        contactfilter = @"and ""IsCustomer"" = true and ""IsVendor""= false and ""IsEmployee""= false and ""IsOther"" = false";
+                        contactfilter = @"and ""IsCustomer"" = true";
                     }
                     else if (request.contacttype == "vendor")
                     {
-                        contactfilter = @"and ""IsCustomer"" = false and ""IsVendor""= true and ""IsEmployee""= false and ""IsOther"" = false";
+                        contactfilter = @"and ""IsVendor""= true";
                     }
                     else if (request.contacttype == "employee")
                     {
-                        contactfilter = @"and ""IsCustomer"" = false and ""IsVendor""= false and ""IsEmployee""= true and ""IsOther"" = false";
+                        contactfilter = @"and ""IsEmployee""= true";
                     }
                     else if (request.contacttype == "other")
                     {
-                        contactfilter = @"and ""IsCustomer"" = false and ""IsVendor""= false and ""IsEmployee""= false and ""IsOther"" = true";
+                        contactfilter = @"and ""IsOther"" = true";
                     }
 
                     if (request.SortBy != null && request.SortBy != "")
