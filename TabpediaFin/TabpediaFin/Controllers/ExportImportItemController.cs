@@ -20,7 +20,14 @@ namespace TabpediaFin.Controllers
             _mediator = mediator;
             this._hostingEnvironment = hostingEnvironment;
         }
+        [HttpGet("filestemplate")]
+        public async Task<ActionResult> DownloadFile()
+        {
+            var filePath = $"TemplateImport/Template_Item_Import.xlsx";
 
+            var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(filePath));
+        }
         [HttpPost("readexcel")]
         public async Task<IActionResult> Read(IFormFile formFile)
         {
