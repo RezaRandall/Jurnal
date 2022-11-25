@@ -34,6 +34,6 @@ public class Table_Tax : Migration
                     CreatedUid = 1,
                     CreatedUtc = DateTime.UtcNow
                 }
-        );
+            );
     }
 }

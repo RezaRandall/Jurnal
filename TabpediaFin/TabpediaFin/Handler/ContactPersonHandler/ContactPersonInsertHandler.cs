@@ -1,6 +1,4 @@
-﻿using TabpediaFin.Handler.ContactPersonHandler;
-
-namespace TabpediaFin.Handler.ContactPersonHandler;
+﻿namespace TabpediaFin.Handler.ContactPersonHandler;
 
 public class ContactPersonInsertHandler : IRequestHandler<ContactPersonInsertDto, RowResponse<ContactPersonFetchDto>>
 {

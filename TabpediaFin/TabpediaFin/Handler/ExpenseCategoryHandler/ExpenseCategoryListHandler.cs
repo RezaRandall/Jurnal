@@ -1,21 +1,21 @@
-﻿namespace TabpediaFin.Handler.ContactGroupHandler
+﻿namespace TabpediaFin.Handler.ExpenseCategoryHandler
 {
-    public class ContactGroupListHandler : IQueryPagedListHandler<ContactGroupListDto>
+    public class ExpenseCategoryListHandler : IQueryPagedListHandler<ExpenseCategoryListDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
 
-        public ContactGroupListHandler(DbManager dbManager, ICurrentUser currentUser)
+        public ExpenseCategoryListHandler(DbManager dbManager, ICurrentUser currentUser)
         {
             _dbManager = dbManager;
             _currentUser = currentUser;
         }
-        public async Task<PagedListResponse<ContactGroupListDto>> Handle(QueryPagedListDto<ContactGroupListDto> request, CancellationToken cancellationToken)
+        public async Task<PagedListResponse<ExpenseCategoryListDto>> Handle(QueryPagedListDto<ExpenseCategoryListDto> request, CancellationToken cancellationToken)
         {
             if (request.PageNum == 0) { request.PageNum = 1; }
             if (request.PageSize == 0) { request.PageSize = 10; }
 
-            var result = new PagedListResponse<ContactGroupListDto>();
+            var result = new PagedListResponse<ExpenseCategoryListDto>();
 
             try
             {
@@ -24,7 +24,7 @@
 
                 if (!string.IsNullOrWhiteSpace(request.Search))
                 {
-                    sqlWhere += SqlHelper.GenerateWhere<ContactGroupListDto>();
+                    sqlWhere += SqlHelper.GenerateWhere<ExpenseCategoryListDto>();
                     parameters.Add("Search", $"%{request.Search.Trim().ToLowerInvariant()}%");
                 }
 
@@ -38,18 +38,18 @@
                 {
                     cn.Open();
 
-                    var list = await cn.FetchListPagedAsync<ContactGroupListDto>(pageNumber: request.PageNum
+                    var list = await cn.FetchListPagedAsync<ExpenseCategoryListDto>(pageNumber: request.PageNum
                         , rowsPerPage: request.PageSize
                         , conditions: sqlWhere
                         , orderby: orderby
                         , currentUser: _currentUser
                         , parameters: parameters);
 
-                    int recordCount = await cn.RecordCountAsync<ContactGroupListDto>(sqlWhere, parameters);
+                    int recordCount = await cn.RecordCountAsync<ExpenseCategoryListDto>(sqlWhere, parameters);
 
                     result.IsOk = true;
                     result.ErrorMessage = string.Empty;
-                    result.List = list?.AsList() ?? new List<ContactGroupListDto>();
+                    result.List = list?.AsList() ?? new List<ExpenseCategoryListDto>();
                     result.RecordCount = recordCount;
                 }
             }
@@ -62,13 +62,16 @@
             return result;
         }
     }
-    [Table("ContactGroup")]
-    public class ContactGroupListDto : BaseDto
+    [Table("ExpenseCategory")]
+    public class ExpenseCategoryListDto : BaseDto
     {
         [Searchable]
         public string Name { get; set; } = string.Empty;
 
         [Searchable]
         public string Description { get; set; } = string.Empty;
+
+        [Searchable]
+        public int AccountId { get; set; }
     }
 }
