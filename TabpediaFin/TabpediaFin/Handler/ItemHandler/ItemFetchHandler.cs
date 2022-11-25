@@ -5,12 +5,12 @@ using TabpediaFin.Handler.ItemUnitMeasureHandler;
 
 namespace TabpediaFin.Handler.Item
 {
-    public class ItemHandler : IQueryByIdHandler<ItemDto>
+    public class ItemFetchHandler : IQueryByIdHandler<ItemDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
 
-        public ItemHandler(DbManager dbManager, ICurrentUser currentUser)
+        public ItemFetchHandler(DbManager dbManager, ICurrentUser currentUser)
         {
             _dbManager = dbManager;
             _currentUser = currentUser;
