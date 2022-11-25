@@ -1,10 +1,10 @@
 ﻿namespace TabpediaFin.Handler.ContactGroupHandler
 {
-    public class AddressTypeFetchHandler : IQueryByIdHandler<ContactGroupFetchDto>
+    public class ContactGroupFetchHandler : IQueryByIdHandler<ContactGroupFetchDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
-        public AddressTypeFetchHandler(DbManager dbManager, ICurrentUser currentUser)
+        public ContactGroupFetchHandler(DbManager dbManager, ICurrentUser currentUser)
         {
             _dbManager = dbManager;
             _currentUser = currentUser;

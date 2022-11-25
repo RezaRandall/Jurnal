@@ -1,23 +1,23 @@
-﻿namespace TabpediaFin.Handler.ContactAddressTypeHandler
+﻿namespace TabpediaFin.Handler.ExpenseCategoryHandler
 {
-    public class ContactAddressTypeFetchHandler : IQueryByIdHandler<ContactAddressTypeFetchDto>
+    public class ExpenseCategoryFetchHandler : IQueryByIdHandler<ExpenseCategoryFetchDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
-        public ContactAddressTypeFetchHandler(DbManager dbManager, ICurrentUser currentUser)
+        public ExpenseCategoryFetchHandler(DbManager dbManager, ICurrentUser currentUser)
         {
             _dbManager = dbManager;
             _currentUser = currentUser;
         }
-        public async Task<RowResponse<ContactAddressTypeFetchDto>> Handle(QueryByIdDto<ContactAddressTypeFetchDto> request, CancellationToken cancellationToken)
+        public async Task<RowResponse<ExpenseCategoryFetchDto>> Handle(QueryByIdDto<ExpenseCategoryFetchDto> request, CancellationToken cancellationToken)
         {
-            var response = new RowResponse<ContactAddressTypeFetchDto>();
+            var response = new RowResponse<ExpenseCategoryFetchDto>();
 
             try
             {
                 using (var cn = _dbManager.CreateConnection())
                 {
-                    var row = await cn.FetchAsync<ContactAddressTypeFetchDto>(request.Id, _currentUser);
+                    var row = await cn.FetchAsync<ExpenseCategoryFetchDto>(request.Id, _currentUser);
 
                     response.IsOk = true;
                     response.Row = row;
@@ -35,10 +35,11 @@
         }
     }
 
-    [Table("ContactAddressType")]
-    public class ContactAddressTypeFetchDto : BaseDto
+    [Table("ExpenseCategory")]
+    public class ExpenseCategoryFetchDto : BaseDto
     {
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public int AccountId { get; set; }
     }
 }

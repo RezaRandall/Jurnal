@@ -1,6 +1,4 @@
-﻿using TabpediaFin.Handler.ContactAddressTypeHandler;
-
-namespace TabpediaFin.Handler.ContactAddressTypeHandler;
+﻿namespace TabpediaFin.Handler.ContactAddressTypeHandler;
 
 public class ContactAddressTypeInsertHandler : IRequestHandler<ContactAddressTypeInsertDto, RowResponse<ContactAddressTypeFetchDto>>
 {

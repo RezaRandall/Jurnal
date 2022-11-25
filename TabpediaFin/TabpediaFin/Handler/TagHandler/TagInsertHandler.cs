@@ -1,6 +1,4 @@
-﻿using TabpediaFin.Handler.TaxHandler;
-
-namespace TabpediaFin.Handler.TagHandler;
+﻿namespace TabpediaFin.Handler.TagHandler;
 
 public class TagInsertHandler : IRequestHandler<TagInsertDto, RowResponse<TagFetchDto>>
 {
