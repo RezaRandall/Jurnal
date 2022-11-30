@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Hosting;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System.Xml.Linq;
+using TabpediaFin.Handler.ContactAddressHandler;
 using TabpediaFin.Handler.ItemItemCategoryHandler;
 using TabpediaFin.Handler.ItemUnitMeasureHandler;
 
@@ -186,7 +188,7 @@ public class ItemUpdateHandler : IRequestHandler<ItemUpdateDto, RowResponse<Item
 
             if (req.ItemItemCategoryList.Count > 0)
             {
-                foreach (ItemItemCategoryUpdateDto itm in req.ItemItemCategoryList) 
+                foreach (ItemItemCategoryUpdateDto itm in req.ItemItemCategoryList)
                 {
                     itemItemCategory.Add(new ItemItemCategory
                     {
@@ -209,7 +211,17 @@ public class ItemUpdateHandler : IRequestHandler<ItemUpdateDto, RowResponse<Item
                 {
                     itemUnitMeasure.Add(new ItemUnitMeasure
                     {
-                        //Id = itm.Id,
+                        Id = itm.Id,
+                        UnitMeasureId = itemUnitMeasureIdResult,
+                        ItemId = itemIdResult,
+                        UnitConversion = itm.UnitConversion,
+                        Cost = itm.Cost,
+                        Price = itm.Price,
+                        Notes = itm.Notes
+                    });
+                    itemUnitMeasureFetchDto.Add(new ItemUnitMeasureFetchDto
+                    {
+                        Id = itm.Id,
                         UnitMeasureId = itemUnitMeasureIdResult,
                         ItemId = itemIdResult,
                         UnitConversion = itm.UnitConversion,
@@ -218,42 +230,33 @@ public class ItemUpdateHandler : IRequestHandler<ItemUpdateDto, RowResponse<Item
                         Notes = itm.Notes
                     });
                 }
+                _context.ItemUnitMeasure.UpdateRange(itemUnitMeasure);
             }
-
+            if (itemUnitMeasure.Count > 0 || itemItemCategory.Count > 0)
+            {
+                await _context.SaveChangesAsync(cancellationToken);
+            }
 
             var row = new ItemDto()
             {
-                Id = item.Id
-                ,
-                Name = item.Name
-                ,
-                Description = item.Description
-                ,
-                Code = item.Code
-                ,
-                Barcode = item.Barcode
-                ,
-                UnitMeasureId = item.UnitMeasureId
-                ,
-                AverageCost = item.AverageCost
-                ,
-                Cost = item.Cost
-                ,
-                Price = item.Price
-                ,
-                IsSales = item.IsSales
-                ,
-                IsPurchase = item.IsPurchase
-                ,
-                IsStock = item.IsStock
-                ,
-                StockMin = item.StockMin
-                ,
-                IsArchived = item.IsArchived
-                ,
-                ImageFileName = item.ImageFileName
-                ,
-                Notes = item.Notes
+                Id = item.Id,
+                Name = item.Name,
+                Description = item.Description,
+                Code = item.Code,
+                Barcode = item.Barcode,
+                UnitMeasureId = item.UnitMeasureId,
+                AverageCost = item.AverageCost,
+                Cost = item.Cost,
+                Price = item.Price,
+                IsSales = item.IsSales,
+                IsPurchase = item.IsPurchase,
+                IsStock = item.IsStock,
+                StockMin = item.StockMin,
+                IsArchived = item.IsArchived,
+                ImageFileName = item.ImageFileName,
+                Notes = item.Notes,
+                ItemItemCategoryList = itemItemCategoryFetchDto,
+                ItemUnitMeasureList = itemUnitMeasureFetchDto
             };
 
             result.IsOk = true;

@@ -1,11 +1,11 @@
 ﻿namespace TabpediaFin.Handler.ContactAddressTypeHandler
 {
-    public class ItemCategoryListHandler : IQueryPagedListHandler<ContactAddressTypeListDto>
+    public class ContactAddressTypeListHandler : IQueryPagedListHandler<ContactAddressTypeListDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
 
-        public ItemCategoryListHandler(DbManager dbManager, ICurrentUser currentUser)
+        public ContactAddressTypeListHandler(DbManager dbManager, ICurrentUser currentUser)
         {
             _dbManager = dbManager;
             _currentUser = currentUser;

@@ -35,6 +35,8 @@ public class FinContext : DbContext
     public DbSet<ContactAddress> ContactAddress { get; set; }
     public DbSet<ContactPerson> ContactPerson { get; set; }
     public DbSet<Warehouse> Warehouse { get; set; }
+    public DbSet<ExpenseCategory> ExpenseCategory { get; set; }
+    
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

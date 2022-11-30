@@ -1,4 +1,4 @@
-﻿using TabpediaFin.Handler.ContactAddressTypeHandler;
+﻿using TabpediaFin.Handler.ContactGroupHandler;
 
 namespace TabpediaFin.Handler.ContactGroupHandler;
 
