@@ -52,11 +52,4 @@ public class ItemController : ApiControllerBase
         command.Id = id;
         return Result(await _mediator.Send(command));
     }
-
-    [HttpPost("/item-item-category/list")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> GetListItemItemCategory([FromBody] QueryPagedListDto<ItemListDto> request)
-    {
-        return Result(await _mediator.Send(request));
-    }
 }

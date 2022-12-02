@@ -74,6 +74,7 @@ namespace TabpediaFin.Handler.ContactHandler
 
                     await _context.ContactAddress.AddRangeAsync(ContactAddress, cancellationToken);
                 }
+
                 if (request.ContactPersonList.Count > 0)
                 {
                     foreach (ContactPersonInsertDto item in request.ContactPersonList)
