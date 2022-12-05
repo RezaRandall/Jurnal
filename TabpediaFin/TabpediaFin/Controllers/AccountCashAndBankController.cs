@@ -1,44 +1,46 @@
 ﻿
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using TabpediaFin.Handler.CashAndBank;
 using TabpediaFin.Handler.ExpenseHandler;
 
 namespace TabpediaFin.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ExpensesController : ApiControllerBase
+public class AccountCashAndBankController : ApiControllerBase
 {
     private readonly IMediator _mediator;
-    public ExpensesController(IMediator mediator)
+    public AccountCashAndBankController(IMediator mediator)
     {
         _mediator = mediator;
     }
 
-    [HttpPost("/Expense/list")]
+    [HttpPost("/AccountCashAndBank/list")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<ExpenseListDto> request)
+    public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<AccountCashAndBankListDto> request)
     {
         return Result(await _mediator.Send(request));
     }
 
-    [HttpGet("/Expense{id}")]
+    [HttpGet("/AccountCashAndBank{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
-        return Result(await _mediator.Send(new QueryByIdDto<ExpenseFetchDto>(id)));
+        return Result(await _mediator.Send(new QueryByIdDto<AccountCashAndBankFetchDto>(id)));
     }
 
-    [HttpPost("/Expense/create")]
+    [HttpPost("/AccountCashAndBank/create")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> Insert([FromBody] ExpenseInsertDto command)
+    public async Task<IActionResult> Insert([FromBody] AccountCashAndBankInsertDto command)
     {
         return Result(await _mediator.Send(command));
     }
 
-    [HttpPut("/Expense/update")]
+    [HttpPut("/AccountCashAndBank/update")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> Update([FromBody] ExpenseUpdateDto command)
+    public async Task<IActionResult> Update([FromBody] AccountCashAndBankUpdateDto command)
     {
         return Result(await _mediator.Send(command));
     }
@@ -48,8 +50,9 @@ public class ExpensesController : ApiControllerBase
     public async Task<IActionResult> Delete(int id)
     {
 
-        ExpenseDeleteDto command = new ExpenseDeleteDto();
+        AccountCashAndBankDeleteDto command = new AccountCashAndBankDeleteDto();
         command.Id = id;
         return Result(await _mediator.Send(command));
     }
+
 }
