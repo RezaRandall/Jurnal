@@ -3,7 +3,7 @@ using TabpediaFin.Dto.Common.Request;
 
 namespace TabpediaFin.Handler.Item;
 
-public class ItemPagedListHandler : IQueryPagedListHandler<ItemListDto>
+public class ItemPagedListHandler : IFetchPagedListHandler<ItemListDto>
 {
     private readonly DbManager _dbManager;
     private readonly ICurrentUser _currentUser;
@@ -14,7 +14,7 @@ public class ItemPagedListHandler : IQueryPagedListHandler<ItemListDto>
         _currentUser = currentUser;
     }
 
-    public async Task<PagedListResponse<ItemListDto>> Handle(QueryPagedListDto<ItemListDto> req, CancellationToken cancellationToken)
+    public async Task<PagedListResponse<ItemListDto>> Handle(FetchPagedListRequestDto<ItemListDto> req, CancellationToken cancellationToken)
     {
         if (req.PageNum == 0) { req.PageNum = 1; }
         if (req.PageSize == 0) { req.PageSize = 10; }

@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Handler.UnitMeasures;
 
-public class UnitMeasureByIdHandler : IQueryByIdHandler<UnitMeasureDto>
+public class UnitMeasureByIdHandler : IFetchByIdHandler<UnitMeasureDto>
 {
     private readonly DbManager _dbManager;
     private readonly ICurrentUser _currentUser;
@@ -11,7 +11,7 @@ public class UnitMeasureByIdHandler : IQueryByIdHandler<UnitMeasureDto>
         _currentUser = currentUser;
     }
 
-    public async Task<RowResponse<UnitMeasureDto>> Handle(QueryByIdDto<UnitMeasureDto> request, CancellationToken cancellationToken)
+    public async Task<RowResponse<UnitMeasureDto>> Handle(FetchByIdRequestDto<UnitMeasureDto> request, CancellationToken cancellationToken)
     {
         var response = new RowResponse<UnitMeasureDto>();
 

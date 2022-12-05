@@ -19,7 +19,7 @@ namespace TabpediaFin.Controllers
 
         [HttpPost("list")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<TagListDto> request)
+        public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<TagListDto> request)
         {
             return Result(await _mediator.Send(request));
         }
@@ -29,7 +29,7 @@ namespace TabpediaFin.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Get(int id)
         {
-            return Result(await _mediator.Send(new QueryByIdDto<TagFetchDto>(id)));
+            return Result(await _mediator.Send(new FetchByIdRequestDto<TagFetchDto>(id)));
         }
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]

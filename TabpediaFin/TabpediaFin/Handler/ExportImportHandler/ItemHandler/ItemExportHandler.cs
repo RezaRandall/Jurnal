@@ -1,8 +1,8 @@
 ﻿namespace TabpediaFin.Handler.ExportImportItemHandler
 {
-    public class ItemExportHandler : IQueryPagedListHandler<ItemExportDto>
+    public class ItemExportHandler : IFetchPagedListHandler<ItemExportDto>
     {
-        public Task<PagedListResponse<ItemExportDto>> Handle(QueryPagedListDto<ItemExportDto> request, CancellationToken cancellationToken)
+        public Task<PagedListResponse<ItemExportDto>> Handle(FetchPagedListRequestDto<ItemExportDto> request, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

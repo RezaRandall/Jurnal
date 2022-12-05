@@ -18,7 +18,7 @@ public class ExpensesController : ApiControllerBase
 
     [HttpPost("/Expense/list")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<ExpenseListDto> request)
+    public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<ExpenseListDto> request)
     {
         return Result(await _mediator.Send(request));
     }

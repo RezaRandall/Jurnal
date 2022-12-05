@@ -21,7 +21,7 @@ public class PaymentTermController : ApiControllerBase
 
     [HttpPost("/payment-terms/list")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<PaymentTermListDto> request)
+    public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<PaymentTermListDto> request)
     {
         return Result(await _mediator.Send(request));
     }
@@ -30,7 +30,7 @@ public class PaymentTermController : ApiControllerBase
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
-        return Result(await _mediator.Send(new QueryByIdDto<PaymentTermDto>(id)));
+        return Result(await _mediator.Send(new FetchByIdRequestDto<PaymentTermDto>(id)));
     }
 
     [HttpPost("/payment-terms/create")]

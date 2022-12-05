@@ -2,8 +2,8 @@
 
 public interface IAuditableEntity
 {
-    public int CreatedUid { get; set; }
-    public DateTime CreatedUtc { get; }
-    public int UpdatedUid { get; set; }
-    public DateTime? UpdatedUtc { get; set; }
+    int CreatedUid { get; set; }
+    DateTime CreatedUtc { get; }
+    int UpdatedUid { get; set; }
+    DateTime? UpdatedUtc { get; set; }
 }

@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Handler.ContactAddressHandler
 {
-    public class ContactAddressFetchHandler : IQueryByIdHandler<ContactAddressFetchDto>
+    public class ContactAddressFetchHandler : IFetchByIdHandler<ContactAddressFetchDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
@@ -9,7 +9,7 @@
             _dbManager = dbManager;
             _currentUser = currentUser;
         }
-        public async Task<RowResponse<ContactAddressFetchDto>> Handle(QueryByIdDto<ContactAddressFetchDto> request, CancellationToken cancellationToken)
+        public async Task<RowResponse<ContactAddressFetchDto>> Handle(FetchByIdRequestDto<ContactAddressFetchDto> request, CancellationToken cancellationToken)
         {
             var response = new RowResponse<ContactAddressFetchDto>();
 

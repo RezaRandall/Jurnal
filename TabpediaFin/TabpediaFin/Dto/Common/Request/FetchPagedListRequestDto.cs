@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Dto.Common.Request;
 
-public class QueryPagedListDto<T> : IRequest<PagedListResponse<T>>
+public class FetchPagedListRequestDto<T> : IRequest<PagedListResponse<T>>
 {
     public int PageSize { get; set; } = 10;
 

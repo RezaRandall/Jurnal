@@ -2,7 +2,7 @@
 
 namespace TabpediaFin.Handler.ExpenseHandler;
 
-public class ExpenseListHandler : IQueryPagedListHandler<ExpenseListDto>
+public class ExpenseListHandler : IFetchPagedListHandler<ExpenseListDto>
 {
     private readonly DbManager _dbManager;
     private readonly ICurrentUser _currentUser;
@@ -13,7 +13,7 @@ public class ExpenseListHandler : IQueryPagedListHandler<ExpenseListDto>
         _currentUser = currentUser;
     }
 
-    public async Task<PagedListResponse<ExpenseListDto>> Handle(QueryPagedListDto<ExpenseListDto> req, CancellationToken cancellationToken)
+    public async Task<PagedListResponse<ExpenseListDto>> Handle(FetchPagedListRequestDto<ExpenseListDto> req, CancellationToken cancellationToken)
     {
         if (req.PageNum == 0) { req.PageNum = 1; }
         if (req.PageSize == 0) { req.PageSize = 10; }

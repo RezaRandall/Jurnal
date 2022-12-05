@@ -18,7 +18,7 @@ public class UnitMeasuresController : ApiControllerBase
 
     [HttpPost("/unit-measure/list")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<UnitMeasureListDto> request)
+    public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<UnitMeasureListDto> request)
     {
         return Result(await _mediator.Send(request));
     }
@@ -27,7 +27,7 @@ public class UnitMeasuresController : ApiControllerBase
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
-        return Result(await _mediator.Send(new QueryByIdDto<UnitMeasureDto>(id)));
+        return Result(await _mediator.Send(new FetchByIdRequestDto<UnitMeasureDto>(id)));
     }
 
     [HttpPost("/unit-measure/create")]

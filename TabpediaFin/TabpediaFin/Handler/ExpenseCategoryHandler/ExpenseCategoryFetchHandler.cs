@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Handler.ExpenseCategoryHandler
 {
-    public class ExpenseCategoryFetchHandler : IQueryByIdHandler<ExpenseCategoryFetchDto>
+    public class ExpenseCategoryFetchHandler : IFetchByIdHandler<ExpenseCategoryFetchDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
@@ -9,7 +9,7 @@
             _dbManager = dbManager;
             _currentUser = currentUser;
         }
-        public async Task<RowResponse<ExpenseCategoryFetchDto>> Handle(QueryByIdDto<ExpenseCategoryFetchDto> request, CancellationToken cancellationToken)
+        public async Task<RowResponse<ExpenseCategoryFetchDto>> Handle(FetchByIdRequestDto<ExpenseCategoryFetchDto> request, CancellationToken cancellationToken)
         {
             var response = new RowResponse<ExpenseCategoryFetchDto>();
 

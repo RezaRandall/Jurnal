@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Handler.TaxHandler
 {
-    public class AddressTypeFetchHandler : IQueryByIdHandler<TaxFetchDto>
+    public class AddressTypeFetchHandler : IFetchByIdHandler<TaxFetchDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
@@ -9,7 +9,7 @@
             _dbManager = dbManager;
             _currentUser = currentUser;
         }
-        public async Task<RowResponse<TaxFetchDto>> Handle(QueryByIdDto<TaxFetchDto> request, CancellationToken cancellationToken)
+        public async Task<RowResponse<TaxFetchDto>> Handle(FetchByIdRequestDto<TaxFetchDto> request, CancellationToken cancellationToken)
         {
             var response = new RowResponse<TaxFetchDto>();
 

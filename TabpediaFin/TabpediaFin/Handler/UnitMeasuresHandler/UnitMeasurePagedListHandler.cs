@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Handler.UnitMeasures;
 
-public class UnitMeasurePagedListHandler : IQueryPagedListHandler<UnitMeasureListDto>
+public class UnitMeasurePagedListHandler : IFetchPagedListHandler<UnitMeasureListDto>
 {
     private readonly DbManager _dbManager;
     private readonly ICurrentUser _currentUser;
@@ -11,7 +11,7 @@ public class UnitMeasurePagedListHandler : IQueryPagedListHandler<UnitMeasureLis
         _currentUser = currentUser;
     }
 
-    public async Task<PagedListResponse<UnitMeasureListDto>> Handle(QueryPagedListDto<UnitMeasureListDto> req, CancellationToken cancellationToken)
+    public async Task<PagedListResponse<UnitMeasureListDto>> Handle(FetchPagedListRequestDto<UnitMeasureListDto> req, CancellationToken cancellationToken)
     {
         if (req.PageNum == 0) { req.PageNum = 1; }
         if (req.PageSize == 0) { req.PageSize = 10; }

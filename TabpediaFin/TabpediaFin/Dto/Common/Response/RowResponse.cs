@@ -1,6 +1,4 @@
-﻿using TabpediaFin.Dto.Common.Response;
-
-namespace TabpediaFin.Dto;
+﻿namespace TabpediaFin.Dto.Common.Response;
 
 public class RowResponse<T> : BaseResponse
 {

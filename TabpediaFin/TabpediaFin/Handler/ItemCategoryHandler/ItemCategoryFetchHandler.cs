@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Handler.ItemCategoryHandler
 {
-    public class ItemCategoryFetchHandler : IQueryByIdHandler<ItemCategoryFetchDto>
+    public class ItemCategoryFetchHandler : IFetchByIdHandler<ItemCategoryFetchDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
@@ -11,7 +11,7 @@
             _currentUser = currentUser;
         }
 
-        public async Task<RowResponse<ItemCategoryFetchDto>> Handle(QueryByIdDto<ItemCategoryFetchDto> request, CancellationToken cancellationToken)
+        public async Task<RowResponse<ItemCategoryFetchDto>> Handle(FetchByIdRequestDto<ItemCategoryFetchDto> request, CancellationToken cancellationToken)
         {
             var response = new RowResponse<ItemCategoryFetchDto>();
 

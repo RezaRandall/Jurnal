@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Handler.ContactGroupHandler
 {
-    public class ContactGroupFetchHandler : IQueryByIdHandler<ContactGroupFetchDto>
+    public class ContactGroupFetchHandler : IFetchByIdHandler<ContactGroupFetchDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
@@ -9,7 +9,7 @@
             _dbManager = dbManager;
             _currentUser = currentUser;
         }
-        public async Task<RowResponse<ContactGroupFetchDto>> Handle(QueryByIdDto<ContactGroupFetchDto> request, CancellationToken cancellationToken)
+        public async Task<RowResponse<ContactGroupFetchDto>> Handle(FetchByIdRequestDto<ContactGroupFetchDto> request, CancellationToken cancellationToken)
         {
             var response = new RowResponse<ContactGroupFetchDto>();
 

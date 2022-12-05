@@ -1,8 +1,8 @@
 ﻿namespace TabpediaFin.Handler.ExportImportContactHandler
 {
-    public class ContactExportHandler : IQueryPagedListHandler<ContactExportDto>
+    public class ContactExportHandler : IFetchPagedListHandler<ContactExportDto>
     {
-        public Task<PagedListResponse<ContactExportDto>> Handle(QueryPagedListDto<ContactExportDto> request, CancellationToken cancellationToken)
+        public Task<PagedListResponse<ContactExportDto>> Handle(FetchPagedListRequestDto<ContactExportDto> request, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

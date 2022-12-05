@@ -23,3 +23,5 @@ global using TabpediaFin.Infrastructure.Utility;
 global using TabpediaFin.Domain;
 global using Microsoft.EntityFrameworkCore;
 global using TabpediaFin.Handler.PaymentMethodHandler;
+global using TabpediaFin.Infrastructure.Caching;
+global using TabpediaFin.Dto.Common.Response;

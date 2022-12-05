@@ -1,5 +1,4 @@
-﻿
-using TabpediaFin.Handler.Item;
+﻿using TabpediaFin.Handler.Item;
 using TabpediaFin.Handler.PaymentTerm;
 
 namespace TabpediaFin.Handler.UnitMeasures;

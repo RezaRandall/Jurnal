@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Handler.PaymentMethodHandler;
 
-public class PaymentMethodFetchPagedListHandler : IQueryPagedListHandler<PaymentMethodListDto>
+public class PaymentMethodFetchPagedListHandler : IFetchPagedListHandler<PaymentMethodListDto>
 {
     private readonly DbManager _dbManager;
     private readonly ICurrentUser _currentUser;
@@ -12,7 +12,7 @@ public class PaymentMethodFetchPagedListHandler : IQueryPagedListHandler<Payment
     }
 
 
-    public async Task<PagedListResponse<PaymentMethodListDto>> Handle(QueryPagedListDto<PaymentMethodListDto> request, CancellationToken cancellationToken)
+    public async Task<PagedListResponse<PaymentMethodListDto>> Handle(FetchPagedListRequestDto<PaymentMethodListDto> request, CancellationToken cancellationToken)
     {
         if (request.PageNum == 0) { request.PageNum = 1; }
         if (request.PageSize == 0) { request.PageSize = 10; }

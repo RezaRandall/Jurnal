@@ -3,7 +3,7 @@ using TabpediaFin.Handler.ContactPersonHandler;
 
 namespace TabpediaFin.Handler.ContactHandler
 {
-    public class ContactFetchHandler : IQueryByIdHandler<ContactFetchDto>
+    public class ContactFetchHandler : IFetchByIdHandler<ContactFetchDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
@@ -13,7 +13,7 @@ namespace TabpediaFin.Handler.ContactHandler
             _dbManager = dbManager;
             _currentUser = currentUser;
         }
-        public async Task<RowResponse<ContactFetchDto>> Handle(QueryByIdDto<ContactFetchDto> request, CancellationToken cancellationToken)
+        public async Task<RowResponse<ContactFetchDto>> Handle(FetchByIdRequestDto<ContactFetchDto> request, CancellationToken cancellationToken)
         {
             var response = new RowResponse<ContactFetchDto>();
 

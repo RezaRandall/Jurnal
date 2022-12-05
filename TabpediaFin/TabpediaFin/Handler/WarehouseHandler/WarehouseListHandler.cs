@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Handler.WarehouseHandler
 {
-    public class WarehouseListHandler : IQueryPagedListHandler<WarehouseListDto>
+    public class WarehouseListHandler : IFetchPagedListHandler<WarehouseListDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
@@ -10,7 +10,7 @@
             _dbManager = dbManager;
             _currentUser = currentUser;
         }
-        public async Task<PagedListResponse<WarehouseListDto>> Handle(QueryPagedListDto<WarehouseListDto> request, CancellationToken cancellationToken)
+        public async Task<PagedListResponse<WarehouseListDto>> Handle(FetchPagedListRequestDto<WarehouseListDto> request, CancellationToken cancellationToken)
         {
             if (request.PageNum == 0) { request.PageNum = 1; }
             if (request.PageSize == 0) { request.PageSize = 10; }

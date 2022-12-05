@@ -20,7 +20,7 @@ namespace TabpediaFin.Controllers
 
         [HttpPost("list")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<WarehouseListDto> request)
+        public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<WarehouseListDto> request)
         {
             return Result(await _mediator.Send(request));
         }
@@ -30,7 +30,7 @@ namespace TabpediaFin.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Get(int id)
         {
-            return Result(await _mediator.Send(new QueryByIdDto<WarehouseFetchDto>(id)));
+            return Result(await _mediator.Send(new FetchByIdRequestDto<WarehouseFetchDto>(id)));
         }
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]

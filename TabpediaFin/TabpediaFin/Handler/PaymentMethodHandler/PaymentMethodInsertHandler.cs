@@ -3,10 +3,12 @@
 public class PaymentMethodInsertHandler : IRequestHandler<PaymentMethodInsertDto, RowResponse<PaymentMethodDto>>
 {
     private readonly FinContext _context;
+    private readonly IPaymentMethodCacheRemover _cacheRemover;
 
-    public PaymentMethodInsertHandler(FinContext db)
+    public PaymentMethodInsertHandler(FinContext db, IPaymentMethodCacheRemover cacheRemover)
     {
         _context = db;
+        _cacheRemover = cacheRemover;
     }
 
     public async Task<RowResponse<PaymentMethodDto>> Handle(PaymentMethodInsertDto request, CancellationToken cancellationToken)
@@ -24,6 +26,8 @@ public class PaymentMethodInsertHandler : IRequestHandler<PaymentMethodInsertDto
         {
             await _context.PaymentMethod.AddAsync(paymentMethod, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
+
+            _cacheRemover.RemoveCache();
 
             var row = new PaymentMethodDto()
             {
@@ -56,4 +60,34 @@ public class PaymentMethodInsertDto : IRequest<RowResponse<PaymentMethodDto>>
     public string Description { get; set; } = string.Empty;
 
     public bool IsActive { get; set; } = true;
+}
+
+
+public class PaymentMethodInsertValidator : AbstractValidator<PaymentMethodInsertDto>
+{
+    private readonly IUniqueNameValidationRepository _repository;
+
+    public PaymentMethodInsertValidator(IUniqueNameValidationRepository repository)
+    {
+        _repository= repository;
+
+        RuleFor(x => x.Name)
+            .NotNull()
+            .NotEmpty()
+            .MaximumLength(250)
+            .MustAsync(
+                async(model, name, cancellation) =>
+                {
+                    return await IsUniqueName(model, name, cancellation);
+                }
+            ).WithMessage("Name must be unique");
+
+        RuleFor(x => x.Description).MaximumLength(250);
+    }
+
+    public async Task<bool> IsUniqueName(PaymentMethodInsertDto model, string name, CancellationToken cancellationToken)
+    {
+        var isExist = await _repository.IsPaymentMethodNameExist(name, 0);
+        return !isExist;
+    }
 }

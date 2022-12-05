@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Handler.ItemCategoryHandler
 {
-    public class ItemCategoryListHandler : IQueryPagedListHandler<ItemCategoryListDto>
+    public class ItemCategoryListHandler : IFetchPagedListHandler<ItemCategoryListDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
@@ -10,7 +10,7 @@
             _dbManager = dbManager;
             _currentUser = currentUser;
         }
-        public async Task<PagedListResponse<ItemCategoryListDto>> Handle(QueryPagedListDto<ItemCategoryListDto> request, CancellationToken cancellationToken)
+        public async Task<PagedListResponse<ItemCategoryListDto>> Handle(FetchPagedListRequestDto<ItemCategoryListDto> request, CancellationToken cancellationToken)
         {
             if (request.PageNum == 0) { request.PageNum = 1; }
             if (request.PageSize == 0) { request.PageSize = 10; }
