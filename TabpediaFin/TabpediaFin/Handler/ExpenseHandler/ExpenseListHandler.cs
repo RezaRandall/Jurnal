@@ -64,7 +64,7 @@ public class ExpenseListHandler : IFetchPagedListHandler<ExpenseListDto>
     }
 }
 
-[Table("Item")]
+[Table("Expense")]
 public class ExpenseListDto : BaseDto
 {
     [Searchable]
@@ -77,7 +77,9 @@ public class ExpenseListDto : BaseDto
     public int DiscountTypeId { get; set; } = 0;
     public int DiscountPercent { get; set; } = 0;
     public Int64 DiscountAmount { get; set; } = 0;
+    [Searchable]
     public string Notes { get; set; } = string.Empty;
+    [Searchable]
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
 }

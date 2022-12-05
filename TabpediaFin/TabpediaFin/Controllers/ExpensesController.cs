@@ -23,12 +23,12 @@ public class ExpensesController : ApiControllerBase
         return Result(await _mediator.Send(request));
     }
 
-    //[HttpGet("/Expense{id}")]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    //public async Task<IActionResult> Get(int id)
-    //{
-    //    return Result(await _mediator.Send(new QueryByIdDto<ExpenseDto>(id)));
-    //}
+    [HttpGet("/Expense{id}")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> Get(int id)
+    {
+        return Result(await _mediator.Send(new QueryByIdDto<ExpenseFetchDto>(id)));
+    }
 
     [HttpPost("/Expense/create")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -44,13 +44,13 @@ public class ExpensesController : ApiControllerBase
         return Result(await _mediator.Send(command));
     }
 
-    //[HttpDelete("{id}")]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    //public async Task<IActionResult> Delete(int id)
-    //{
+    [HttpDelete("{id}")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> Delete(int id)
+    {
 
-    //    ExpenseDeleteDto command = new ExpenseDeleteDto();
-    //    command.Id = id;
-    //    return Result(await _mediator.Send(command));
-    //}
+        ExpenseDeleteDto command = new ExpenseDeleteDto();
+        command.Id = id;
+        return Result(await _mediator.Send(command));
+    }
 }

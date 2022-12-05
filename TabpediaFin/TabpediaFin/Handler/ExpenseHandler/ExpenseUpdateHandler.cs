@@ -32,7 +32,6 @@ public class ExpenseUpdateHandler : IRequestHandler<ExpenseUpdateDto, RowRespons
             expense.DiscountAmount = request.DiscountAmount;
             expense.Notes = request.Notes;
             expense.Description = request.Description;
-            expense.Description = request.Description;
             expense.TaxId = request.TaxId;
 
             await _context.SaveChangesAsync(cancellationToken);
