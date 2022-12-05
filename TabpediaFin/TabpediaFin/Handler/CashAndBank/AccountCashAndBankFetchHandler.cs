@@ -2,7 +2,7 @@
 
 namespace TabpediaFin.Handler.CashAndBank;
 
-public class AccountCashAndBankFetchHandler : IQueryByIdHandler<AccountCashAndBankFetchDto>
+public class AccountCashAndBankFetchHandler : IFetchByIdHandler<AccountCashAndBankFetchDto>
 {
     private readonly DbManager _dbManager;
     private readonly ICurrentUser _currentUser;
@@ -12,7 +12,7 @@ public class AccountCashAndBankFetchHandler : IQueryByIdHandler<AccountCashAndBa
         _currentUser = currentUser;
     }
 
-    public async Task<RowResponse<AccountCashAndBankFetchDto>> Handle(QueryByIdDto<AccountCashAndBankFetchDto> request, CancellationToken cancellationToken)
+    public async Task<RowResponse<AccountCashAndBankFetchDto>> Handle(FetchByIdRequestDto<AccountCashAndBankFetchDto> request, CancellationToken cancellationToken)
     {
         var response = new RowResponse<AccountCashAndBankFetchDto>();
 

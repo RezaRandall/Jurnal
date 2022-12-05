@@ -2,7 +2,7 @@
 
 namespace TabpediaFin.Handler.CashAndBank;
 
-public class AccountCashAndBankListHandler : IQueryPagedListHandler<AccountCashAndBankListDto>
+public class AccountCashAndBankListHandler : IFetchPagedListHandler<AccountCashAndBankListDto>
 {
     private readonly DbManager _dbManager;
     private readonly ICurrentUser _currentUser;
@@ -13,7 +13,7 @@ public class AccountCashAndBankListHandler : IQueryPagedListHandler<AccountCashA
         _currentUser = currentUser;
     }
 
-    public async Task<PagedListResponse<AccountCashAndBankListDto>> Handle(QueryPagedListDto<AccountCashAndBankListDto> request, CancellationToken cancellationToken)
+    public async Task<PagedListResponse<AccountCashAndBankListDto>> Handle(FetchPagedListRequestDto<AccountCashAndBankListDto> request, CancellationToken cancellationToken)
     {
         if (request.PageNum == 0) { request.PageNum = 1; }
         if (request.PageSize == 0) { request.PageSize = 10; }

@@ -19,7 +19,7 @@ public class AccountCashAndBankController : ApiControllerBase
 
     [HttpPost("/AccountCashAndBank/list")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<AccountCashAndBankListDto> request)
+    public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<AccountCashAndBankListDto> request)
     {
         return Result(await _mediator.Send(request));
     }
@@ -28,7 +28,7 @@ public class AccountCashAndBankController : ApiControllerBase
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
-        return Result(await _mediator.Send(new QueryByIdDto<AccountCashAndBankFetchDto>(id)));
+        return Result(await _mediator.Send(new FetchByIdRequestDto<AccountCashAndBankFetchDto>(id)));
     }
 
     [HttpPost("/AccountCashAndBank/create")]
