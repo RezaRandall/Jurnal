@@ -1,4 +1,5 @@
 using FluentValidation.AspNetCore;
+using Microsoft.Extensions.FileProviders;
 using Npgsql;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
@@ -100,6 +101,14 @@ app.UseEndpoints(endpoints =>
 });
 
 app.MapControllers();
+
+app.UseFileServer(new FileServerOptions
+{
+    FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "UserUpload")),
+    RequestPath = "/UserUpload",
+    EnableDefaultFiles = true
+});
 
 using (var scope = app.Services.CreateScope())
 {
