@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Handler.TaxHandler
 {
-    public class AddressTypeListHandler : IQueryPagedListHandler<TaxListDto>
+    public class AddressTypeListHandler : IFetchPagedListHandler<TaxListDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
@@ -10,7 +10,7 @@
             _dbManager = dbManager;
             _currentUser = currentUser;
         }
-        public async Task<PagedListResponse<TaxListDto>> Handle(QueryPagedListDto<TaxListDto> request, CancellationToken cancellationToken)
+        public async Task<PagedListResponse<TaxListDto>> Handle(FetchPagedListRequestDto<TaxListDto> request, CancellationToken cancellationToken)
         {
             if (request.PageNum == 0) { request.PageNum = 1; }
             if (request.PageSize == 0) { request.PageSize = 10; }

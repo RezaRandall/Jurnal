@@ -3,7 +3,7 @@ using TabpediaFin.Handler.ItemUnitMeasureHandler;
 
 namespace TabpediaFin.Handler.ExpenseHandler;
 
-public class ExpenseFetchHandler : IQueryByIdHandler<ExpenseFetchDto>
+public class ExpenseFetchHandler : IFetchByIdHandler<ExpenseFetchDto>
 {
     private readonly DbManager _dbManager;
     private readonly ICurrentUser _currentUser;
@@ -14,7 +14,7 @@ public class ExpenseFetchHandler : IQueryByIdHandler<ExpenseFetchDto>
         _currentUser = currentUser;
     }
 
-    public async Task<RowResponse<ExpenseFetchDto>> Handle(QueryByIdDto<ExpenseFetchDto> request, CancellationToken cancellationToken)
+    public async Task<RowResponse<ExpenseFetchDto>> Handle(FetchByIdRequestDto<ExpenseFetchDto> request, CancellationToken cancellationToken)
     {
         var response = new RowResponse<ExpenseFetchDto>();
 

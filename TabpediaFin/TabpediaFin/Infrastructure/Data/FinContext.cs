@@ -38,8 +38,18 @@ public class FinContext : DbContext
     public DbSet<ContactPerson> ContactPerson { get; set; }
     public DbSet<Warehouse> Warehouse { get; set; }
     public DbSet<ExpenseCategory> ExpenseCategory { get; set; }
+    public DbSet<PurchaseRequest> PurchaseRequest { get; set; }
+    public DbSet<PurchaseRequestTag> PurchaseRequestTag { get; set; }
+    public DbSet<PurchaseRequestAttachment> PurchaseRequestAttachment { get; set; }
+    public DbSet<PurchaseRequestItem> PurchaseRequestItem { get; set; }
     
 
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.AppendGlobalQueryFilter<IHasTenant>(s => s.TenantId == _currentUser.TenantId);
+        base.OnModelCreating(modelBuilder);
+    }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -55,7 +65,7 @@ public class FinContext : DbContext
     }
 
 
-    public async Task<int> SaveChangesAsync()
+    public int SaveChangesAsync()
     {
         UpdateAuditFields();
         return base.SaveChanges();
@@ -64,25 +74,26 @@ public class FinContext : DbContext
 
     private void UpdateAuditFields()
     {
-        // get entries that are being Added or Updated
         var modifiedEntries = ChangeTracker.Entries()
             .Where(x => (x.State == EntityState.Added || x.State == EntityState.Modified));
 
         foreach (var entry in modifiedEntries)
         {
             var entity = entry.Entity as BaseEntity;
-            var now = DateTime.UtcNow;
-
-            if (entry.State == EntityState.Added)
+            if (entity != null) 
             {
-                entity.CreatedUid = _currentUser.UserId;
-                entity.CreatedUtc = now;
-            }
+                var now = DateTime.UtcNow;
 
-            entity.TenantId = _currentUser.TenantId;
-            entity.UpdatedUid = _currentUser.UserId;
-            entity.UpdatedUtc = now;
+                if (entry.State == EntityState.Added)
+                {
+                    entity.CreatedUid = _currentUser.UserId;
+                    entity.CreatedUtc = now;
+                }
+
+                entity.TenantId = _currentUser.TenantId;
+                entity.UpdatedUid = _currentUser.UserId;
+                entity.UpdatedUtc = now;
+            }
         }
     }
-
 }

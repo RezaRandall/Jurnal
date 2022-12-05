@@ -1,6 +1,4 @@
-﻿using TabpediaFin.Handler.UnitMeasures;
-
-namespace TabpediaFin.Handler.PaymentTerm;
+﻿namespace TabpediaFin.Handler.PaymentTerm;
 
 public class PaymentTermDeleteHandler : IRequestHandler<PaymentTermDeleteDto, RowResponse<bool>>
 {

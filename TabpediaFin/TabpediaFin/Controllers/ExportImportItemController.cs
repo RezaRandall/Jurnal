@@ -47,7 +47,7 @@ namespace TabpediaFin.Controllers
             var workbook = new HSSFWorkbook();
             var sheet = workbook.CreateSheet("sheet1");
             
-            QueryPagedListDto<ItemListDto> reqsend = new QueryPagedListDto<ItemListDto>();
+            FetchPagedListRequestDto<ItemListDto> reqsend = new FetchPagedListRequestDto<ItemListDto>();
             reqsend.PageSize = int.MaxValue;
             reqsend.PageNum = 0;
             reqsend.Search = "";

@@ -78,16 +78,18 @@ public class Table_PaymentMethod : Migration
 }
 
 
-//[Migration(202211132047)]
-//public class Table_PaymentMethod_202211132047 : Migration
-//{
-//    public override void Down()
-//    {
+[Migration(202212041312)]
+public class Table_PaymentMethod_202212041312 : Migration
+{
+    public override void Down()
+    {
 
-//    }
+    }
 
-//    public override void Up()
-//    {
-//        Create.Index("UQ_Name").OnTable("PaymentMethod").OnColumn
-//    }
-//}
+    public override void Up()
+    {
+        Create.UniqueConstraint("paymentmethod_name_idx")
+            .OnTable("PaymentMethod")
+            .Columns(new string[] { "TenantId", "Name" });
+    }
+}

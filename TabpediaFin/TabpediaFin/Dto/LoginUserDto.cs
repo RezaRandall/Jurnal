@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Dto;
 
-public class LoginUserDto : BaseDto
+public class LoginUserDto
 {
     public string Username { get; set; } = string.Empty;
 

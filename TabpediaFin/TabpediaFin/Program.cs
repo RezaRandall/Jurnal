@@ -1,19 +1,14 @@
 using FluentValidation.AspNetCore;
+using Microsoft.Extensions.FileProviders;
+using Npgsql;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using System.Reflection;
-using TabpediaFin.Infrastructure.Data;
-using MediatR;
-using TabpediaFin.Infrastructure.Validation;
 using TabpediaFin.Infrastructure;
-using Microsoft.AspNetCore.Builder;
-using TabpediaFin.Infrastructure.OpenApi;
-using Microsoft.EntityFrameworkCore.Migrations.Internal;
 using TabpediaFin.Infrastructure.Migrator;
-using TabpediaFin.Repository;
-using Microsoft.Extensions.Configuration;
-using Npgsql;
-using TabpediaFin.Handler.Item;
+using TabpediaFin.Infrastructure.OpenApi;
+using TabpediaFin.Infrastructure.Validation;
+using TabpediaFin.Infrastructure.Worker;
 
 Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Verbose()
@@ -35,6 +30,8 @@ builder.Services.AddDbMigrator();
 
 builder.Services.AddDbContext<FinContext>();
 
+builder.Services.AddCaching();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.RegisterSwagger("Tabpedia Finance", "v1");
@@ -50,9 +47,13 @@ builder.Services.AddControllers(options =>
     .AddNewtonsoftJson(options =>
     {
         options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+    })
+    .AddFluentValidation(cfg => 
+    { 
+        cfg.RegisterValidatorsFromAssembly(typeof(Program).Assembly);
+        cfg.AutomaticValidationEnabled = true;
     });
 
-builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddCors(options =>
 {
@@ -72,6 +73,8 @@ builder.Services.RegisterRepositories();
 builder.Services.AddScoped<IDbConnection>(db => new NpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddJwt();
+
+builder.Services.AddWorker();
 
 var app = builder.Build();
 
@@ -98,6 +101,14 @@ app.UseEndpoints(endpoints =>
 });
 
 app.MapControllers();
+
+app.UseFileServer(new FileServerOptions
+{
+    FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "UserUpload")),
+    RequestPath = "/UserUpload",
+    EnableDefaultFiles = true
+});
 
 using (var scope = app.Services.CreateScope())
 {

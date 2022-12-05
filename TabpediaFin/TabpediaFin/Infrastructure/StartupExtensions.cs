@@ -24,12 +24,16 @@ public static class StartupExtensions
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<ICurrentUser, CurrentUser>();
 
+        services.AddTransient<IPaymentMethodCacheRemover, PaymentMethodCacheRemover>();
+
         return services;
     }
 
     public static IServiceCollection RegisterRepositories(this IServiceCollection services)
     {
         services.AddTransient<IAuthenticateRepository, AuthenticateRepository>();
+        services.AddTransient<ISelectRepository, SelectRepository>();
+        services.AddTransient<IUniqueNameValidationRepository, UniqueNameValidationRepository>();
 
         return services;
     }

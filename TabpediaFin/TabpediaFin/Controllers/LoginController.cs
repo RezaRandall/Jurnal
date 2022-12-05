@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 
 namespace TabpediaFin.Controllers;
 
@@ -41,6 +40,4 @@ public class LoginController : ControllerBase
             TenantName = _currentUser.TenantName ?? string.Empty
         };
     }
-
-
 }

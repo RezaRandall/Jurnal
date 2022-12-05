@@ -17,7 +17,7 @@ public class ItemController : ApiControllerBase
 
     [HttpPost("/item/list")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<ItemListDto> request)
+    public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<ItemListDto> request)
     {
         return Result(await _mediator.Send(request));
     }
@@ -26,7 +26,7 @@ public class ItemController : ApiControllerBase
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
-        return Result(await _mediator.Send(new QueryByIdDto<ItemDto>(id)));
+        return Result(await _mediator.Send(new FetchByIdRequestDto<ItemDto>(id)));
     }
 
     [HttpPost("/item/create")]

@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Handler.PaymentMethodHandler;
 
-public class PaymentMethodFetchHandler : IQueryByIdHandler<PaymentMethodDto>
+public class PaymentMethodFetchHandler : IFetchByIdHandler<PaymentMethodDto>
 {
     private readonly DbManager _dbManager;
     private readonly ICurrentUser _currentUser;
@@ -12,7 +12,7 @@ public class PaymentMethodFetchHandler : IQueryByIdHandler<PaymentMethodDto>
     }
 
 
-    public async Task<RowResponse<PaymentMethodDto>> Handle(QueryByIdDto<PaymentMethodDto> request, CancellationToken cancellationToken)
+    public async Task<RowResponse<PaymentMethodDto>> Handle(FetchByIdRequestDto<PaymentMethodDto> request, CancellationToken cancellationToken)
     {
         var response = new RowResponse<PaymentMethodDto>();
 

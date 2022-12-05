@@ -20,7 +20,7 @@ namespace TabpediaFin.Controllers
         }
         [HttpPost("list")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetAll([FromBody] QueryPagedListDto<contactlistDto> request)
+        public async Task<IActionResult> GetAll([FromBody] FetchPagedListRequestDto<contactlistDto> request)
         {
             QueryPagedListContactDto<contactlistDto> reqsend = new QueryPagedListContactDto<contactlistDto>();
             reqsend.PageSize = request.PageSize;
@@ -33,7 +33,7 @@ namespace TabpediaFin.Controllers
 
         [HttpPost("customer/list")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetCustomer([FromBody] QueryPagedListDto<contactlistDto> request)
+        public async Task<IActionResult> GetCustomer([FromBody] FetchPagedListRequestDto<contactlistDto> request)
         {
             QueryPagedListContactDto<contactlistDto> reqsend = new QueryPagedListContactDto<contactlistDto>();
             reqsend.PageSize = request.PageSize;
@@ -46,7 +46,7 @@ namespace TabpediaFin.Controllers
         }
         [HttpPost("vendor/list")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetVendor([FromBody] QueryPagedListDto<contactlistDto> request)
+        public async Task<IActionResult> GetVendor([FromBody] FetchPagedListRequestDto<contactlistDto> request)
         {
             QueryPagedListContactDto<contactlistDto> reqsend = new QueryPagedListContactDto<contactlistDto>();
             reqsend.PageSize = request.PageSize;
@@ -59,7 +59,7 @@ namespace TabpediaFin.Controllers
         }
         [HttpPost("employee/list")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetEmployee([FromBody] QueryPagedListDto<contactlistDto> request)
+        public async Task<IActionResult> GetEmployee([FromBody] FetchPagedListRequestDto<contactlistDto> request)
         {
             QueryPagedListContactDto<contactlistDto> reqsend = new QueryPagedListContactDto<contactlistDto>();
             reqsend.PageSize = request.PageSize;
@@ -72,7 +72,7 @@ namespace TabpediaFin.Controllers
         }
         [HttpPost("other/list")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetOther([FromBody] QueryPagedListDto<contactlistDto> request)
+        public async Task<IActionResult> GetOther([FromBody] FetchPagedListRequestDto<contactlistDto> request)
         {
             QueryPagedListContactDto<contactlistDto> reqsend = new QueryPagedListContactDto<contactlistDto>();
             reqsend.PageSize = request.PageSize;
@@ -89,7 +89,7 @@ namespace TabpediaFin.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetCustomer(int id)
         {
-            return Result(await _mediator.Send(new QueryByIdDto<ContactFetchDto>(id)));
+            return Result(await _mediator.Send(new FetchByIdRequestDto<ContactFetchDto>(id)));
         }
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -118,7 +118,7 @@ namespace TabpediaFin.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetAddress(int id)
         {
-            return Result(await _mediator.Send(new QueryByIdDto<ContactAddressFetchDto>(id)));
+            return Result(await _mediator.Send(new FetchByIdRequestDto<ContactAddressFetchDto>(id)));
         }
         [HttpPost("contactaddress")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -147,7 +147,7 @@ namespace TabpediaFin.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetPerson(int id)
         {
-            return Result(await _mediator.Send(new QueryByIdDto<ContactPersonFetchDto>(id)));
+            return Result(await _mediator.Send(new FetchByIdRequestDto<ContactPersonFetchDto>(id)));
         }
         [HttpPost("contactperson")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]

@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Handler.ExpenseCategoryHandler
 {
-    public class ExpenseCategoryListHandler : IQueryPagedListHandler<ExpenseCategoryListDto>
+    public class ExpenseCategoryListHandler : IFetchPagedListHandler<ExpenseCategoryListDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
@@ -10,7 +10,7 @@
             _dbManager = dbManager;
             _currentUser = currentUser;
         }
-        public async Task<PagedListResponse<ExpenseCategoryListDto>> Handle(QueryPagedListDto<ExpenseCategoryListDto> request, CancellationToken cancellationToken)
+        public async Task<PagedListResponse<ExpenseCategoryListDto>> Handle(FetchPagedListRequestDto<ExpenseCategoryListDto> request, CancellationToken cancellationToken)
         {
             if (request.PageNum == 0) { request.PageNum = 1; }
             if (request.PageSize == 0) { request.PageSize = 10; }

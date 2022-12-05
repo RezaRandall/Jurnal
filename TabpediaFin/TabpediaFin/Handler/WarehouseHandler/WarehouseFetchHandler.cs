@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Handler.WarehouseHandler
 {
-    public class WarehouseFetchHandler : IQueryByIdHandler<WarehouseFetchDto>
+    public class WarehouseFetchHandler : IFetchByIdHandler<WarehouseFetchDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
@@ -11,7 +11,7 @@
             _currentUser = currentUser;
         }
 
-        public async Task<RowResponse<WarehouseFetchDto>> Handle(QueryByIdDto<WarehouseFetchDto> request, CancellationToken cancellationToken)
+        public async Task<RowResponse<WarehouseFetchDto>> Handle(FetchByIdRequestDto<WarehouseFetchDto> request, CancellationToken cancellationToken)
         {
             var response = new RowResponse<WarehouseFetchDto>();
 

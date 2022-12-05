@@ -5,7 +5,7 @@ using TabpediaFin.Handler.ItemUnitMeasureHandler;
 
 namespace TabpediaFin.Handler.Item
 {
-    public class ItemFetchHandler : IQueryByIdHandler<ItemDto>
+    public class ItemFetchHandler : IFetchByIdHandler<ItemDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
@@ -16,7 +16,7 @@ namespace TabpediaFin.Handler.Item
             _currentUser = currentUser;
         }
 
-        public async Task<RowResponse<ItemDto>> Handle(QueryByIdDto<ItemDto> request, CancellationToken cancellationToken)
+        public async Task<RowResponse<ItemDto>> Handle(FetchByIdRequestDto<ItemDto> request, CancellationToken cancellationToken)
         {
             var response = new RowResponse<ItemDto>();
 

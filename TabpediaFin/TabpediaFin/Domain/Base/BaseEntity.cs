@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Domain.Base;
 
-public abstract class BaseEntity<TId> : IEntity<TId>
+public abstract class BaseEntity<TId> : IEntity<TId>, IHasTenant
 {
     public TId Id { get; protected set; } = default!;
 

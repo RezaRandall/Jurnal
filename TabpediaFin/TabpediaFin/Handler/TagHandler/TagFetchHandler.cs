@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Handler.TagHandler
 {
-    public class TagFetchHandler : IQueryByIdHandler<TagFetchDto>
+    public class TagFetchHandler : IFetchByIdHandler<TagFetchDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
@@ -9,7 +9,7 @@
             _dbManager = dbManager;
             _currentUser = currentUser;
         }
-        public async Task<RowResponse<TagFetchDto>> Handle(QueryByIdDto<TagFetchDto> request, CancellationToken cancellationToken)
+        public async Task<RowResponse<TagFetchDto>> Handle(FetchByIdRequestDto<TagFetchDto> request, CancellationToken cancellationToken)
         {
             var response = new RowResponse<TagFetchDto>();
 

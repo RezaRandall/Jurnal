@@ -12,7 +12,7 @@ public class PaymentMethodController : ApiControllerBase
 
 
     [HttpPost("list")]
-    public async Task<IActionResult> GetList([FromBody] QueryPagedListDto<PaymentMethodListDto> request)
+    public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<PaymentMethodListDto> request)
     {
         return Result(await _mediator.Send(request));
     }
@@ -21,7 +21,14 @@ public class PaymentMethodController : ApiControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)
     {
-        return Result(await _mediator.Send(new QueryByIdDto<PaymentMethodDto>(id)));
+        return Result(await _mediator.Send(new FetchByIdRequestDto<PaymentMethodDto>(id)));
+    }
+
+
+    [HttpGet]
+    public async Task<IActionResult> Create()
+    {
+        return Result(await _mediator.Send(new CreateRequestDto<PaymentMethodDto>()));
     }
 
 
@@ -38,4 +45,10 @@ public class PaymentMethodController : ApiControllerBase
         return Result(await _mediator.Send(command));
     }
 
+
+    [HttpDelete("{id}")]
+    public async Task Delete(int id)
+    {
+        await _mediator.Send(new DeleteByIdRequestDto<PaymentMethodDto>(id));
+    }
 }

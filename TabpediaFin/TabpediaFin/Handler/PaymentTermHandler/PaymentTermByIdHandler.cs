@@ -2,7 +2,7 @@
 
 namespace TabpediaFin.Handler.PaymentTerm;
 
-public class PaymentTermByIdHandler : IQueryByIdHandler<PaymentTermDto>
+public class PaymentTermByIdHandler : IFetchByIdHandler<PaymentTermDto>
 {
     private readonly DbManager _dbManager;
     private readonly ICurrentUser _currentUser;
@@ -13,7 +13,7 @@ public class PaymentTermByIdHandler : IQueryByIdHandler<PaymentTermDto>
         _currentUser = currentUser;
     }
 
-    public async Task<RowResponse<PaymentTermDto>> Handle(QueryByIdDto<PaymentTermDto> request, CancellationToken cancellationToken)
+    public async Task<RowResponse<PaymentTermDto>> Handle(FetchByIdRequestDto<PaymentTermDto> request, CancellationToken cancellationToken)
     {
         var response = new RowResponse<PaymentTermDto>();
 

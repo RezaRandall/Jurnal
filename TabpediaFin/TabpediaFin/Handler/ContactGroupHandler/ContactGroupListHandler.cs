@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Handler.ContactGroupHandler
 {
-    public class ContactGroupListHandler : IQueryPagedListHandler<ContactGroupListDto>
+    public class ContactGroupListHandler : IFetchPagedListHandler<ContactGroupListDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
@@ -10,7 +10,7 @@
             _dbManager = dbManager;
             _currentUser = currentUser;
         }
-        public async Task<PagedListResponse<ContactGroupListDto>> Handle(QueryPagedListDto<ContactGroupListDto> request, CancellationToken cancellationToken)
+        public async Task<PagedListResponse<ContactGroupListDto>> Handle(FetchPagedListRequestDto<ContactGroupListDto> request, CancellationToken cancellationToken)
         {
             if (request.PageNum == 0) { request.PageNum = 1; }
             if (request.PageSize == 0) { request.PageSize = 10; }
