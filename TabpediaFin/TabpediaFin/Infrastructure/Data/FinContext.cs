@@ -37,6 +37,11 @@ public class FinContext : DbContext
     public DbSet<ContactPerson> ContactPerson { get; set; }
     public DbSet<Warehouse> Warehouse { get; set; }
     public DbSet<ExpenseCategory> ExpenseCategory { get; set; }
+    public DbSet<PurchaseRequest> PurchaseRequest { get; set; }
+    public DbSet<PurchaseRequestTag> PurchaseRequestTag { get; set; }
+    public DbSet<PurchaseRequestAttachment> PurchaseRequestAttachment { get; set; }
+    public DbSet<PurchaseRequestItem> PurchaseRequestItem { get; set; }
+    
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
