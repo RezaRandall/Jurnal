@@ -2,7 +2,7 @@
 
 namespace TabpediaFin.Migrations;
 
-[Migration(202212021604)]
+// [Migration(202212021604)]
 public class Table_Expense : Migration
 {
     public override void Down()
