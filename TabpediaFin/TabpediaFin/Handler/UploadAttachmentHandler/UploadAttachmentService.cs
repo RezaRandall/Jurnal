@@ -20,6 +20,8 @@ namespace TabpediaFin.Handler.UploadAttachmentHandler
                 var uploads = Path.Combine(Directory.GetCurrentDirectory(), "UserUpload", "posts", TenantId.ToString());
                 string extension = System.IO.Path.GetExtension(item.FileName);
                 var filePath = Path.Combine(uploads, uniqueFileName);
+                string host = "https://localhost:7030/";
+                var FileUrl = host + "UserUpload/posts/"+ TenantId.ToString() + "/"+ uniqueFileName;
                 Directory.CreateDirectory(Path.GetDirectoryName(filePath));
 
 
@@ -28,7 +30,7 @@ namespace TabpediaFin.Handler.UploadAttachmentHandler
                 listreturn.Add(new uploadreturn
                 {
                     FileName = uniqueFileName,
-                    FileUrl = filePath,
+                    FileUrl = FileUrl,
                     FileSize = item.Length,
                     Extension = extension,
                     TransId = TransId

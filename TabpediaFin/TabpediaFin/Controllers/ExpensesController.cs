@@ -27,7 +27,7 @@ public class ExpensesController : ApiControllerBase
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
-        return Result(await _mediator.Send(new QueryByIdDto<ExpenseFetchDto>(id)));
+        return Result(await _mediator.Send(new FetchByIdRequestDto<ExpenseFetchDto>(id)));
     }
 
     [HttpPost("/Expense/create")]

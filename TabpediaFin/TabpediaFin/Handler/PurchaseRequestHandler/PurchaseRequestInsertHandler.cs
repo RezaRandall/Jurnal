@@ -40,9 +40,9 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
                 transidresult = PurchaseRequest.Id;
                 UploadAttachmentService service = new UploadAttachmentService(_environment);
                 List<uploadreturn> filedata = await service.UploadAttachmentAsync(request.AttachmentFile, _currentUser.TenantId, transidresult);
-                List<PurchaseRequestFetchAttachment> returnfile = await PostAttachmentAsync(filedata);
-                List<PurchaseRequestFetchTag> TagListResult = await PostTagAsync(request.TagList, transidresult);
-                List<PurchaseRequestFetchItem> ItemListResult = await PostItemAsync(request.ItemList, transidresult);
+                List<PurchaseRequestFetchAttachment> returnfile = await PostAttachmentAsync(filedata, cancellationToken);
+                List<PurchaseRequestFetchTag> TagListResult = await PostTagAsync(request.TagList, transidresult, cancellationToken);
+                List<PurchaseRequestFetchItem> ItemListResult = await PostItemAsync(request.ItemList, transidresult, cancellationToken);
 
                 var row = new PurchaseRequestFetchDto()
                 {
@@ -58,6 +58,7 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
                     Notes = PurchaseRequest.Notes,
                     AttachmentList = returnfile,
                     TagList = TagListResult,
+                    ItemList = ItemListResult
                 };
 
                 result.IsOk = true;
@@ -73,16 +74,16 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
             return result;
         }
 
-        public async Task<List<PurchaseRequestFetchAttachment>> PostAttachmentAsync(List<uploadreturn> filedata)
+        public async Task<List<PurchaseRequestFetchAttachment>> PostAttachmentAsync(List<uploadreturn> filedata, CancellationToken cancellationToken)
         {
-            List<PurchaseRequestAttachment> PurchaseRequestAttachment = new List<PurchaseRequestAttachment>();
-            List<PurchaseRequestFetchAttachment> PurchaseRequestFetchAttachment = new List<PurchaseRequestFetchAttachment>();
+            List<PurchaseRequestAttachment> PurchaseRequestAttachmentList = new List<PurchaseRequestAttachment>();
+            List<PurchaseRequestFetchAttachment> PurchaseRequestFetchAttachmentList = new List<PurchaseRequestFetchAttachment>();
 
             if (filedata.Count > 0)
             {
                 foreach (uploadreturn item in filedata)
                 {
-                    PurchaseRequestAttachment.Add(new PurchaseRequestAttachment
+                    PurchaseRequestAttachmentList.Add(new PurchaseRequestAttachment
                     {
                         FileName = item.FileName,
                         FileUrl = item.FileUrl,
@@ -90,7 +91,7 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
                         FileSize = item.FileSize,
                         TransId = item.TransId,
                     });
-                    PurchaseRequestFetchAttachment.Add(new PurchaseRequestFetchAttachment
+                    PurchaseRequestFetchAttachmentList.Add(new PurchaseRequestFetchAttachment
                     {
                         FileName = item.FileName,
                         FileUrl = item.FileUrl,
@@ -100,12 +101,13 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
                     });
                 }
 
-                await _context.PurchaseRequestAttachment.AddRangeAsync(PurchaseRequestAttachment);
+                await _context.PurchaseRequestAttachment.AddRangeAsync(PurchaseRequestAttachmentList, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
             }
 
-            return PurchaseRequestFetchAttachment;
+            return PurchaseRequestFetchAttachmentList;
         }
-        public async Task<List<PurchaseRequestFetchTag>> PostTagAsync(List<PurchaseRequestInsertTag> filedata, int TransId)
+        public async Task<List<PurchaseRequestFetchTag>> PostTagAsync(List<PurchaseRequestInsertTag> filedata, int TransId, CancellationToken cancellationToken)
         {
             List<PurchaseRequestTag> PurchaseRequestTag = new List<PurchaseRequestTag>();
             List<PurchaseRequestFetchTag> PurchaseRequestFetchTag = new List<PurchaseRequestFetchTag>();
@@ -126,12 +128,13 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
                     });
                 }
 
-                await _context.PurchaseRequestTag.AddRangeAsync(PurchaseRequestTag);
+                await _context.PurchaseRequestTag.AddRangeAsync(PurchaseRequestTag, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
             }
 
             return PurchaseRequestFetchTag;
         }
-        public async Task<List<PurchaseRequestFetchItem>> PostItemAsync(List<PurchaseRequestInsertItem> filedata, int TransId)
+        public async Task<List<PurchaseRequestFetchItem>> PostItemAsync(List<PurchaseRequestInsertItem> filedata, int TransId, CancellationToken cancellationToken)
         {
             List<PurchaseRequestItem> PurchaseRequestItem = new List<PurchaseRequestItem>();
             List<PurchaseRequestFetchItem> PurchaseRequestFetchItem = new List<PurchaseRequestFetchItem>();
@@ -158,7 +161,8 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
                     });
                 }
 
-                await _context.PurchaseRequestItem.AddRangeAsync(PurchaseRequestItem);
+                await _context.PurchaseRequestItem.AddRangeAsync(PurchaseRequestItem, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
             }
 
             return PurchaseRequestFetchItem;
