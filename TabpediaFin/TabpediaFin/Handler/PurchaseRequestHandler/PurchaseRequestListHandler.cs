@@ -13,7 +13,7 @@
 
         public async Task<PagedListResponse<PurchaseRequestListDto>> Handle(FetchPagedListRequestDto<PurchaseRequestListDto> request, CancellationToken cancellationToken)
         {
-            if (request.PageNum == 0) { request.PageNum = 1; }
+            if (request.PageNum == 0) { request.PageNum = 0; }
             if (request.PageSize == 0) { request.PageSize = 10; }
             var response = new PagedListResponse<PurchaseRequestListDto>();
             try
@@ -39,7 +39,7 @@
                         sqlsearch = @"AND LOWER(i.""StaffId"") LIKE @Search  AND LOWER(i.""VendorId"") LIKE @Search  AND LOWER(i.""TransDate"") LIKE @Search  AND LOWER(i.""DueDate"") LIKE @Search  AND LOWER(i.""TransCode"") LIKE @Search  AND LOWER(i.""BudgetYear"") LIKE @Search  AND LOWER(i.""UrgentLevel"") LIKE @Search  AND LOWER(i.""Memo"") LIKE @Search  AND LOWER(i.""Notes"") LIKE @Search";
                     }
 
-                    var sql = @"SELECT i.""Id"", i.""TenantId"",i.""StaffId"", i.""VendorId"", i.""TransDate"",i.""DueDate"",i.""BudgetYear"",i.""UrgentLevel"",i.""Status"",i.""Memo"",i.""Notes""  FROM ""PurchaseRequest"" i WHERE i.""TenantId"" = @TenantId " + contactfilter + " " + sqlsearch + " " + sqlsort + " LIMIT @PageSize OFFSET @PageNum";
+                    var sql = @"SELECT i.""Id"", i.""TenantId"",i.""StaffId"", i.""VendorId"", i.""TransCode"", i.""TransDate"",i.""DueDate"",i.""BudgetYear"",i.""UrgentLevel"",i.""Status"",i.""Memo"",i.""Notes""  FROM ""PurchaseRequest"" i WHERE i.""TenantId"" = @TenantId " + contactfilter + " " + sqlsearch + " " + sqlsort + " LIMIT @PageSize OFFSET @PageNum";
 
                     var parameters = new DynamicParameters();
                     parameters.Add("TenantId", _currentUser.TenantId);
