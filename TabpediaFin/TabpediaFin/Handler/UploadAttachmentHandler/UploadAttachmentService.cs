@@ -4,11 +4,8 @@ namespace TabpediaFin.Handler.UploadAttachmentHandler
     public class UploadAttachmentService
     {
 
-        private readonly IWebHostEnvironment environment;
-
-        public UploadAttachmentService(IWebHostEnvironment environment)
+        public UploadAttachmentService()
         {
-            this.environment = environment;
         }
 
         public async Task<List<uploadreturn>> UploadAttachmentAsync(ICollection<IFormFile> param, int TenantId, int TransId)
@@ -31,7 +28,7 @@ namespace TabpediaFin.Handler.UploadAttachmentHandler
                 {
                     FileName = uniqueFileName,
                     FileUrl = FileUrl,
-                    FileSize = item.Length,
+                    FileSize = item.Length.ToString(),
                     Extension = extension,
                     TransId = TransId
                 });
@@ -45,7 +42,7 @@ namespace TabpediaFin.Handler.UploadAttachmentHandler
     {
         public string FileName { get; set; } = string.Empty;
         public string FileUrl { get; set; } = string.Empty;
-        public long FileSize { get; set; }
+        public string FileSize { get; set; } = string.Empty;
         public string Extension { get; set; } = string.Empty;
         public int TransId { get; set; }
     }

@@ -18,12 +18,19 @@ namespace TabpediaFin.Controllers
             _mediator = mediator;
         }
 
+        [HttpPost("list")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetAll([FromBody] FetchPagedListRequestDto<PurchaseRequestListDto> request)
+        {
+            return Result(await _mediator.Send(request));
+        }
+
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Insert([FromForm] PurchaseRequestInsertDto command)
         {
             return Result(await _mediator.Send(command));
         }
-       
+
     }
 }

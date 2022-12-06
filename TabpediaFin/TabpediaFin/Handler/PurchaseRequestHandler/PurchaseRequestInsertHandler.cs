@@ -4,13 +4,11 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
     public class PurchaseRequestInsertHandler : IRequestHandler<PurchaseRequestInsertDto, RowResponse<PurchaseRequestFetchDto>>
     {
         private readonly FinContext _context;
-        private readonly IWebHostEnvironment _environment;
         private readonly ICurrentUser _currentUser;
 
         public PurchaseRequestInsertHandler(FinContext db, IWebHostEnvironment environment, ICurrentUser currentUser)
         {
             _context = db;
-            _environment = environment;
             _currentUser = currentUser;
         }
 
@@ -38,7 +36,7 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
                 await _context.PurchaseRequest.AddAsync(PurchaseRequest, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
                 transidresult = PurchaseRequest.Id;
-                UploadAttachmentService service = new UploadAttachmentService(_environment);
+                UploadAttachmentService service = new UploadAttachmentService();
                 List<uploadreturn> filedata = await service.UploadAttachmentAsync(request.AttachmentFile, _currentUser.TenantId, transidresult);
                 List<PurchaseRequestFetchAttachment> returnfile = await PostAttachmentAsync(filedata, cancellationToken);
                 List<PurchaseRequestFetchTag> TagListResult = await PostTagAsync(request.TagList, transidresult, cancellationToken);
@@ -201,7 +199,7 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
     {
         public string FileName { get; set; } = string.Empty;
         public string FileUrl { get; set; } = string.Empty;
-        public long FileSize { get; set; }
+        public string FileSize { get; set; } = string.Empty;
         public string Extension { get; set; } = string.Empty;
         public int TransId { get; set; }
     }

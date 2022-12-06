@@ -15,7 +15,6 @@
         public int UrgentLevel { get; set; }
         public string Memo { get; set; } = string.Empty;
         public string Notes { get; set; } = string.Empty;
-        public string AttachmentLink { get; set; } = string.Empty;
         public List<PurchaseRequestFetchTag> TagList { get; set; }
         public List<PurchaseRequestFetchItem> ItemList { get; set; }
         public List<PurchaseRequestFetchAttachment> AttachmentList { get; set; }
@@ -39,7 +38,7 @@
         public string FileName { get; set; } = string.Empty;
         public string FileUrl { get; set; } = string.Empty;
         public string Extension { get; set; } = string.Empty;
-        public double FileSize { get; set; }
+        public string FileSize { get; set; } = string.Empty;
         public int TransId { get; set; }
     }
 }
