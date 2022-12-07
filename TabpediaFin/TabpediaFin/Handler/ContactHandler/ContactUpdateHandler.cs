@@ -57,6 +57,7 @@ namespace TabpediaFin.Handler.ContactHandler
                             AddressTypeId = item.AddressTypeId,
                             //AddresType = item.AddresType,
                             Notes = item.Notes,
+                            CreatedUid = _currentUser.UserId,
                         });
                         ContactAddressFetchDto.Add(new ContactAddressFetchDto
                         {
@@ -86,6 +87,7 @@ namespace TabpediaFin.Handler.ContactHandler
                             Fax = item.Fax,
                             Others = item.Others,
                             Notes = item.Notes,
+                            CreatedUid = _currentUser.UserId,
                         });
                         ContactPersonFetchDto.Add(new ContactPersonFetchDto
                         {

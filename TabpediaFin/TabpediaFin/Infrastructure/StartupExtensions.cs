@@ -24,8 +24,17 @@ public static class StartupExtensions
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<ICurrentUser, CurrentUser>();
 
+        services.AddTransient<IContactAddressCacheRemover, ContactAddressCacheRemover>();
+        services.AddTransient<IContactAddressTypeCacheRemover, ContactAddressTypeCacheRemover>();
+        services.AddTransient<IContactGroupCacheRemover, ContactGroupCacheRemover>();
+        services.AddTransient<IContactPersonCacheRemover, ContactPersonCacheRemover>();
+        services.AddTransient<IExpenseCategoryCacheRemover, ExpenseCategoryCacheRemover>();
+        services.AddTransient<IItemCategoryCacheRemover, ItemCategoryCacheRemover>();
         services.AddTransient<IPaymentMethodCacheRemover, PaymentMethodCacheRemover>();
-
+        services.AddTransient<ITagCacheRemover, TagCacheRemover>();
+        services.AddTransient<ITaxCacheRemover, TaxCacheRemover>();
+        services.AddTransient<IWarehouseCacheRemover, WarehouseCacheRemover>();
+        services.AddTransient<IPurchaseRequestCacheRemover, PurchaseRequestCacheRemover>();
         return services;
     }
 

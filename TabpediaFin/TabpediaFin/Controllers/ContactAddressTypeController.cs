@@ -50,10 +50,7 @@ namespace TabpediaFin.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Delete(int id)
         {
-
-            ContactAddressTypeDeleteDto command = new ContactAddressTypeDeleteDto();
-            command.Id = id;
-            return Result(await _mediator.Send(command));
+            return Result(await _mediator.Send(new DeleteByIdRequestDto<ContactAddressTypeFetchDto>(id)));
         }
     }
 }

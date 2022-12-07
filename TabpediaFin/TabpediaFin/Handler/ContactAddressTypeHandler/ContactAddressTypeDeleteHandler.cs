@@ -1,29 +1,36 @@
 ﻿namespace TabpediaFin.Handler.ContactAddressTypeHandler
 {
-    public class ContactAddressTypeDeleteHandler : IRequestHandler<ContactAddressTypeDeleteDto, RowResponse<bool>>
+    public class ContactAddressTypeDeleteHandler : IDeleteByIdHandler<ContactAddressTypeFetchDto>
     {
         private readonly FinContext _context;
-        private readonly ICurrentUser _currentUser;
+        private readonly IContactAddressTypeCacheRemover _cacheRemover;
 
-        public ContactAddressTypeDeleteHandler(FinContext db, ICurrentUser currentUser)
+        public ContactAddressTypeDeleteHandler(FinContext db, IContactAddressTypeCacheRemover cacheRemover)
         {
             _context = db;
-            _currentUser = currentUser;
+            _cacheRemover = cacheRemover;
         }
-        public async Task<RowResponse<bool>> Handle(ContactAddressTypeDeleteDto request, CancellationToken cancellationToken)
+
+        public async Task<RowResponse<ContactAddressTypeFetchDto>> Handle(DeleteByIdRequestDto<ContactAddressTypeFetchDto> request, CancellationToken cancellationToken)
         {
-            var result = new RowResponse<bool>();
+            var result = new RowResponse<ContactAddressTypeFetchDto>();
+
             try
             {
-                var ContactAddressType = await _context.ContactAddressType.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
+                var ContactAddressType = await _context.ContactAddressType.FirstAsync(x => x.Id == request.Id, cancellationToken);
+                if (ContactAddressType == null || ContactAddressType.Id == 0)
+                {
+                    throw new HttpException(HttpStatusCode.NotFound, "Data not found");
+                }
 
-                _context.ContactAddressType.Attach(ContactAddressType);
                 _context.ContactAddressType.Remove(ContactAddressType);
                 await _context.SaveChangesAsync(cancellationToken);
 
+                _cacheRemover.RemoveCache();
+
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.Row = true;
+                result.Row = new ContactAddressTypeFetchDto();
             }
             catch (Exception ex)
             {
@@ -33,11 +40,5 @@
 
             return result;
         }
-    }
-
-    public class ContactAddressTypeDeleteDto : IRequest<RowResponse<bool>>
-    {
-        public int Id { get; set; }
-
     }
 }

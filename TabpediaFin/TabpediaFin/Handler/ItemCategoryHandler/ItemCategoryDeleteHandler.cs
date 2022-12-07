@@ -1,30 +1,36 @@
 ﻿namespace TabpediaFin.Handler.ItemCategoryHandler
 {
-    public class ItemCategoryDeleteHandler : IRequestHandler<ItemCategoryDeleteDto, RowResponse<bool>>
+    public class ItemCategoryDeleteHandler : IDeleteByIdHandler<ItemCategoryFetchDto>
     {
         private readonly FinContext _context;
-        private readonly ICurrentUser _currentUser;
+        private readonly IItemCategoryCacheRemover _cacheRemover;
 
-        public ItemCategoryDeleteHandler(FinContext db, ICurrentUser currentUser)
+        public ItemCategoryDeleteHandler(FinContext db, IItemCategoryCacheRemover cacheRemover)
         {
             _context = db;
-            _currentUser = currentUser;
+            _cacheRemover = cacheRemover;
         }
-        public async Task<RowResponse<bool>> Handle(ItemCategoryDeleteDto request, CancellationToken cancellationToken)
+
+        public async Task<RowResponse<ItemCategoryFetchDto>> Handle(DeleteByIdRequestDto<ItemCategoryFetchDto> request, CancellationToken cancellationToken)
         {
-            var result = new RowResponse<bool>();
+            var result = new RowResponse<ItemCategoryFetchDto>();
+
             try
             {
-                var ItemCategory = await _context.ItemCategory.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-                
-                _context.ItemCategory.Attach(ItemCategory);
-                _context.ItemCategory.Remove(ItemCategory);
+                var ItemCategory = await _context.ItemCategory.FirstAsync(x => x.Id == request.Id, cancellationToken);
+                if (ItemCategory == null || ItemCategory.Id == 0)
+                {
+                    throw new HttpException(HttpStatusCode.NotFound, "Data not found");
+                }
 
+                _context.ItemCategory.Remove(ItemCategory);
                 await _context.SaveChangesAsync(cancellationToken);
+
+                _cacheRemover.RemoveCache();
 
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.Row = true;
+                result.Row = new ItemCategoryFetchDto();
             }
             catch (Exception ex)
             {
@@ -34,11 +40,5 @@
 
             return result;
         }
-    }
-
-    public class ItemCategoryDeleteDto : IRequest<RowResponse<bool>>
-    {
-        public int Id { get; set; }
-
     }
 }

@@ -18,7 +18,7 @@ public class Table_PurchaseRequestItem : Migration
             .WithColumn("TransId").AsInt32().NotNullable()
             .WithColumn("ItemId").AsInt32().NotNullable()
             .WithColumn("Quantity").AsInt32().NotNullable()
-            .WithColumn("UnitMeasureId").AsInt32().NotNullable()
+            .WithColumn("ItemUnitMeasureId").AsInt32().NotNullable()
             .WithColumn("CreatedUid").AsInt32().NotNullable()
             .WithColumn("CreatedUtc").AsDateTime().NotNullable()
             .WithColumn("UpdatedUid").AsInt32().Nullable()

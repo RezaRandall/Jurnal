@@ -1,30 +1,36 @@
 ﻿namespace TabpediaFin.Handler.WarehouseHandler
 {
-    public class WarehouseDeleteHandler : IRequestHandler<WarehouseDeleteDto, RowResponse<bool>>
+    public class WarehouseDeleteHandler : IDeleteByIdHandler<WarehouseFetchDto>
     {
         private readonly FinContext _context;
-        private readonly ICurrentUser _currentUser;
+        private readonly IWarehouseCacheRemover _cacheRemover;
 
-        public WarehouseDeleteHandler(FinContext db, ICurrentUser currentUser)
+        public WarehouseDeleteHandler(FinContext db, IWarehouseCacheRemover cacheRemover)
         {
             _context = db;
-            _currentUser = currentUser;
+            _cacheRemover = cacheRemover;
         }
-        public async Task<RowResponse<bool>> Handle(WarehouseDeleteDto request, CancellationToken cancellationToken)
+
+        public async Task<RowResponse<WarehouseFetchDto>> Handle(DeleteByIdRequestDto<WarehouseFetchDto> request, CancellationToken cancellationToken)
         {
-            var result = new RowResponse<bool>();
+            var result = new RowResponse<WarehouseFetchDto>();
+
             try
             {
-                var Warehouse = await _context.Warehouse.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
+                var Warehouse = await _context.Warehouse.FirstAsync(x => x.Id == request.Id, cancellationToken);
+                if (Warehouse == null || Warehouse.Id == 0)
+                {
+                    throw new HttpException(HttpStatusCode.NotFound, "Data not found");
+                }
 
-                _context.Warehouse.Attach(Warehouse);
                 _context.Warehouse.Remove(Warehouse);
-
                 await _context.SaveChangesAsync(cancellationToken);
+
+                _cacheRemover.RemoveCache();
 
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.Row = true;
+                result.Row = new WarehouseFetchDto();
             }
             catch (Exception ex)
             {
@@ -34,11 +40,5 @@
 
             return result;
         }
-    }
-
-    public class WarehouseDeleteDto : IRequest<RowResponse<bool>>
-    {
-        public int Id { get; set; }
-
     }
 }

@@ -3,12 +3,12 @@
 public class ItemCategoryUpdateHandler : IRequestHandler<ItemCategoryUpdateDto, RowResponse<ItemCategoryFetchDto>>
 {
     private readonly FinContext _context;
-    private readonly ICurrentUser _currentUser;
+    private readonly IItemCategoryCacheRemover _cacheRemover;
 
-    public ItemCategoryUpdateHandler(FinContext db, ICurrentUser currentUser)
+    public ItemCategoryUpdateHandler(FinContext db, IItemCategoryCacheRemover cacheRemover)
     {
         _context = db;
-        _currentUser = currentUser;
+        _cacheRemover = cacheRemover;
     }
 
     public async Task<RowResponse<ItemCategoryFetchDto>> Handle(ItemCategoryUpdateDto request, CancellationToken cancellationToken)
@@ -17,11 +17,19 @@ public class ItemCategoryUpdateHandler : IRequestHandler<ItemCategoryUpdateDto, 
 
         try
         {
-            var ItemCategory = await _context.ItemCategory.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var ItemCategory = await _context.ItemCategory.FirstAsync(x => x.Id == request.Id, cancellationToken);
+
+            if (ItemCategory == null || ItemCategory.Id == 0)
+            {
+                throw new HttpException(HttpStatusCode.NotFound, "Data not found");
+            }
+
             ItemCategory.Name = request.Name;
             ItemCategory.Description = request.Description;
 
             await _context.SaveChangesAsync(cancellationToken);
+
+            _cacheRemover.RemoveCache();
 
             var row = new ItemCategoryFetchDto()
             {
@@ -52,4 +60,36 @@ public class ItemCategoryUpdateDto : IRequest<RowResponse<ItemCategoryFetchDto>>
     public string Name { get; set; } = string.Empty;
 
     public string Description { get; set; } = string.Empty;
+}
+
+public class ItemCategoryUpdateValidator : AbstractValidator<ItemCategoryUpdateDto>
+{
+    private readonly IUniqueNameValidationRepository _repository;
+
+    public ItemCategoryUpdateValidator(IUniqueNameValidationRepository repository)
+    {
+        _repository = repository;
+
+        RuleFor(x => x.Id)
+            .NotEmpty();
+
+        RuleFor(x => x.Name)
+            .NotNull()
+            .NotEmpty()
+            .MaximumLength(250)
+            .MustAsync(
+                async (model, name, cancellation) =>
+                {
+                    return await IsUniqueName(model, name, cancellation);
+                }
+            ).WithMessage("Name must be unique");
+
+        RuleFor(x => x.Description).MaximumLength(250);
+    }
+
+    public async Task<bool> IsUniqueName(ItemCategoryUpdateDto model, string name, CancellationToken cancellationToken)
+    {
+        var isExist = await _repository.IsItemCategoryNameExist(name, model.Id);
+        return !isExist;
+    }
 }

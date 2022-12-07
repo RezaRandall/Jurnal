@@ -1,30 +1,36 @@
 ﻿namespace TabpediaFin.Handler.ExpenseCategoryHandler
 {
-    public class ExpenseCategoryDeleteHandler : IRequestHandler<ExpenseCategoryDeleteDto, RowResponse<bool>>
+    public class ExpenseCategoryDeleteHandler : IDeleteByIdHandler<ExpenseCategoryFetchDto>
     {
         private readonly FinContext _context;
-        private readonly ICurrentUser _currentUser;
+        private readonly IExpenseCategoryCacheRemover _cacheRemover;
 
-        public ExpenseCategoryDeleteHandler(FinContext db, ICurrentUser currentUser)
+        public ExpenseCategoryDeleteHandler(FinContext db, IExpenseCategoryCacheRemover cacheRemover)
         {
             _context = db;
-            _currentUser = currentUser;
+            _cacheRemover = cacheRemover;
         }
-        public async Task<RowResponse<bool>> Handle(ExpenseCategoryDeleteDto request, CancellationToken cancellationToken)
+
+        public async Task<RowResponse<ExpenseCategoryFetchDto>> Handle(DeleteByIdRequestDto<ExpenseCategoryFetchDto> request, CancellationToken cancellationToken)
         {
-            var result = new RowResponse<bool>();
+            var result = new RowResponse<ExpenseCategoryFetchDto>();
+
             try
             {
-                var ExpenseCategory = await _context.ExpenseCategory.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-                
-                _context.ExpenseCategory.Attach(ExpenseCategory);
-                _context.ExpenseCategory.Remove(ExpenseCategory);
+                var ExpenseCategory = await _context.ExpenseCategory.FirstAsync(x => x.Id == request.Id, cancellationToken);
+                if (ExpenseCategory == null || ExpenseCategory.Id == 0)
+                {
+                    throw new HttpException(HttpStatusCode.NotFound, "Data not found");
+                }
 
+                _context.ExpenseCategory.Remove(ExpenseCategory);
                 await _context.SaveChangesAsync(cancellationToken);
+
+                _cacheRemover.RemoveCache();
 
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.Row = true;
+                result.Row = new ExpenseCategoryFetchDto();
             }
             catch (Exception ex)
             {
@@ -34,11 +40,5 @@
 
             return result;
         }
-    }
-
-    public class ExpenseCategoryDeleteDto : IRequest<RowResponse<bool>>
-    {
-        public int Id { get; set; }
-
     }
 }

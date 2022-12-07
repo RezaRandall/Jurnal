@@ -3,12 +3,12 @@
 public class TagUpdateHandler : IRequestHandler<TagUpdateDto, RowResponse<TagFetchDto>>
 {
     private readonly FinContext _context;
-    private readonly ICurrentUser _currentUser;
+    private readonly ITagCacheRemover _cacheRemover;
 
-    public TagUpdateHandler(FinContext db, ICurrentUser currentUser)
+    public TagUpdateHandler(FinContext db, ITagCacheRemover cacheRemover)
     {
         _context = db;
-        _currentUser = currentUser;
+        _cacheRemover = cacheRemover;
     }
 
     public async Task<RowResponse<TagFetchDto>> Handle(TagUpdateDto request, CancellationToken cancellationToken)
@@ -17,11 +17,19 @@ public class TagUpdateHandler : IRequestHandler<TagUpdateDto, RowResponse<TagFet
 
         try
         {
-            var Tag = await _context.Tag.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var Tag = await _context.Tag.FirstAsync(x => x.Id == request.Id, cancellationToken);
+
+            if (Tag == null || Tag.Id == 0)
+            {
+                throw new HttpException(HttpStatusCode.NotFound, "Data not found");
+            }
+
             Tag.Name = request.Name;
             Tag.Description = request.Description;
 
             await _context.SaveChangesAsync(cancellationToken);
+
+            _cacheRemover.RemoveCache();
 
             var row = new TagFetchDto()
             {
@@ -52,4 +60,35 @@ public class TagUpdateDto : IRequest<RowResponse<TagFetchDto>>
     public string Name { get; set; } = string.Empty;
 
     public string Description { get; set; } = string.Empty;
+}
+public class TagUpdateValidator : AbstractValidator<TagUpdateDto>
+{
+    private readonly IUniqueNameValidationRepository _repository;
+
+    public TagUpdateValidator(IUniqueNameValidationRepository repository)
+    {
+        _repository = repository;
+
+        RuleFor(x => x.Id)
+            .NotEmpty();
+
+        RuleFor(x => x.Name)
+            .NotNull()
+            .NotEmpty()
+            .MaximumLength(250)
+            .MustAsync(
+                async (model, name, cancellation) =>
+                {
+                    return await IsUniqueName(model, name, cancellation);
+                }
+            ).WithMessage("Name must be unique");
+
+        RuleFor(x => x.Description).MaximumLength(250);
+    }
+
+    public async Task<bool> IsUniqueName(TagUpdateDto model, string name, CancellationToken cancellationToken)
+    {
+        var isExist = await _repository.IsTagNameExist(name, model.Id);
+        return !isExist;
+    }
 }

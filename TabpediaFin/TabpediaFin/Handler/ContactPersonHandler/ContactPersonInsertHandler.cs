@@ -3,10 +3,12 @@
 public class ContactPersonInsertHandler : IRequestHandler<ContactPersonInsertDto, RowResponse<ContactPersonFetchDto>>
 {
     private readonly FinContext _context;
+    private readonly IContactPersonCacheRemover _cacheRemover;
 
-    public ContactPersonInsertHandler(FinContext db)
+    public ContactPersonInsertHandler(FinContext db, IContactPersonCacheRemover cacheRemover)
     {
         _context = db;
+        _cacheRemover = cacheRemover;
     }
 
     public async Task<RowResponse<ContactPersonFetchDto>> Handle(ContactPersonInsertDto request, CancellationToken cancellationToken)
@@ -28,7 +30,9 @@ public class ContactPersonInsertHandler : IRequestHandler<ContactPersonInsertDto
         {
             await _context.ContactPerson.AddAsync(ContactPerson, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
-
+            
+            _cacheRemover.RemoveCache();
+            
             var row = new ContactPersonFetchDto()
             {
                 ContactId = ContactPerson.ContactId,
@@ -68,3 +72,27 @@ public class ContactPersonInsertDto : IRequest<RowResponse<ContactPersonFetchDto
     public string Notes { get; set; } = string.Empty;
 
 }
+
+public class ContactPersonInsertValidator : AbstractValidator<ContactPersonInsertDto>
+{
+    private readonly IUniqueNameValidationRepository _repository;
+
+    public ContactPersonInsertValidator(IUniqueNameValidationRepository repository)
+    {
+        _repository = repository;
+
+        RuleFor(x => x.ContactId)
+            .NotNull()
+            .NotEmpty();
+        RuleFor(x => x.Name)
+            .NotNull()
+            .NotEmpty()
+            .MaximumLength(250);
+        RuleFor(x => x.Email).MaximumLength(250);
+        RuleFor(x => x.Phone).MaximumLength(250);
+        RuleFor(x => x.Fax).MaximumLength(250);
+        RuleFor(x => x.Others).MaximumLength(250);
+        RuleFor(x => x.Notes).MaximumLength(250);
+    }
+}
+

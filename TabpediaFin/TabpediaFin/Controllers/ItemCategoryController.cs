@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TabpediaFin.Handler.ItemCategoryHandler;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -52,10 +51,7 @@ namespace TabpediaFin.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Delete(int id)
         {
-
-            ItemCategoryDeleteDto command = new ItemCategoryDeleteDto();
-            command.Id = id;
-            return Result(await _mediator.Send(command));
+            return Result(await _mediator.Send(new DeleteByIdRequestDto<ItemCategoryFetchDto>(id)));
         }
     }
 }

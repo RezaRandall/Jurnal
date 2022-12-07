@@ -5,10 +5,12 @@ namespace TabpediaFin.Handler.ContactGroupHandler;
 public class ContactGroupInsertHandler : IRequestHandler<ContactGroupInsertDto, RowResponse<ContactGroupFetchDto>>
 {
     private readonly FinContext _context;
+    private readonly IContactGroupCacheRemover _cacheRemover;
 
-    public ContactGroupInsertHandler(FinContext db)
+    public ContactGroupInsertHandler(FinContext db, IContactGroupCacheRemover cacheRemover)
     {
         _context = db;
+        _cacheRemover = cacheRemover;
     }
 
     public async Task<RowResponse<ContactGroupFetchDto>> Handle(ContactGroupInsertDto request, CancellationToken cancellationToken)
@@ -25,6 +27,8 @@ public class ContactGroupInsertHandler : IRequestHandler<ContactGroupInsertDto, 
         {
             await _context.ContactGroup.AddAsync(ContactGroup, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
+
+            _cacheRemover.RemoveCache();
 
             var row = new ContactGroupFetchDto()
             {
@@ -55,4 +59,33 @@ public class ContactGroupInsertDto : IRequest<RowResponse<ContactGroupFetchDto>>
 
     public string Description { get; set; } = string.Empty;
 
+}
+
+public class ContactGroupInsertValidator : AbstractValidator<ContactGroupInsertDto>
+{
+    private readonly IUniqueNameValidationRepository _repository;
+
+    public ContactGroupInsertValidator(IUniqueNameValidationRepository repository)
+    {
+        _repository = repository;
+
+        RuleFor(x => x.Name)
+            .NotNull()
+            .NotEmpty()
+            .MaximumLength(250)
+            .MustAsync(
+                async (model, name, cancellation) =>
+                {
+                    return await IsUniqueName(model, name, cancellation);
+                }
+            ).WithMessage("Name must be unique");
+
+        RuleFor(x => x.Description).MaximumLength(250);
+    }
+
+    public async Task<bool> IsUniqueName(ContactGroupInsertDto model, string name, CancellationToken cancellationToken)
+    {
+        var isExist = await _repository.IsContactGroupNameExist(name, 0);
+        return !isExist;
+    }
 }

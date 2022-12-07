@@ -1,30 +1,36 @@
 ﻿namespace TabpediaFin.Handler.TaxHandler
 {
-    public class TaxDeleteHandler : IRequestHandler<TaxDeleteDto, RowResponse<bool>>
+    public class TaxDeleteHandler : IDeleteByIdHandler<TaxFetchDto>
     {
         private readonly FinContext _context;
-        private readonly ICurrentUser _currentUser;
+        private readonly ITaxCacheRemover _cacheRemover;
 
-        public TaxDeleteHandler(FinContext db, ICurrentUser currentUser)
+        public TaxDeleteHandler(FinContext db, ITaxCacheRemover cacheRemover)
         {
             _context = db;
-            _currentUser = currentUser;
+            _cacheRemover = cacheRemover;
         }
-        public async Task<RowResponse<bool>> Handle(TaxDeleteDto request, CancellationToken cancellationToken)
+
+        public async Task<RowResponse<TaxFetchDto>> Handle(DeleteByIdRequestDto<TaxFetchDto> request, CancellationToken cancellationToken)
         {
-            var result = new RowResponse<bool>();
+            var result = new RowResponse<TaxFetchDto>();
+
             try
             {
-                var Tax = await _context.Tax.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-                
-                _context.Tax.Attach(Tax);
-                _context.Tax.Remove(Tax);
+                var Tax = await _context.Tax.FirstAsync(x => x.Id == request.Id, cancellationToken);
+                if (Tax == null || Tax.Id == 0)
+                {
+                    throw new HttpException(HttpStatusCode.NotFound, "Data not found");
+                }
 
+                _context.Tax.Remove(Tax);
                 await _context.SaveChangesAsync(cancellationToken);
+
+                _cacheRemover.RemoveCache();
 
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.Row = true;
+                result.Row = new TaxFetchDto();
             }
             catch (Exception ex)
             {
@@ -34,11 +40,5 @@
 
             return result;
         }
-    }
-
-    public class TaxDeleteDto : IRequest<RowResponse<bool>>
-    {
-        public int Id { get; set; }
-
     }
 }

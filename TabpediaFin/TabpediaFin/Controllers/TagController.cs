@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using TabpediaFin.Handler.TagHandler;
 
 namespace TabpediaFin.Controllers
 {
@@ -45,14 +44,12 @@ namespace TabpediaFin.Controllers
             return Result(await _mediator.Send(command));
         }
 
+
         [HttpDelete("{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Delete(int id)
         {
-
-            TagDeleteDto command = new TagDeleteDto();
-            command.Id = id;
-            return Result(await _mediator.Send(command));
+            return Result(await _mediator.Send(new DeleteByIdRequestDto<TagFetchDto>(id)));
         }
     }
 }

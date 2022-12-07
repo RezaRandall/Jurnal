@@ -3,12 +3,12 @@
 public class ExpenseCategoryUpdateHandler : IRequestHandler<ExpenseCategoryUpdateDto, RowResponse<ExpenseCategoryFetchDto>>
 {
     private readonly FinContext _context;
-    private readonly ICurrentUser _currentUser;
+    private readonly IExpenseCategoryCacheRemover _cacheRemover;
 
-    public ExpenseCategoryUpdateHandler(FinContext db, ICurrentUser currentUser)
+    public ExpenseCategoryUpdateHandler(FinContext db, IExpenseCategoryCacheRemover cacheRemover)
     {
         _context = db;
-        _currentUser = currentUser;
+        _cacheRemover = cacheRemover;
     }
 
     public async Task<RowResponse<ExpenseCategoryFetchDto>> Handle(ExpenseCategoryUpdateDto request, CancellationToken cancellationToken)
@@ -17,12 +17,19 @@ public class ExpenseCategoryUpdateHandler : IRequestHandler<ExpenseCategoryUpdat
 
         try
         {
-            var ExpenseCategory = await _context.ExpenseCategory.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var ExpenseCategory = await _context.ExpenseCategory.FirstAsync(x => x.Id == request.Id, cancellationToken);
+
+            if (ExpenseCategory == null || ExpenseCategory.Id == 0)
+            {
+                throw new HttpException(HttpStatusCode.NotFound, "Data not found");
+            }
+
             ExpenseCategory.Name = request.Name;
             ExpenseCategory.Description = request.Description;
             ExpenseCategory.AccountId = request.AccountId;
 
             await _context.SaveChangesAsync(cancellationToken);
+            _cacheRemover.RemoveCache();
 
             var row = new ExpenseCategoryFetchDto()
             {
@@ -55,4 +62,36 @@ public class ExpenseCategoryUpdateDto : IRequest<RowResponse<ExpenseCategoryFetc
 
     public string Description { get; set; } = string.Empty;
     public int AccountId { get; set; }
+}
+
+public class ExpenseCategoryUpdateValidator : AbstractValidator<ExpenseCategoryUpdateDto>
+{
+    private readonly IUniqueNameValidationRepository _repository;
+
+    public ExpenseCategoryUpdateValidator(IUniqueNameValidationRepository repository)
+    {
+        _repository = repository;
+
+        RuleFor(x => x.Id)
+            .NotEmpty();
+
+        RuleFor(x => x.Name)
+            .NotNull()
+            .NotEmpty()
+            .MaximumLength(250)
+            .MustAsync(
+                async (model, name, cancellation) =>
+                {
+                    return await IsUniqueName(model, name, cancellation);
+                }
+            ).WithMessage("Name must be unique");
+
+        RuleFor(x => x.Description).MaximumLength(250);
+    }
+
+    public async Task<bool> IsUniqueName(ExpenseCategoryUpdateDto model, string name, CancellationToken cancellationToken)
+    {
+        var isExist = await _repository.IsExpenseCategoryNameExist(name, model.Id);
+        return !isExist;
+    }
 }

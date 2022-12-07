@@ -1,30 +1,36 @@
 ﻿namespace TabpediaFin.Handler.ContactGroupHandler
 {
-    public class ContactGroupDeleteHandler : IRequestHandler<ContactGroupDeleteDto, RowResponse<bool>>
+    public class ContactGroupDeleteHandler : IDeleteByIdHandler<ContactGroupFetchDto>
     {
         private readonly FinContext _context;
-        private readonly ICurrentUser _currentUser;
+        private readonly IContactGroupCacheRemover _cacheRemover;
 
-        public ContactGroupDeleteHandler(FinContext db, ICurrentUser currentUser)
+        public ContactGroupDeleteHandler(FinContext db, IContactGroupCacheRemover cacheRemover)
         {
             _context = db;
-            _currentUser = currentUser;
+            _cacheRemover = cacheRemover;
         }
-        public async Task<RowResponse<bool>> Handle(ContactGroupDeleteDto request, CancellationToken cancellationToken)
+
+        public async Task<RowResponse<ContactGroupFetchDto>> Handle(DeleteByIdRequestDto<ContactGroupFetchDto> request, CancellationToken cancellationToken)
         {
-            var result = new RowResponse<bool>();
+            var result = new RowResponse<ContactGroupFetchDto>();
+
             try
             {
-                var ContactGroup = await _context.ContactGroup.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-                
-                _context.ContactGroup.Attach(ContactGroup);
-                _context.ContactGroup.Remove(ContactGroup);
+                var ContactGroup = await _context.ContactGroup.FirstAsync(x => x.Id == request.Id, cancellationToken);
+                if (ContactGroup == null || ContactGroup.Id == 0)
+                {
+                    throw new HttpException(HttpStatusCode.NotFound, "Data not found");
+                }
 
+                _context.ContactGroup.Remove(ContactGroup);
                 await _context.SaveChangesAsync(cancellationToken);
+
+                _cacheRemover.RemoveCache();
 
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.Row = true;
+                result.Row = new ContactGroupFetchDto();
             }
             catch (Exception ex)
             {
@@ -34,11 +40,5 @@
 
             return result;
         }
-    }
-
-    public class ContactGroupDeleteDto : IRequest<RowResponse<bool>>
-    {
-        public int Id { get; set; }
-
     }
 }

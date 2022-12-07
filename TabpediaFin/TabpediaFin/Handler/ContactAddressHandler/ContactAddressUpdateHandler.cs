@@ -3,12 +3,12 @@
 public class ContactAddressUpdateHandler : IRequestHandler<ContactAddressUpdateDto, RowResponse<ContactAddressFetchDto>>
 {
     private readonly FinContext _context;
-    private readonly ICurrentUser _currentUser;
+    private readonly IContactAddressCacheRemover _cacheRemover;
 
-    public ContactAddressUpdateHandler(FinContext db, ICurrentUser currentUser)
+    public ContactAddressUpdateHandler(FinContext db, IContactAddressCacheRemover cacheRemover)
     {
         _context = db;
-        _currentUser = currentUser;
+        _cacheRemover = cacheRemover;
     }
 
     public async Task<RowResponse<ContactAddressFetchDto>> Handle(ContactAddressUpdateDto request, CancellationToken cancellationToken)
@@ -17,7 +17,12 @@ public class ContactAddressUpdateHandler : IRequestHandler<ContactAddressUpdateD
 
         try
         {
-            var ContactAddress = await _context.ContactAddress.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var ContactAddress = await _context.ContactAddress.FirstAsync(x => x.Id == request.Id, cancellationToken);
+
+            if (ContactAddress == null || ContactAddress.Id == 0)
+            {
+                throw new HttpException(HttpStatusCode.NotFound, "Data not found");
+            }
             ContactAddress.ContactId = request.ContactId;
             ContactAddress.AddressName = request.AddressName;
             ContactAddress.Address = request.Address;
@@ -29,6 +34,8 @@ public class ContactAddressUpdateHandler : IRequestHandler<ContactAddressUpdateD
 
 
             await _context.SaveChangesAsync(cancellationToken);
+            
+            _cacheRemover.RemoveCache();
 
             var row = new ContactAddressFetchDto()
             {
@@ -69,4 +76,33 @@ public class ContactAddressUpdateDto : IRequest<RowResponse<ContactAddressFetchD
     public int AddressTypeId { get; set; } = 0;
     public string AddresType { get; set; } = string.Empty;
     public string Notes { get; set; } = string.Empty;
+}
+
+public class ContactAddressUpdateValidator : AbstractValidator<ContactAddressUpdateDto>
+{
+    private readonly IUniqueNameValidationRepository _repository;
+
+    public ContactAddressUpdateValidator(IUniqueNameValidationRepository repository)
+    {
+        _repository = repository;
+
+        RuleFor(x => x.Id)
+            .NotEmpty();
+
+        RuleFor(x => x.ContactId)
+           .NotNull()
+           .NotEmpty();
+        RuleFor(x => x.AddressName)
+            .NotNull()
+            .NotEmpty()
+            .MaximumLength(250);
+        RuleFor(x => x.Address)
+            .NotNull()
+            .NotEmpty()
+            .MaximumLength(250);
+        RuleFor(x => x.CityName).MaximumLength(250);
+        RuleFor(x => x.PostalCode).MaximumLength(250);
+        RuleFor(x => x.AddressTypeId).NotNull().NotEmpty();
+        RuleFor(x => x.Notes).MaximumLength(250);
+    }
 }

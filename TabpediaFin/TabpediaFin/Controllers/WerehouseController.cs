@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using TabpediaFin.Handler.WarehouseHandler;
 
 namespace TabpediaFin.Controllers
 {
@@ -16,7 +15,6 @@ namespace TabpediaFin.Controllers
         {
             _mediator = mediator;
         }
-
 
         [HttpPost("list")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -50,10 +48,7 @@ namespace TabpediaFin.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Delete(int id)
         {
-
-            WarehouseDeleteDto command = new WarehouseDeleteDto();
-            command.Id = id;
-            return Result(await _mediator.Send(command));
+            return Result(await _mediator.Send(new DeleteByIdRequestDto<WarehouseFetchDto>(id)));
         }
     }
 }

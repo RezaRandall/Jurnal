@@ -5,10 +5,12 @@ namespace TabpediaFin.Handler.TaxHandler;
 public class TaxInsertHandler : IRequestHandler<TaxInsertDto, RowResponse<TaxFetchDto>>
 {
     private readonly FinContext _context;
+    private readonly ITaxCacheRemover _cacheRemover;
 
-    public TaxInsertHandler(FinContext db)
+    public TaxInsertHandler(FinContext db, ITaxCacheRemover cacheRemover)
     {
         _context = db;
+        _cacheRemover = cacheRemover;
     }
 
     public async Task<RowResponse<TaxFetchDto>> Handle(TaxInsertDto request, CancellationToken cancellationToken)
@@ -25,7 +27,9 @@ public class TaxInsertHandler : IRequestHandler<TaxInsertDto, RowResponse<TaxFet
         {
             await _context.Tax.AddAsync(Tax, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
-
+            
+            _cacheRemover.RemoveCache();
+            
             var row = new TaxFetchDto()
             {
                 Id = Tax.Id,
@@ -58,4 +62,33 @@ public class TaxInsertDto : IRequest<RowResponse<TaxFetchDto>>
     
     public double RatePercent { get; set; }
 
+}
+
+public class TaxInsertValidator : AbstractValidator<TaxInsertDto>
+{
+    private readonly IUniqueNameValidationRepository _repository;
+
+    public TaxInsertValidator(IUniqueNameValidationRepository repository)
+    {
+        _repository = repository;
+
+        RuleFor(x => x.Name)
+            .NotNull()
+            .NotEmpty()
+            .MaximumLength(250)
+            .MustAsync(
+                async (model, name, cancellation) =>
+                {
+                    return await IsUniqueName(model, name, cancellation);
+                }
+            ).WithMessage("Name must be unique");
+
+        RuleFor(x => x.Description).MaximumLength(250);
+    }
+
+    public async Task<bool> IsUniqueName(TaxInsertDto model, string name, CancellationToken cancellationToken)
+    {
+        var isExist = await _repository.IsTaxNameExist(name, 0);
+        return !isExist;
+    }
 }

@@ -3,12 +3,12 @@
 public class WarehouseUpdateHandler : IRequestHandler<WarehouseUpdateDto, RowResponse<WarehouseFetchDto>>
 {
     private readonly FinContext _context;
-    private readonly ICurrentUser _currentUser;
+    private readonly IWarehouseCacheRemover _cacheRemover;
 
-    public WarehouseUpdateHandler(FinContext db, ICurrentUser currentUser)
+    public WarehouseUpdateHandler(FinContext db, IWarehouseCacheRemover cacheRemover)
     {
         _context = db;
-        _currentUser = currentUser;
+        _cacheRemover = cacheRemover;
     }
 
     public async Task<RowResponse<WarehouseFetchDto>> Handle(WarehouseUpdateDto request, CancellationToken cancellationToken)
@@ -17,7 +17,13 @@ public class WarehouseUpdateHandler : IRequestHandler<WarehouseUpdateDto, RowRes
 
         try
         {
-            var Warehouse = await _context.Warehouse.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var Warehouse = await _context.Warehouse.FirstAsync(x => x.Id == request.Id, cancellationToken);
+
+            if (Warehouse == null || Warehouse.Id == 0)
+            {
+                throw new HttpException(HttpStatusCode.NotFound, "Data not found");
+            }
+
             Warehouse.Name = request.Name;
             Warehouse.Description = request.Description;
             Warehouse.Address = request.Address;
@@ -29,7 +35,9 @@ public class WarehouseUpdateHandler : IRequestHandler<WarehouseUpdateDto, RowRes
             Warehouse.ContactPersonName = request.ContactPersonName;
 
             await _context.SaveChangesAsync(cancellationToken);
-
+            
+            _cacheRemover.RemoveCache();
+            
             var row = new WarehouseFetchDto()
             {
                 Id = request.Id,
@@ -42,7 +50,6 @@ public class WarehouseUpdateHandler : IRequestHandler<WarehouseUpdateDto, RowRes
                 Phone = Warehouse.Phone,
                 Fax = Warehouse.Fax,
                 ContactPersonName = Warehouse.ContactPersonName,
-
             };
 
             result.IsOk= true;
@@ -72,4 +79,42 @@ public class WarehouseUpdateDto : IRequest<RowResponse<WarehouseFetchDto>>
     public string Phone { get; set; } = string.Empty;
     public string Fax { get; set; } = string.Empty;
     public string ContactPersonName { get; set; } = string.Empty;
+}
+
+public class WarehouseUpdateValidator : AbstractValidator<WarehouseUpdateDto>
+{
+    private readonly IUniqueNameValidationRepository _repository;
+
+    public WarehouseUpdateValidator(IUniqueNameValidationRepository repository)
+    {
+        _repository = repository;
+
+        RuleFor(x => x.Id)
+            .NotEmpty();
+
+        RuleFor(x => x.Name)
+            .NotNull()
+            .NotEmpty()
+            .MaximumLength(250)
+            .MustAsync(
+                async (model, name, cancellation) =>
+                {
+                    return await IsUniqueName(model, name, cancellation);
+                }
+            ).WithMessage("Name must be unique");
+
+        RuleFor(x => x.Description).MaximumLength(250);
+        RuleFor(x => x.CityName).MaximumLength(250);
+        RuleFor(x => x.PostalCode).MaximumLength(250);
+        RuleFor(x => x.Phone).MaximumLength(250);
+        RuleFor(x => x.Fax).MaximumLength(250);
+        RuleFor(x => x.Email).MaximumLength(250);
+        RuleFor(x => x.ContactPersonName).MaximumLength(250);
+    }
+
+    public async Task<bool> IsUniqueName(WarehouseUpdateDto model, string name, CancellationToken cancellationToken)
+    {
+        var isExist = await _repository.IsWarehouseNameExist(name, model.Id);
+        return !isExist;
+    }
 }

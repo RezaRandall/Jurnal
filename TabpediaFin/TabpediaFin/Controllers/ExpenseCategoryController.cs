@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using TabpediaFin.Handler.ExpenseCategoryHandler;
 
 namespace TabpediaFin.Controllers
 {
@@ -50,10 +49,7 @@ namespace TabpediaFin.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Delete(int id)
         {
-
-            ExpenseCategoryDeleteDto command = new ExpenseCategoryDeleteDto();
-            command.Id = id;
-            return Result(await _mediator.Send(command));
+            return Result(await _mediator.Send(new DeleteByIdRequestDto<ExpenseCategoryFetchDto>(id)));
         }
     }
 }

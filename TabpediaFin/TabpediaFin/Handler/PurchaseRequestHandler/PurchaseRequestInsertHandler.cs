@@ -146,7 +146,7 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
                         
                         ItemId = item.ItemId,
                         Quantity = item.Quantity,
-                        UnitMeasureId = item.UnitMeasureId,
+                        ItemUnitMeasureId = item.ItemUnitMeasureId,
                         TransId = TransId
 
                     });
@@ -154,7 +154,7 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
                     {
                         ItemId = item.ItemId,
                         Quantity = item.Quantity,
-                        UnitMeasureId = item.UnitMeasureId,
+                        ItemUnitMeasureId = item.ItemUnitMeasureId,
                         TransId = TransId
                     });
                 }
@@ -192,7 +192,7 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
     {
         public int ItemId { get; set; }
         public int Quantity { get; set; }
-        public int UnitMeasureId { get; set; }
+        public int ItemUnitMeasureId { get; set; }
     }
 
     public class PurchestRequestAttahmentItem

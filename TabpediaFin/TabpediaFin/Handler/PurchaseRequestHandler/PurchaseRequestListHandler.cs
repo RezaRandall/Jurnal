@@ -39,7 +39,42 @@
                         sqlsearch = @"AND LOWER(i.""StaffId"") LIKE @Search  AND LOWER(i.""VendorId"") LIKE @Search  AND LOWER(i.""TransDate"") LIKE @Search  AND LOWER(i.""DueDate"") LIKE @Search  AND LOWER(i.""TransCode"") LIKE @Search  AND LOWER(i.""BudgetYear"") LIKE @Search  AND LOWER(i.""UrgentLevel"") LIKE @Search  AND LOWER(i.""Memo"") LIKE @Search  AND LOWER(i.""Notes"") LIKE @Search";
                     }
 
-                    var sql = @"SELECT i.""Id"", i.""TenantId"",i.""StaffId"", i.""VendorId"", i.""TransCode"", i.""TransDate"",i.""DueDate"",i.""BudgetYear"",i.""UrgentLevel"",i.""Status"",i.""Memo"",i.""Notes""  FROM ""PurchaseRequest"" i WHERE i.""TenantId"" = @TenantId " + contactfilter + " " + sqlsearch + " " + sqlsort + " LIMIT @PageSize OFFSET @PageNum";
+                    var sql = @"SELECT  c.""Name"" as Vendor, 
+                                        a.""FullName"" as Staff, 
+                                        i.""Id"", 
+                                        i.""TenantId"",
+                                        i.""StaffId"", 
+                                        i.""VendorId"", 
+                                        i.""TransCode"", 
+                                        i.""TransDate"",
+                                        i.""DueDate"",
+                                        i.""BudgetYear"",
+                                        i.""UrgentLevel"",
+                                        CASE 
+                                            WHEN i.""UrgentLevel""  = 0
+                                                THEN 'Low'
+                                            WHEN i.""UrgentLevel""  = 1
+                                                THEN 'Moderate'
+                                            ELSE
+                                                'High'
+                                            END AS UrgentLevelString,
+                                        CASE 
+                                            WHEN i.""DueDate"" < now()  AND i.""Status"" = 0
+                                                THEN 3
+                                            ELSE
+                                                i.""Status""
+                                            END AS Status,
+                                        CASE 
+                                            WHEN i.""DueDate"" >= now()  AND i.""Status"" = 0
+                                                THEN 'Open'
+                                            WHEN i.""DueDate"" < now()  AND i.""Status"" = 0
+                                                THEN 'Expired'
+                                            ELSE
+                                                'Closed'
+                                            END AS StatusString,
+                                        i.""Memo"",
+                                        i.""Notes""  
+                                        FROM ""PurchaseRequest"" i LEFT JOIN ""AppUser"" a ON a.""Id"" = i.""StaffId"" LEFT JOIN ""Contact"" c ON c.""Id"" = i.""VendorId""  WHERE i.""TenantId"" = @TenantId " + contactfilter + " " + sqlsearch + " " + sqlsort + " LIMIT @PageSize OFFSET @PageNum";
 
                     var parameters = new DynamicParameters();
                     parameters.Add("TenantId", _currentUser.TenantId);
@@ -73,7 +108,11 @@
         [Searchable]
         public int StaffId { get; set; }
         [Searchable]
+        public string Staff { get; set; }
+        [Searchable]
         public int VendorId { get; set; }
+        [Searchable]
+        public string Vendor { get; set; }
         [Searchable]
         public DateTime TransDate { get; set; }
         [Searchable]
@@ -84,10 +123,14 @@
         public string BudgetYear { get; set; } = string.Empty;
         [Searchable]
         public int UrgentLevel { get; set; }
+        public string UrgentLevelString { get; set; } = string.Empty;
         [Searchable]
         public string Memo { get; set; } = string.Empty;
         [Searchable]
         public string Notes { get; set; } = string.Empty;
+        [Searchable]
+        public int Status { get; set; }
+        public string StatusString { get; set; } = string.Empty;
     }
 
 }

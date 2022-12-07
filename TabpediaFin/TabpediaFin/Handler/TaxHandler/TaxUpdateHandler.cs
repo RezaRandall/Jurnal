@@ -3,12 +3,12 @@
 public class TaxUpdateHandler : IRequestHandler<TaxUpdateDto, RowResponse<TaxFetchDto>>
 {
     private readonly FinContext _context;
-    private readonly ICurrentUser _currentUser;
+    private readonly ITaxCacheRemover _cacheRemover;
 
-    public TaxUpdateHandler(FinContext db, ICurrentUser currentUser)
+    public TaxUpdateHandler(FinContext db, ITaxCacheRemover cacheRemover)
     {
         _context = db;
-        _currentUser = currentUser;
+        _cacheRemover = cacheRemover;
     }
 
     public async Task<RowResponse<TaxFetchDto>> Handle(TaxUpdateDto request, CancellationToken cancellationToken)
@@ -17,12 +17,20 @@ public class TaxUpdateHandler : IRequestHandler<TaxUpdateDto, RowResponse<TaxFet
 
         try
         {
-            var Tax = await _context.Tax.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var Tax = await _context.Tax.FirstAsync(x => x.Id == request.Id, cancellationToken);
+
+            if (Tax == null || Tax.Id == 0)
+            {
+                throw new HttpException(HttpStatusCode.NotFound, "Data not found");
+            }
+
             Tax.Name = request.Name;
             Tax.Description = request.Description;
             Tax.RatePercent = request.RatePercent;
 
             await _context.SaveChangesAsync(cancellationToken);
+
+            _cacheRemover.RemoveCache();
 
             var row = new TaxFetchDto()
             {
@@ -55,4 +63,36 @@ public class TaxUpdateDto : IRequest<RowResponse<TaxFetchDto>>
 
     public string Description { get; set; } = string.Empty;
     public double RatePercent { get; set; }
+}
+
+public class TaxUpdateValidator : AbstractValidator<TaxUpdateDto>
+{
+    private readonly IUniqueNameValidationRepository _repository;
+
+    public TaxUpdateValidator(IUniqueNameValidationRepository repository)
+    {
+        _repository = repository;
+
+        RuleFor(x => x.Id)
+            .NotEmpty();
+
+        RuleFor(x => x.Name)
+            .NotNull()
+            .NotEmpty()
+            .MaximumLength(250)
+            .MustAsync(
+                async (model, name, cancellation) =>
+                {
+                    return await IsUniqueName(model, name, cancellation);
+                }
+            ).WithMessage("Name must be unique");
+
+        RuleFor(x => x.Description).MaximumLength(250);
+    }
+
+    public async Task<bool> IsUniqueName(TaxUpdateDto model, string name, CancellationToken cancellationToken)
+    {
+        var isExist = await _repository.IsTaxNameExist(name, model.Id);
+        return !isExist;
+    }
 }

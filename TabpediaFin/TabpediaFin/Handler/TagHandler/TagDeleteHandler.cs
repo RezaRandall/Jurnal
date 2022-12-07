@@ -1,30 +1,36 @@
 ﻿namespace TabpediaFin.Handler.TagHandler
 {
-    public class TagDeleteHandler : IRequestHandler<TagDeleteDto, RowResponse<bool>>
+    public class TagDeleteHandler : IDeleteByIdHandler<TagFetchDto>
     {
         private readonly FinContext _context;
-        private readonly ICurrentUser _currentUser;
+        private readonly ITagCacheRemover _cacheRemover;
 
-        public TagDeleteHandler(FinContext db, ICurrentUser currentUser)
+        public TagDeleteHandler(FinContext db, ITagCacheRemover cacheRemover)
         {
             _context = db;
-            _currentUser = currentUser;
+            _cacheRemover = cacheRemover;
         }
-        public async Task<RowResponse<bool>> Handle(TagDeleteDto request, CancellationToken cancellationToken)
+
+        public async Task<RowResponse<TagFetchDto>> Handle(DeleteByIdRequestDto<TagFetchDto> request, CancellationToken cancellationToken)
         {
-            var result = new RowResponse<bool>();
+            var result = new RowResponse<TagFetchDto>();
+
             try
             {
-                var Tag = await _context.Tag.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
+                var Tag = await _context.Tag.FirstAsync(x => x.Id == request.Id, cancellationToken);
+                if (Tag == null || Tag.Id == 0)
+                {
+                    throw new HttpException(HttpStatusCode.NotFound, "Data not found");
+                }
 
-                _context.Tag.Attach(Tag);
                 _context.Tag.Remove(Tag);
-
                 await _context.SaveChangesAsync(cancellationToken);
+
+                _cacheRemover.RemoveCache();
 
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.Row = true;
+                result.Row = new TagFetchDto();
             }
             catch (Exception ex)
             {
@@ -34,11 +40,5 @@
 
             return result;
         }
-    }
-
-    public class TagDeleteDto : IRequest<RowResponse<bool>>
-    {
-        public int Id { get; set; }
-
     }
 }

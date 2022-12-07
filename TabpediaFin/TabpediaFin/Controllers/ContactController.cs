@@ -133,14 +133,12 @@ namespace TabpediaFin.Controllers
         {
             return Result(await _mediator.Send(command));
         }
+        
         [HttpDelete("contactaddress/{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> DeleteContactAddress(int id)
         {
-
-            ContactAddressDeleteDto command = new ContactAddressDeleteDto();
-            command.Id = id;
-            return Result(await _mediator.Send(command));
+            return Result(await _mediator.Send(new DeleteByIdRequestDto<ContactAddressFetchDto>(id)));
         }
 
         [HttpGet("contactperson/{id}")]
@@ -166,10 +164,7 @@ namespace TabpediaFin.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> DeleteContactPerson(int id)
         {
-
-            ContactPersonDeleteDto command = new ContactPersonDeleteDto();
-            command.Id = id;
-            return Result(await _mediator.Send(command));
+            return Result(await _mediator.Send(new DeleteByIdRequestDto<ContactPersonFetchDto>(id)));
         }
         public enum contacttypeenum
         {

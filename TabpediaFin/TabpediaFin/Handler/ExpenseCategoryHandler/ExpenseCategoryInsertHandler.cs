@@ -3,10 +3,12 @@
 public class ExpenseCategoryInsertHandler : IRequestHandler<ExpenseCategoryInsertDto, RowResponse<ExpenseCategoryFetchDto>>
 {
     private readonly FinContext _context;
+    private readonly IExpenseCategoryCacheRemover _cacheRemover;
 
-    public ExpenseCategoryInsertHandler(FinContext db)
+    public ExpenseCategoryInsertHandler(FinContext db, IExpenseCategoryCacheRemover cacheRemover)
     {
         _context = db;
+        _cacheRemover = cacheRemover;
     }
 
     public async Task<RowResponse<ExpenseCategoryFetchDto>> Handle(ExpenseCategoryInsertDto request, CancellationToken cancellationToken)
@@ -24,6 +26,8 @@ public class ExpenseCategoryInsertHandler : IRequestHandler<ExpenseCategoryInser
         {
             await _context.ExpenseCategory.AddAsync(ExpenseCategory, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
+
+            _cacheRemover.RemoveCache();
 
             var row = new ExpenseCategoryFetchDto()
             {
@@ -57,3 +61,32 @@ public class ExpenseCategoryInsertDto : IRequest<RowResponse<ExpenseCategoryFetc
     public int AccountId { get; set; }
 
 }
+public class ExpenseCategoryInsertValidator : AbstractValidator<ExpenseCategoryInsertDto>
+{
+    private readonly IUniqueNameValidationRepository _repository;
+
+    public ExpenseCategoryInsertValidator(IUniqueNameValidationRepository repository)
+    {
+        _repository = repository;
+
+        RuleFor(x => x.Name)
+            .NotNull()
+            .NotEmpty()
+            .MaximumLength(250)
+            .MustAsync(
+                async (model, name, cancellation) =>
+                {
+                    return await IsUniqueName(model, name, cancellation);
+                }
+            ).WithMessage("Name must be unique");
+
+        RuleFor(x => x.Description).MaximumLength(250);
+    }
+
+    public async Task<bool> IsUniqueName(ExpenseCategoryInsertDto model, string name, CancellationToken cancellationToken)
+    {
+        var isExist = await _repository.IsExpenseCategoryNameExist(name, 0);
+        return !isExist;
+    }
+}
+

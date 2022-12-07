@@ -10,10 +10,45 @@ public class UniqueNameValidationRepository : BaseRepository, IUniqueNameValidat
         _currentUser = currentUser;
     }
 
+    public async Task<bool> IsContactAddressTypeNameExist(string name, int id)
+    {
+        return await IsNameExist("ContactAddressType", name, id);
+    }
+
+    public async Task<bool> IsContactGroupNameExist(string name, int id)
+    {
+        return await IsNameExist("ContactGroup", name, id);
+    }
+    
+    public async Task<bool> IsExpenseCategoryNameExist(string name, int id)
+    {
+        return await IsNameExist("ExpenseCategory", name, id);
+    }
+
+    public async Task<bool> IsItemCategoryNameExist(string name, int id)
+    {
+        return await IsNameExist("ItemCategory", name, id);
+    }
 
     public async Task<bool> IsPaymentMethodNameExist(string name, int id)
     {
         return await IsNameExist("PaymentMethod", name, id);
+    }
+
+    public async Task<bool> IsTagNameExist(string name, int id)
+    {
+        return await IsNameExist("Tag", name, id);
+    }
+
+
+    public async Task<bool> IsTaxNameExist(string name, int id)
+    {
+        return await IsNameExist("Tax", name, id);
+    }
+
+    public async Task<bool> IsWarehouseNameExist(string name, int id)
+    {
+        return await IsNameExist("Warehouse", name, id);
     }
 
 
@@ -54,5 +89,12 @@ public class UniqueNameValidationRepository : BaseRepository, IUniqueNameValidat
 
 public interface IUniqueNameValidationRepository
 {
+    Task<bool> IsContactAddressTypeNameExist(string name, int id);
+    Task<bool> IsContactGroupNameExist(string name, int id);
+    Task<bool> IsExpenseCategoryNameExist(string name, int id);
+    Task<bool> IsItemCategoryNameExist(string name, int id);
     Task<bool> IsPaymentMethodNameExist(string name, int id);
+    Task<bool> IsTagNameExist(string name, int id); 
+    Task<bool> IsTaxNameExist(string name, int id);
+    Task<bool> IsWarehouseNameExist(string name, int id);
 }

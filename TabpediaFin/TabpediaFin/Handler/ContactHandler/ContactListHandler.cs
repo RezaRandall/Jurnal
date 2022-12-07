@@ -13,7 +13,7 @@
 
         public async Task<PagedListResponse<contactlistDto>> Handle(QueryPagedListContactDto<contactlistDto> request, CancellationToken cancellationToken)
         {
-            if (request.PageNum == 0) { request.PageNum = 1; }
+            if (request.PageNum == 0) { request.PageNum = 0; }
             if (request.PageSize == 0) { request.PageSize = 10; }
             var response = new PagedListResponse<contactlistDto>();
             try

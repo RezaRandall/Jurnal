@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using TabpediaFin.Handler.TaxHandler;
 
 namespace TabpediaFin.Controllers
 {
@@ -46,14 +45,12 @@ namespace TabpediaFin.Controllers
             return Result(await _mediator.Send(command));
         }
 
+
         [HttpDelete("{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Delete(int id)
         {
-
-            TaxDeleteDto command = new TaxDeleteDto();
-            command.Id = id;
-            return Result(await _mediator.Send(command));
+            return Result(await _mediator.Send(new DeleteByIdRequestDto<TaxFetchDto>(id)));
         }
     }
 }
