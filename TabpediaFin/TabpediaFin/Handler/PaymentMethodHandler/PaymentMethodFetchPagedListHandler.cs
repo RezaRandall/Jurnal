@@ -30,11 +30,7 @@ public class PaymentMethodFetchPagedListHandler : IFetchPagedListHandler<Payment
                 parameters.Add("Search", $"%{request.Search.Trim().ToLowerInvariant()}%");
             }
 
-            var orderby = string.Empty;
-            if (string.IsNullOrWhiteSpace(request.SortBy))
-            {
-                orderby = SqlHelper.GenerateOrderBy(request.SortBy, request.SortDesc);
-            }
+            var orderby = SqlHelper.GenerateOrderBy(request.SortBy, request.SortDesc, @" ""Name"" ASC  ");
 
             using (var cn = _dbManager.CreateConnection())
             {
