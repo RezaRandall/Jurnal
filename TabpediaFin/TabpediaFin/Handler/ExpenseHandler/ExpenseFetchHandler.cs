@@ -1,5 +1,6 @@
 ﻿using TabpediaFin.Handler.ItemItemCategoryHandler;
 using TabpediaFin.Handler.ItemUnitMeasureHandler;
+using TabpediaFin.Handler.PurchaseRequestHandler;
 
 namespace TabpediaFin.Handler.ExpenseHandler;
 
@@ -63,4 +64,21 @@ public class ExpenseFetchDto : BaseDto
     public string Notes { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
+    public List<ExpenseFetchTag> TagList { get; set; } = new List<ExpenseFetchTag>();
+    //public List<ExpenseFetchAttachment> AttachmentList { get; set; } 
+}
+
+public class ExpenseFetchAttachment : BaseDto
+{
+    public string FileName { get; set; } = string.Empty;
+    public string FileUrl { get; set; } = string.Empty;
+    public string Extension { get; set; } = string.Empty;
+    public string FileSize { get; set; } = string.Empty;
+    public int TransId { get; set; }
+}
+
+public class ExpenseFetchTag : BaseDto
+{
+    public int TagId { get; set; }
+    public int TransId { get; set; }
 }

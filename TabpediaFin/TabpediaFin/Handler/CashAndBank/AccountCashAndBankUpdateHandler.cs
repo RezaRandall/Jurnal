@@ -27,6 +27,7 @@ public class AccountCashAndBankUpdateHandler : IRequestHandler<AccountCashAndBan
             accountCashAndBank.TaxId = request.TaxId;
             accountCashAndBank.BankId = request.BankId;
             accountCashAndBank.Description = request.Description;
+            accountCashAndBank.Balance = request.Balance;
 
             await _context.SaveChangesAsync(cancellationToken);
 
@@ -40,6 +41,7 @@ public class AccountCashAndBankUpdateHandler : IRequestHandler<AccountCashAndBan
                 TaxId = accountCashAndBank.TaxId,
                 BankId = accountCashAndBank.BankId,
                 Description = accountCashAndBank.Description,
+                Balance = accountCashAndBank.Balance,
             };
 
             result.IsOk = true;
@@ -68,4 +70,5 @@ public class AccountCashAndBankUpdateDto : IRequest<RowResponse<AccountCashAndBa
     public int TaxId { get; set; } = 0;
     public int BankId { get; set; } = 0;
     public string Description { get; set; } = string.Empty;
+    public Int64 Balance { get; set; } = 0;
 }

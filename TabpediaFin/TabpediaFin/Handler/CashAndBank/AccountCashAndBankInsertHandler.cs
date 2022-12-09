@@ -24,6 +24,7 @@ public class AccountCashAndBankInsertHandler : IRequestHandler<AccountCashAndBan
             TaxId = request.TaxId,
             BankId = request.BankId,
             Description = request.Description,
+            Balance = request.Balance,
         };
 
         try
@@ -40,6 +41,7 @@ public class AccountCashAndBankInsertHandler : IRequestHandler<AccountCashAndBan
                 TaxId = accountCashAndBank.TaxId,
                 BankId = accountCashAndBank.BankId,
                 Description = accountCashAndBank.Description,
+                Balance = accountCashAndBank.Balance,
             };
 
             result.IsOk = true;
@@ -65,4 +67,5 @@ public class AccountCashAndBankInsertDto : IRequest<RowResponse<AccountCashAndBa
     public int TaxId { get; set; } = 0;
     public int BankId { get; set; } = 0;
     public string Description { get; set; } = string.Empty;
+    public Int64 Balance { get; set; } = 0;
 }

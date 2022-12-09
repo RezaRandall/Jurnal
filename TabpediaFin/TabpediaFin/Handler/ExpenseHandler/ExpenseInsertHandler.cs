@@ -1,26 +1,271 @@
-﻿using TabpediaFin.Handler.ExpenseCategoryHandler;
-using TabpediaFin.Handler.ExpenseHandler;
-using TabpediaFin.Handler.Item;
+﻿using TabpediaFin.Domain.Expense;
+using TabpediaFin.Handler.ContactHandler;
+using TabpediaFin.Handler.UploadAttachmentHandler;
 
 namespace TabpediaFin.Handler.ExpenseHandler;
 
+//public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowResponse<ExpenseFetchDto>>
+//{
+//    private readonly FinContext _context;
+//    private readonly ICurrentUser _currentUser;
+
+//    public ExpenseInsertHandler(FinContext db, IWebHostEnvironment environment, ICurrentUser currentUser)
+//    {
+//        _context = db;
+//        _currentUser = currentUser;
+//    }
+
+//    public async Task<RowResponse<ExpenseFetchDto>> Handle(ExpenseInsertDto request, CancellationToken cancellationToken)
+//    {
+//        var result = new RowResponse<ExpenseFetchDto>();
+//        int transIdResult;
+//        DateTime TransDate = TimeZoneInfo.ConvertTimeToUtc(request.TransDate);
+
+//        var expense = new Expense()
+//        {
+//            TransNum = request.TransNum,
+//            TransDate = TransDate,
+//            ContactId = request.ContactId,
+//            PaymentMethodId = request.PaymentMethodId,
+//            PaymentTermId = request.PaymentTermId,
+//            Amount = request.Amount,
+//            DiscountTypeId = request.DiscountTypeId,
+//            DiscountPercent = request.DiscountPercent,
+//            DiscountAmount = request.DiscountAmount,
+//            Notes = request.Notes,
+//            Description = request.Description,
+//            TaxId = request.TaxId,
+
+//        };
+
+//        try
+//        {
+//            await _context.Expense.AddAsync(expense, cancellationToken);
+//            await _context.SaveChangesAsync(cancellationToken);
+//            transIdResult = expense.Id;
+//            UploadAttachmentService service = new UploadAttachmentService();
+//            List<uploadreturn> filedata = await service.UploadAttachmentAsync(request.AttachmentFile, _currentUser.TenantId, transIdResult);
+//            List<ExpenseFetchAttachment> returnfile = await PostAttachmentAsync(filedata, cancellationToken);
+//            List<ExpenseFetchTag> TagListResult = await PostTagAsync(request.TagList, transIdResult, cancellationToken);
+
+//            var row = new ExpenseFetchDto()
+//            {
+//                TransNum = expense.TransNum,
+//                TransDate = expense.TransDate,
+//                ContactId = expense.ContactId,
+//                PaymentMethodId = expense.PaymentMethodId,
+//                PaymentTermId = expense.PaymentTermId,
+//                Amount = expense.Amount,
+//                DiscountTypeId = expense.DiscountTypeId,
+//                DiscountPercent = expense.DiscountPercent,
+//                DiscountAmount = expense.DiscountAmount,
+//                Notes = expense.Notes,
+//                Description = expense.Description,
+//                TaxId = expense.TaxId,
+//            };
+
+//            result.IsOk = true;
+//            result.ErrorMessage = string.Empty;
+//            result.Row = row;
+//        }
+//        catch (Exception ex)
+//        {
+//            result.IsOk = false;
+//            result.ErrorMessage = ex.Message;
+//        }
+
+//        return result;
+//    }
+
+//    public async Task<List<ExpenseFetchAttachment>> PostAttachmentAsync(List<uploadreturn> filedata, CancellationToken cancellationToken)
+//    {
+//        List<ExpenseAttachment> ExpenseAttachmentList = new List<ExpenseAttachment>();
+//        List<ExpenseFetchAttachment> ExpenseFetchAttachmentList = new List<ExpenseFetchAttachment>();
+
+//        if (filedata.Count > 0)
+//        {
+//            foreach (uploadreturn item in filedata)
+//            {
+//                ExpenseAttachmentList.Add(new ExpenseAttachment
+//                {
+//                    FileName = item.FileName,
+//                    FileUrl = item.FileUrl,
+//                    Extension = item.Extension,
+//                    FileSize = item.FileSize,
+//                    TransId = item.TransId,
+//                });
+//                ExpenseFetchAttachmentList.Add(new ExpenseFetchAttachment
+//                {
+//                    FileName = item.FileName,
+//                    FileUrl = item.FileUrl,
+//                    Extension = item.Extension,
+//                    FileSize = item.FileSize,
+//                    TransId = item.TransId,
+//                });
+//            }
+
+//            await _context.ExpenseAttachment.AddRangeAsync(ExpenseAttachmentList, cancellationToken);
+//            await _context.SaveChangesAsync(cancellationToken);
+//        }
+
+//        return ExpenseFetchAttachmentList;
+//    }
+
+//    public async Task<List<ExpenseFetchTag>> PostTagAsync(List<ExpenseInsertTag> filedata, int TransId, CancellationToken cancellationToken)
+//    {
+//        List<ExpenseTag> ExpenseTag = new List<ExpenseTag>();
+//        List<ExpenseFetchTag> ExpenseFetchTag = new List<ExpenseFetchTag>();
+
+//        if (filedata.Count > 0)
+//        {
+//            foreach (ExpenseInsertTag item in filedata)
+//            {
+//                ExpenseTag.Add(new ExpenseTag
+//                {
+//                    TagId = item.TagId,
+//                    TransId = TransId
+//                });
+//                ExpenseFetchTag.Add(new ExpenseFetchTag
+//                {
+//                    TagId = item.TagId,
+//                    TransId = TransId
+//                });
+//            }
+
+//            await _context.ExpenseTag.AddRangeAsync(ExpenseTag, cancellationToken);
+//            await _context.SaveChangesAsync(cancellationToken);
+//        }
+
+//        return ExpenseFetchTag;
+//    }
+
+
+//}
+
+// pembatas
+
+//public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowResponse<ExpenseFetchDto>>
+//{
+//    private readonly FinContext _context;
+//    private readonly ICurrentUser _currentUser;
+
+//    public ExpenseInsertHandler(FinContext db, IWebHostEnvironment environment, ICurrentUser currentUser)
+//    {
+//        _context = db;
+//        _currentUser = currentUser;
+//    }
+
+//    public async Task<RowResponse<ExpenseFetchDto>> Handle(ExpenseInsertDto request, int TransId, CancellationToken cancellationToken)
+//    {
+//        var result = new RowResponse<ExpenseFetchDto>();
+//        int expenseIdResult;
+//        DateTime TransDate = TimeZoneInfo.ConvertTimeToUtc(request.TransDate);
+
+//        var expense = new Expense()
+//        {
+//            TransNum = request.TransNum,
+//            TransDate = TransDate,
+//            ContactId = request.ContactId,
+//            PaymentMethodId = request.PaymentMethodId,
+//            PaymentTermId = request.PaymentTermId,
+//            Amount = request.Amount,
+//            DiscountTypeId = request.DiscountTypeId,
+//            DiscountPercent = request.DiscountPercent,
+//            DiscountAmount = request.DiscountAmount,
+//            Notes = request.Notes,
+//            Description = request.Description,
+//            TaxId = request.TaxId,
+//        };
+//        List<Tag> Tag = new List<Tag>();
+//        List<TagFetchDto> TagFetchDto = new List<TagFetchDto>();
+//        List<ExpenseTag> ExpenseTag = new List<ExpenseTag>();
+
+
+//        try
+//        {
+//            await _context.Expense.AddAsync(expense, cancellationToken);
+//            await _context.SaveChangesAsync(cancellationToken);
+//            //expenseIdResult = expense.Id;
+//            if (request.TagList.Count > 0)
+//            {
+//                foreach (TagFetchDto item in request.TagList)
+//                {
+//                    ExpenseTag.Add(new ExpenseTag
+//                    {
+//                        TagId = item.Id,
+//                        TransId = TransId,
+//                    });
+//                    //ContactAddressFetchDto.Add(new ContactAddressFetchDto
+//                    TagFetchDto.Add(new TagFetchDto
+//                    {
+//                        Id = item.Id,
+//                        //TransId = TransId,
+//                    });
+
+//                }
+
+//                await _context.ExpenseTag.AddRangeAsync(ExpenseTag, cancellationToken);
+//            }
+//            if (ExpenseTag.Count > 0)
+//            {
+//                await _context.SaveChangesAsync(cancellationToken);
+//            }
+//            var row = new ExpenseFetchDto()
+//            {
+//                Id = expense.Id,
+//                TransNum = expense.TransNum,
+//                TransDate = expense.TransDate,
+//                ContactId = expense.ContactId,
+//                PaymentMethodId = expense.PaymentMethodId,
+//                PaymentTermId = expense.PaymentTermId,
+//                Amount = expense.Amount,
+//                DiscountTypeId = expense.DiscountTypeId,
+//                DiscountPercent = expense.DiscountPercent,
+//                DiscountAmount = expense.DiscountAmount,
+//                Notes = expense.Notes,
+//                Description = expense.Description,
+
+//                //TagList = TagFetchDto,
+//            };
+
+//            result.IsOk = true;
+//            result.ErrorMessage = string.Empty;
+//            result.Row = row;
+//        }
+//        catch (Exception ex)
+//        {
+//            result.IsOk = false;
+//            result.ErrorMessage = ex.Message;
+//        }
+
+//        return result;
+//    }
+
+
+//}
+
+// pembatas 
 public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowResponse<ExpenseFetchDto>>
 {
     private readonly FinContext _context;
+    private readonly ICurrentUser _currentUser;
 
-    public ExpenseInsertHandler(FinContext db)
+    public ExpenseInsertHandler(FinContext db, IWebHostEnvironment environment, ICurrentUser currentUser)
     {
         _context = db;
+        _currentUser = currentUser;
     }
 
-    public async Task<RowResponse<ExpenseFetchDto>> Handle(ExpenseInsertDto request, CancellationToken cancellationToken)
+    public async Task<RowResponse<ExpenseFetchDto>> Handle(ExpenseInsertDto request,  CancellationToken cancellationToken)
     {
         var result = new RowResponse<ExpenseFetchDto>();
+        int transIdResult;
+        DateTime TransDate = TimeZoneInfo.ConvertTimeToUtc(request.TransDate);
 
         var expense = new Expense()
         {
             TransNum = request.TransNum,
-            TransDate = request.TransDate,
+            TransDate = TransDate,
             ContactId = request.ContactId,
             PaymentMethodId = request.PaymentMethodId,
             PaymentTermId = request.PaymentTermId,
@@ -31,12 +276,18 @@ public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowRespons
             Notes = request.Notes,
             Description = request.Description,
             TaxId = request.TaxId,
+
         };
 
         try
         {
             await _context.Expense.AddAsync(expense, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
+            transIdResult = expense.Id;
+            UploadAttachmentService service = new UploadAttachmentService();
+            List<uploadreturn> filedata = await service.UploadAttachmentAsync(request.AttachmentFile, _currentUser.TenantId, transIdResult);
+            List<ExpenseFetchAttachment> returnfile = await PostAttachmentAsync(filedata, cancellationToken);
+            List<ExpenseFetchTag> TagListResult = await PostTagAsync(request.TagList, transIdResult, cancellationToken);
 
             var row = new ExpenseFetchDto()
             {
@@ -67,6 +318,67 @@ public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowRespons
         return result;
     }
 
+    public async Task<List<ExpenseFetchAttachment>> PostAttachmentAsync(List<uploadreturn> filedata, CancellationToken cancellationToken)
+    {
+        List<ExpenseAttachment> ExpenseAttachmentList = new List<ExpenseAttachment>();
+        List<ExpenseFetchAttachment> ExpenseFetchAttachmentList = new List<ExpenseFetchAttachment>();
+
+        if (filedata.Count > 0)
+        {
+            foreach (uploadreturn item in filedata)
+            {
+                ExpenseAttachmentList.Add(new ExpenseAttachment
+                {
+                    FileName = item.FileName,
+                    FileUrl = item.FileUrl,
+                    Extension = item.Extension,
+                    FileSize = item.FileSize,
+                    TransId = item.TransId,
+                });
+                ExpenseFetchAttachmentList.Add(new ExpenseFetchAttachment
+                {
+                    FileName = item.FileName,
+                    FileUrl = item.FileUrl,
+                    Extension = item.Extension,
+                    FileSize = item.FileSize,
+                    TransId = item.TransId,
+                });
+            }
+
+            await _context.ExpenseAttachment.AddRangeAsync(ExpenseAttachmentList, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        return ExpenseFetchAttachmentList;
+    }
+
+    public async Task<List<ExpenseFetchTag>> PostTagAsync(List<ExpenseInsertTag> filedata, int TransId, CancellationToken cancellationToken)
+    {
+        List<ExpenseTag> ExpenseTag = new List<ExpenseTag>();
+        List<ExpenseFetchTag> ExpenseFetchTag = new List<ExpenseFetchTag>();
+
+        if (filedata.Count > 0)
+        {
+            foreach (ExpenseInsertTag item in filedata)
+            {
+                ExpenseTag.Add(new ExpenseTag
+                {
+                    TagId = item.TagId,
+                    TransId = TransId
+                });
+                ExpenseFetchTag.Add(new ExpenseFetchTag
+                {
+                    TagId = item.TagId,
+                    TransId = TransId
+                });
+            }
+
+            await _context.ExpenseTag.AddRangeAsync(ExpenseTag, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        return ExpenseFetchTag;
+    }
 
 
 }
@@ -74,7 +386,7 @@ public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowRespons
 public class ExpenseInsertDto : IRequest<RowResponse<ExpenseFetchDto>>
 {
     public string TransNum { get; set; } = string.Empty;
-    public DateTime? TransDate { get; set; }
+    public DateTime TransDate { get; set; }
     public int ContactId { get; set; } = 0;
     public int PaymentMethodId { get; set; } = 0;
     public int PaymentTermId { get; set; } = 0;
@@ -85,4 +397,15 @@ public class ExpenseInsertDto : IRequest<RowResponse<ExpenseFetchDto>>
     public string Notes { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
+    public ICollection<IFormFile> AttachmentFile { get; set; }
+    public List<ExpenseInsertTag> TagList { get; set; }
+    //public List<TagInsertDto> TagList { get; set; } //= new List<ExpenseInsertTag>();
+    //public List<TagFetchDto> TagList { get; set; } //= new List<ExpenseInsertTag>();    
+    //public List<ExpenseTag> TagList { get; set; } //= new List<ExpenseInsertTag>();
 }
+
+public class ExpenseInsertTag
+{
+    public int TagId { get; set; } = 0;
+}
+

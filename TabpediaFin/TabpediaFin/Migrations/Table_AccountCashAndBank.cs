@@ -3,7 +3,7 @@
 namespace TabpediaFin.Migrations;
 
 [Migration(202212051531)]
-public class Table_Account : Migration
+public class Table_AccountCashAndbank : Migration
 {
     public override void Down()
     {
@@ -22,9 +22,13 @@ public class Table_Account : Migration
             .WithColumn("TaxId").AsInt32().Nullable()
             .WithColumn("BankId").AsInt32().Nullable()
             .WithColumn("Description").AsString(250).Nullable()
+            .WithColumn("Balance").AsDecimal(18, 2).NotNullable().WithDefaultValue(0)
             .WithColumn("CreatedUid").AsInt32().NotNullable()
             .WithColumn("CreatedUtc").AsDateTime().NotNullable()
             .WithColumn("UpdatedUid").AsInt32().Nullable()
             .WithColumn("UpdatedUtc").AsDateTime().Nullable();
+
+        //Alter.Table("AccountCashAndBank")
+        //    .AddColumn("Balance").AsDecimal(18, 2).NotNullable().WithDefaultValue(0);
     }
 }
