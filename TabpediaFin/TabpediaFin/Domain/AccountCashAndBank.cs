@@ -9,4 +9,5 @@ public class AccountCashAndBank : BaseEntity
     public int TaxId { get; set; } = 0;
     public int BankId { get; set; } = 0;
     public string Description { get; set; } = string.Empty;
+    public Int64 Balance { get; set; } = 0;
 }

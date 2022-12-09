@@ -31,7 +31,18 @@ public static class SqlHelper
     }
 
 
-    public static string GenerateOrderBy(string sort, bool isDesc)
+    public static string GenerateOrderBy(string sort, bool isDesc = false, string defaultSort = @" ""Name"" ")
+    {
+        if (string.IsNullOrWhiteSpace(sort)) 
+        {
+            return defaultSort;
+        }
+
+        return GenerateOrderBy(sort, isDesc);
+    }
+
+
+    private static string GenerateOrderBy(string sort, bool isDesc)
     {
         if (string.IsNullOrWhiteSpace(sort)) return string.Empty;
         var colname = sort.ToPascalCase();

@@ -1,4 +1,4 @@
-﻿namespace TabpediaFin.Domain;
+﻿namespace TabpediaFin.Domain.Expense;
 
 public class Expense : BaseEntity
 {

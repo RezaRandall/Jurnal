@@ -1,44 +1,45 @@
-﻿
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using TabpediaFin.Handler.ExpenseHandler;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using TabpediaFin.Handler.SendMoneyHandler;
 
 namespace TabpediaFin.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ExpensesController : ApiControllerBase
+public class SendMoneyController : ApiControllerBase
 {
     private readonly IMediator _mediator;
-    public ExpensesController(IMediator mediator)
+    public SendMoneyController(IMediator mediator)
     {
         _mediator = mediator;
     }
 
-    [HttpPost("/Expense/list")]
+    [HttpPost("/SendMoney/list")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<ExpenseListDto> request)
+    public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<SendMoneyListDto> request)
     {
         return Result(await _mediator.Send(request));
     }
 
-    [HttpGet("/Expense{id}")]
+    [HttpGet("/SendMoney{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
-        return Result(await _mediator.Send(new FetchByIdRequestDto<ExpenseFetchDto>(id)));
+        return Result(await _mediator.Send(new FetchByIdRequestDto<SendMoneyFetchDto>(id)));
     }
 
-    [HttpPost("/Expense/create")]
+    [HttpPost("/SendMoney/create")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> Insert([FromForm] ExpenseInsertDto command)
+    public async Task<IActionResult> Insert([FromForm] SendMoneyInsertDto command)
     {
         return Result(await _mediator.Send(command));
     }
 
-    [HttpPut("/Expense/update")]
+    [HttpPut("/SendMoney/update")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> Update([FromBody] ExpenseUpdateDto command)
+    public async Task<IActionResult> Update([FromBody] SendMoneyUpdateDto command)
     {
         return Result(await _mediator.Send(command));
     }
@@ -47,9 +48,10 @@ public class ExpensesController : ApiControllerBase
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Delete(int id)
     {
-
-        ExpenseDeleteDto command = new ExpenseDeleteDto();
+        SendMoneyDeleteDto command = new SendMoneyDeleteDto();
         command.Id = id;
         return Result(await _mediator.Send(command));
     }
+
+
 }

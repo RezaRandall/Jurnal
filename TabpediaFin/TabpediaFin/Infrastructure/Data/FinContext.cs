@@ -1,5 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TabpediaFin.Domain;
+using TabpediaFin.Domain.Expense;
+using TabpediaFin.Domain.ReceiveMoney;
+using TabpediaFin.Domain.SendMoney;
+using TabpediaFin.Domain.TransferMoney;
 
 namespace TabpediaFin.Infrastructure.Data;
 
@@ -27,8 +31,19 @@ public class FinContext : DbContext
     public DbSet<ItemItemCategory> ItemItemCategory { get; set; }
     public DbSet<PaymentTerms> PaymentTerm { get; set; }
     public DbSet<Expense> Expense { get; set; }
+    public DbSet<ExpenseTag> ExpenseTag { get; set; }
+    public DbSet<ExpenseAttachment> ExpenseAttachment { get; set; }
     public DbSet<AccountCashAndBank> AccountCashAndBank { get; set; }
     public DbSet<ItemCategory> ItemCategory { get; set; }
+    public DbSet<TransferMoney> TransferMoney { get; set; }
+    public DbSet<TransferMoneyAttachment> TransferMoneyAttachment { get; set; }
+    public DbSet<TransferMoneyTag> TransferMoneyTag { get; set; }
+    public DbSet<ReceiveMoney> ReceiveMoney { get; set; }
+    public DbSet<ReceiveMoneyAttachment> ReceiveMoneyAttachment { get; set; }
+    public DbSet<ReceiveMoneyTag> ReceiveMoneyTag { get; set; }
+    public DbSet<SendMoney> SendMoney { get; set; }
+    public DbSet<SendMoneyAttachment> SendMoneyAttachment { get; set; }
+    public DbSet<SendMoneyTag> SendMoneyTag { get; set; }
     public DbSet<Tag> Tag { get; set; }
     public DbSet<Tax> Tax { get; set; }
     public DbSet<ContactAddressType> ContactAddressType { get; set; }
