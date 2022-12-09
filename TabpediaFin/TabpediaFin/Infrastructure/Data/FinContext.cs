@@ -42,7 +42,18 @@ public class FinContext : DbContext
     public DbSet<PurchaseRequestTag> PurchaseRequestTag { get; set; }
     public DbSet<PurchaseRequestAttachment> PurchaseRequestAttachment { get; set; }
     public DbSet<PurchaseRequestItem> PurchaseRequestItem { get; set; }
-    
+    public DbSet<PurchaseOffer> PurchaseOffer { get; set; }
+    public DbSet<PurchaseOfferTag> PurchaseOfferTag { get; set; }
+    public DbSet<PurchaseOfferAttachment> PurchaseOfferAttachment { get; set; }
+    public DbSet<PurchaseOfferItem> PurchaseOfferItem { get; set; }
+    public DbSet<PurchaseOrder> PurchaseOrder { get; set; }
+    public DbSet<PurchaseOrderTag> PurchaseOrderTag { get; set; }
+    public DbSet<PurchaseOrderAttachment> PurchaseOrderAttachment { get; set; }
+    public DbSet<PurchaseOrderItem> PurchaseOrderItem { get; set; }
+    public DbSet<PurchaseBilling> PurchaseBilling { get; set; }
+    public DbSet<PurchaseBillingTag> PurchaseBillingTag { get; set; }
+    public DbSet<PurchaseBillingAttachment> PurchaseBillingAttachment { get; set; }
+    public DbSet<PurchaseBillingItem> PurchaseBillingItem { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

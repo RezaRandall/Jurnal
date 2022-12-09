@@ -13,5 +13,10 @@ public class SelectListCacheNames
     public const string Tax = "_Tax";
     public const string Warehouse = "_Warehouse";
     public const string PurchaseRequest = "_PurchaseRequest";
+    public const string PurchaseOffer = "_PurchaseOffer";
+    public const string PurchaseOrder = "_PurchaseOrder";
+    public const string PurchaseBilling = "_PurchaseBilling";
+   
+
 
 }

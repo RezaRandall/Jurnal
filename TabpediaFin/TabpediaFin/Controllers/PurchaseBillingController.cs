@@ -6,20 +6,20 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace TabpediaFin.Controllers
 {
-    [Route("api/PurchaseRequest")]
+    [Route("api/purchasebilling")]
     [ApiController]
-    public class PurchaseRequestController : ApiControllerBase
+    public class PurchaseBillingController : ApiControllerBase
     {
         private readonly IMediator _mediator;
         
-        public PurchaseRequestController(IMediator mediator, ICurrentUser currentUser)
+        public PurchaseBillingController(IMediator mediator, ICurrentUser currentUser)
         {
             _mediator = mediator;
         }
 
         [HttpPost("list")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetAll([FromBody] FetchPagedListRequestDto<PurchaseRequestListDto> request)
+        public async Task<IActionResult> GetAll([FromBody] FetchPagedListRequestDto<PurchaseBillingListDto> request)
         {
             return Result(await _mediator.Send(request));
         }
@@ -28,19 +28,19 @@ namespace TabpediaFin.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetTrans(int id)
         {
-            return Result(await _mediator.Send(new FetchByIdRequestDto<PurchaseRequestFetchDto>(id)));
+            return Result(await _mediator.Send(new FetchByIdRequestDto<PurchaseBillingFetchDto>(id)));
         }
 
-        [HttpPost]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> InsertRequestrPurchase([FromBody] PurchaseRequestInsertDto command)
-        {
-            return Result(await _mediator.Send(command));
-        }
+        //[HttpPost]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        //public async Task<IActionResult> InsertBillingPurchase([FromBody] PurchaseBillingInsertDto command)
+        //{
+        //    return Result(await _mediator.Send(command));
+        //}
 
         [HttpPut]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> Update([FromBody] PurchaseRequestUpdateDto command)
+        public async Task<IActionResult> Update([FromBody] PurchaseBillingUpdateDto command)
         {
             return Result(await _mediator.Send(command));
         }
@@ -48,13 +48,13 @@ namespace TabpediaFin.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Delete(int id)
         {
-            return Result(await _mediator.Send(new DeleteByIdRequestDto<PurchaseRequestFetchDto>(id)));
+            return Result(await _mediator.Send(new DeleteByIdRequestDto<PurchaseBillingFetchDto>(id)));
         }
         [HttpPost("CloseTransaction/{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Close(int id)
         {
-            PurchaseRequestCloseDto command = new PurchaseRequestCloseDto();
+            PurchaseBillingCloseDto command = new PurchaseBillingCloseDto();
             command.Id = id;
             return Result(await _mediator.Send(command));
         }

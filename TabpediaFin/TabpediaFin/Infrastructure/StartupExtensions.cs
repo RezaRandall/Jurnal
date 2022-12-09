@@ -35,6 +35,10 @@ public static class StartupExtensions
         services.AddTransient<ITaxCacheRemover, TaxCacheRemover>();
         services.AddTransient<IWarehouseCacheRemover, WarehouseCacheRemover>();
         services.AddTransient<IPurchaseRequestCacheRemover, PurchaseRequestCacheRemover>();
+        services.AddTransient<IPurchaseOfferCacheRemover, PurchaseOfferCacheRemover>();
+        services.AddTransient<IPurchaseOrderCacheRemover, PurchaseOrderCacheRemover>();
+        services.AddTransient<IPurchaseBillingCacheRemover, PurchaseBillingCacheRemover>();
+
         return services;
     }
 

@@ -1,24 +1,24 @@
 ﻿using TabpediaFin.Handler.UploadAttachmentHandler;
-namespace TabpediaFin.Handler.PurchaseRequestHandler
+namespace TabpediaFin.Handler.PurchaseBillingHandler
 {
-    public class PurchaseRequestInsertHandler : IRequestHandler<PurchaseRequestInsertDto, RowResponse<PurchaseRequestFetchDto>>
+    public class PurchaseBillingInsertHandler : IRequestHandler<PurchaseBillingInsertDto, RowResponse<PurchaseBillingFetchDto>>
     {
         private readonly FinContext _context;
         private readonly ICurrentUser _currentUser;
 
-        public PurchaseRequestInsertHandler(FinContext db, IWebHostEnvironment environment, ICurrentUser currentUser)
+        public PurchaseBillingInsertHandler(FinContext db, IWebHostEnvironment environment, ICurrentUser currentUser)
         {
             _context = db;
             _currentUser = currentUser;
         }
 
-        public async Task<RowResponse<PurchaseRequestFetchDto>> Handle(PurchaseRequestInsertDto request, CancellationToken cancellationToken)
+        public async Task<RowResponse<PurchaseBillingFetchDto>> Handle(PurchaseBillingInsertDto request, CancellationToken cancellationToken)
         {
-            var result = new RowResponse<PurchaseRequestFetchDto>();
+            var result = new RowResponse<PurchaseBillingFetchDto>();
             int transidresult;
             DateTime TransDate =  TimeZoneInfo.ConvertTimeToUtc(request.TransDate);
             DateTime DueDate = TimeZoneInfo.ConvertTimeToUtc(request.DueDate);
-            var PurchaseRequest = new PurchaseRequest()
+            var PurchaseBilling = new PurchaseBilling()
             {
                 StaffId = request.StaffId,
                 VendorId = request.VendorId,
@@ -34,26 +34,26 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
 
             try
             {
-                await _context.PurchaseRequest.AddAsync(PurchaseRequest, cancellationToken);
+                await _context.PurchaseBilling.AddAsync(PurchaseBilling, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
-                transidresult = PurchaseRequest.Id;
+                transidresult = PurchaseBilling.Id;
 
-                List<PurchaseRequestFetchAttachment> returnfile = await PostAttachmentAsync(request.AttachmentFile, transidresult, cancellationToken);
-                List<PurchaseRequestFetchTag> TagListResult = await PostTagAsync(request.TagList, transidresult, cancellationToken);
-                List<PurchaseRequestFetchItem> ItemListResult = await PostItemAsync(request.ItemList, transidresult, cancellationToken);
+                List<PurchaseBillingFetchAttachment> returnfile = await PostAttachmentAsync(request.AttachmentFile, transidresult, cancellationToken);
+                List<PurchaseBillingFetchTag> TagListResult = await PostTagAsync(request.TagList, transidresult, cancellationToken);
+                List<PurchaseBillingFetchItem> ItemListResult = await PostItemAsync(request.ItemList, transidresult, cancellationToken);
 
-                var row = new PurchaseRequestFetchDto()
+                var row = new PurchaseBillingFetchDto()
                 {
-                    Id = PurchaseRequest.Id,
-                    StaffId = PurchaseRequest.StaffId,
-                    VendorId = PurchaseRequest.VendorId,
-                    TransDate = PurchaseRequest.TransDate,
-                    DueDate = PurchaseRequest.DueDate,
-                    TransCode = PurchaseRequest.TransCode,
-                    BudgetYear = PurchaseRequest.BudgetYear,
-                    UrgentLevel = PurchaseRequest.UrgentLevel,
-                    Memo = PurchaseRequest.Memo,
-                    Notes = PurchaseRequest.Notes,
+                    Id = PurchaseBilling.Id,
+                    StaffId = PurchaseBilling.StaffId,
+                    VendorId = PurchaseBilling.VendorId,
+                    TransDate = PurchaseBilling.TransDate,
+                    DueDate = PurchaseBilling.DueDate,
+                    TransCode = PurchaseBilling.TransCode,
+                    BudgetYear = PurchaseBilling.BudgetYear,
+                    UrgentLevel = PurchaseBilling.UrgentLevel,
+                    Memo = PurchaseBilling.Memo,
+                    Notes = PurchaseBilling.Notes,
                     AttachmentList = returnfile,
                     TagList = TagListResult,
                     ItemList = ItemListResult
@@ -72,16 +72,16 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
             return result;
         }
 
-        public async Task<List<PurchaseRequestFetchAttachment>> PostAttachmentAsync(List<PurchestRequestAttahmentItem> filedata, int TransId, CancellationToken cancellationToken)
+        public async Task<List<PurchaseBillingFetchAttachment>> PostAttachmentAsync(List<PurchestRequestAttahmentItem> filedata, int TransId, CancellationToken cancellationToken)
         {
-            List<PurchaseRequestAttachment> PurchaseRequestAttachmentList = new List<PurchaseRequestAttachment>();
-            List<PurchaseRequestFetchAttachment> PurchaseRequestFetchAttachmentList = new List<PurchaseRequestFetchAttachment>();
+            List<PurchaseBillingAttachment> PurchaseBillingAttachmentList = new List<PurchaseBillingAttachment>();
+            List<PurchaseBillingFetchAttachment> PurchaseBillingFetchAttachmentList = new List<PurchaseBillingFetchAttachment>();
 
             if (filedata.Count > 0)
             {
                 foreach (PurchestRequestAttahmentItem item in filedata)
                 {
-                    PurchaseRequestAttachmentList.Add(new PurchaseRequestAttachment
+                    PurchaseBillingAttachmentList.Add(new PurchaseBillingAttachment
                     {
                         FileName = item.FileName,
                         FileUrl = item.FileUrl,
@@ -89,7 +89,7 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
                         FileSize = item.FileSize,
                         TransId = TransId,
                     });
-                    PurchaseRequestFetchAttachmentList.Add(new PurchaseRequestFetchAttachment
+                    PurchaseBillingFetchAttachmentList.Add(new PurchaseBillingFetchAttachment
                     {
                         FileName = item.FileName,
                         FileUrl = item.FileUrl,
@@ -99,49 +99,49 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
                     });
                 }
 
-                await _context.PurchaseRequestAttachment.AddRangeAsync(PurchaseRequestAttachmentList, cancellationToken);
+                await _context.PurchaseBillingAttachment.AddRangeAsync(PurchaseBillingAttachmentList, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
             }
 
-            return PurchaseRequestFetchAttachmentList;
+            return PurchaseBillingFetchAttachmentList;
         }
-        public async Task<List<PurchaseRequestFetchTag>> PostTagAsync(List<PurchaseRequestInsertTag> filedata, int TransId, CancellationToken cancellationToken)
+        public async Task<List<PurchaseBillingFetchTag>> PostTagAsync(List<PurchaseBillingInsertTag> filedata, int TransId, CancellationToken cancellationToken)
         {
-            List<PurchaseRequestTag> PurchaseRequestTag = new List<PurchaseRequestTag>();
-            List<PurchaseRequestFetchTag> PurchaseRequestFetchTag = new List<PurchaseRequestFetchTag>();
+            List<PurchaseBillingTag> PurchaseBillingTag = new List<PurchaseBillingTag>();
+            List<PurchaseBillingFetchTag> PurchaseBillingFetchTag = new List<PurchaseBillingFetchTag>();
 
             if (filedata.Count > 0)
             {
-                foreach (PurchaseRequestInsertTag item in filedata)
+                foreach (PurchaseBillingInsertTag item in filedata)
                 {
-                    PurchaseRequestTag.Add(new PurchaseRequestTag
+                    PurchaseBillingTag.Add(new PurchaseBillingTag
                     {
                         TagId = item.TagId,
                         TransId = TransId
                     });
-                    PurchaseRequestFetchTag.Add(new PurchaseRequestFetchTag
+                    PurchaseBillingFetchTag.Add(new PurchaseBillingFetchTag
                     {
                         TagId = item.TagId,
                         TransId = TransId
                     });
                 }
 
-                await _context.PurchaseRequestTag.AddRangeAsync(PurchaseRequestTag, cancellationToken);
+                await _context.PurchaseBillingTag.AddRangeAsync(PurchaseBillingTag, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
             }
 
-            return PurchaseRequestFetchTag;
+            return PurchaseBillingFetchTag;
         }
-        public async Task<List<PurchaseRequestFetchItem>> PostItemAsync(List<PurchaseRequestInsertItem> filedata, int TransId, CancellationToken cancellationToken)
+        public async Task<List<PurchaseBillingFetchItem>> PostItemAsync(List<PurchaseBillingInsertItem> filedata, int TransId, CancellationToken cancellationToken)
         {
-            List<PurchaseRequestItem> PurchaseRequestItem = new List<PurchaseRequestItem>();
-            List<PurchaseRequestFetchItem> PurchaseRequestFetchItem = new List<PurchaseRequestFetchItem>();
+            List<PurchaseBillingItem> PurchaseBillingItem = new List<PurchaseBillingItem>();
+            List<PurchaseBillingFetchItem> PurchaseBillingFetchItem = new List<PurchaseBillingFetchItem>();
 
             if (filedata.Count > 0)
             {
-                foreach (PurchaseRequestInsertItem item in filedata)
+                foreach (PurchaseBillingInsertItem item in filedata)
                 {
-                    PurchaseRequestItem.Add(new PurchaseRequestItem
+                    PurchaseBillingItem.Add(new PurchaseBillingItem
                     {
                         ItemId = item.ItemId,
                         Quantity = item.Quantity,
@@ -149,7 +149,7 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
                         TransId = TransId
 
                     });
-                    PurchaseRequestFetchItem.Add(new PurchaseRequestFetchItem
+                    PurchaseBillingFetchItem.Add(new PurchaseBillingFetchItem
                     {
                         ItemId = item.ItemId,
                         Quantity = item.Quantity,
@@ -158,15 +158,15 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
                     });
                 }
 
-                await _context.PurchaseRequestItem.AddRangeAsync(PurchaseRequestItem, cancellationToken);
+                await _context.PurchaseBillingItem.AddRangeAsync(PurchaseBillingItem, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
             }
 
-            return PurchaseRequestFetchItem;
+            return PurchaseBillingFetchItem;
         }
     }
 
-    public class PurchaseRequestInsertDto : IRequest<RowResponse<PurchaseRequestFetchDto>>
+    public class PurchaseBillingInsertDto : IRequest<RowResponse<PurchaseBillingFetchDto>>
     {
         public int StaffId { get; set; }
         public int VendorId { get; set; }
@@ -178,17 +178,19 @@ namespace TabpediaFin.Handler.PurchaseRequestHandler
         public int Status { get; set; }
         public string Memo { get; set; } = string.Empty;
         public string Notes { get; set; } = string.Empty;
+        public int DiscountType { get; set; }
+        public double DiscountAmount { get; set; }
         public List<PurchestRequestAttahmentItem> AttachmentFile { get; set; }
-        public List<PurchaseRequestInsertTag> TagList { get; set; }
-        public List<PurchaseRequestInsertItem> ItemList { get; set; }
+        public List<PurchaseBillingInsertTag> TagList { get; set; }
+        public List<PurchaseBillingInsertItem> ItemList { get; set; }
     }
 
-    public class PurchaseRequestInsertTag
+    public class PurchaseBillingInsertTag
     {
         public int TagId { get; set; }
     }
 
-    public class PurchaseRequestInsertItem
+    public class PurchaseBillingInsertItem
     {
         public int ItemId { get; set; }
         public int Quantity { get; set; }
