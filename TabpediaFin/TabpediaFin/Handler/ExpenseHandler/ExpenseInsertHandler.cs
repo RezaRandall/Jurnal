@@ -284,9 +284,9 @@ public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowRespons
             await _context.Expense.AddAsync(expense, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
             transIdResult = expense.Id;
-            UploadAttachmentService service = new UploadAttachmentService();
-            List<uploadreturn> filedata = await service.UploadAttachmentAsync(request.AttachmentFile, _currentUser.TenantId, transIdResult);
-            List<ExpenseFetchAttachment> returnfile = await PostAttachmentAsync(filedata, cancellationToken);
+            // UploadAttachmentService service = new UploadAttachmentService();
+            //List<uploadreturn> filedata = await service.UploadAttachmentAsync(request.AttachmentFile, _currentUser.TenantId, transIdResult);
+            //List<ExpenseFetchAttachment> returnfile = await PostAttachmentAsync(filedata, cancellationToken);
             List<ExpenseFetchTag> TagListResult = await PostTagAsync(request.TagList, transIdResult, cancellationToken);
 
             var row = new ExpenseFetchDto()
@@ -318,39 +318,39 @@ public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowRespons
         return result;
     }
 
-    public async Task<List<ExpenseFetchAttachment>> PostAttachmentAsync(List<uploadreturn> filedata, CancellationToken cancellationToken)
-    {
-        List<ExpenseAttachment> ExpenseAttachmentList = new List<ExpenseAttachment>();
-        List<ExpenseFetchAttachment> ExpenseFetchAttachmentList = new List<ExpenseFetchAttachment>();
+    //public async Task<List<ExpenseFetchAttachment>> PostAttachmentAsync(List<uploadreturn> filedata, CancellationToken cancellationToken)
+    //{
+    //    List<ExpenseAttachment> ExpenseAttachmentList = new List<ExpenseAttachment>();
+    //    List<ExpenseFetchAttachment> ExpenseFetchAttachmentList = new List<ExpenseFetchAttachment>();
 
-        if (filedata.Count > 0)
-        {
-            foreach (uploadreturn item in filedata)
-            {
-                ExpenseAttachmentList.Add(new ExpenseAttachment
-                {
-                    FileName = item.FileName,
-                    FileUrl = item.FileUrl,
-                    Extension = item.Extension,
-                    FileSize = item.FileSize,
-                    TransId = item.TransId,
-                });
-                ExpenseFetchAttachmentList.Add(new ExpenseFetchAttachment
-                {
-                    FileName = item.FileName,
-                    FileUrl = item.FileUrl,
-                    Extension = item.Extension,
-                    FileSize = item.FileSize,
-                    TransId = item.TransId,
-                });
-            }
+    //    if (filedata.Count > 0)
+    //    {
+    //        foreach (uploadreturn item in filedata)
+    //        {
+    //            ExpenseAttachmentList.Add(new ExpenseAttachment
+    //            {
+    //                FileName = item.FileName,
+    //                FileUrl = item.FileUrl,
+    //                Extension = item.Extension,
+    //                FileSize = item.FileSize,
+    //                TransId = item.TransId,
+    //            });
+    //            ExpenseFetchAttachmentList.Add(new ExpenseFetchAttachment
+    //            {
+    //                FileName = item.FileName,
+    //                FileUrl = item.FileUrl,
+    //                Extension = item.Extension,
+    //                FileSize = item.FileSize,
+    //                TransId = item.TransId,
+    //            });
+    //        }
 
-            await _context.ExpenseAttachment.AddRangeAsync(ExpenseAttachmentList, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
+    //        await _context.ExpenseAttachment.AddRangeAsync(ExpenseAttachmentList, cancellationToken);
+    //        await _context.SaveChangesAsync(cancellationToken);
+    //    }
 
-        return ExpenseFetchAttachmentList;
-    }
+    //    return ExpenseFetchAttachmentList;
+    //}
 
     public async Task<List<ExpenseFetchTag>> PostTagAsync(List<ExpenseInsertTag> filedata, int TransId, CancellationToken cancellationToken)
     {
