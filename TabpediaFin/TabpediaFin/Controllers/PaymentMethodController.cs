@@ -32,6 +32,13 @@ public class PaymentMethodController : ApiControllerBase
     }
 
 
+    [HttpGet("view/{id}")]
+    public async Task<IActionResult> View(int id)
+    {
+        return Result(await _mediator.Send(new ViewByIdRequestDto<PaymentMethodDto>(id)));
+    }
+
+
     [HttpPost]
     public async Task<IActionResult> Insert([FromBody] PaymentMethodInsertDto command)
     {

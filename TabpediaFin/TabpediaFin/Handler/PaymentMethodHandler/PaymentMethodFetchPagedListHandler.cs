@@ -21,34 +21,21 @@ public class PaymentMethodFetchPagedListHandler : IFetchPagedListHandler<Payment
 
         try
         {
-            string sqlWhere = " WHERE (1=1) ";
-            var parameters = new DynamicParameters();
-
-            if (!string.IsNullOrWhiteSpace(request.Search))
-            {
-                sqlWhere += SqlHelper.GenerateWhere<PaymentMethodDto>();
-                parameters.Add("Search", $"%{request.Search.Trim().ToLowerInvariant()}%");
-            }
-
-            var orderby = SqlHelper.GenerateOrderBy(request.SortBy, request.SortDesc, @" ""Name"" ASC  ");
-
             using (var cn = _dbManager.CreateConnection())
             {
                 cn.Open();
 
-                var list = await cn.FetchListPagedAsync<PaymentMethodListDto>(pageNumber: request.PageNum
+                var q = await cn.FetchListPagedAsync<PaymentMethodListDto>(pageNumber: request.PageNum
                     , rowsPerPage: request.PageSize
-                    , conditions: sqlWhere
-                    , orderby: orderby
-                    , currentUser: _currentUser
-                    , parameters: parameters);
-
-                int recordCount = await cn.RecordCountAsync<PaymentMethodListDto>(sqlWhere, parameters);
+                    , search: request.Search
+                    , sortby: request.SortBy
+                    , sortdesc: request.SortDesc
+                    , currentUser: _currentUser);
 
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.List = list?.AsList() ?? new List<PaymentMethodListDto>();
-                result.RecordCount = recordCount;
+                result.List = q.List;
+                result.RecordCount = q.TotalRecord;
             }
         }
         catch (Exception ex)
