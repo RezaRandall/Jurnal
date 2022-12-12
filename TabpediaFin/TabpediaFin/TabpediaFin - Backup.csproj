@@ -8,21 +8,41 @@
 
   <ItemGroup>
     <Compile Remove="Handler\CashAndBank\**" />
+    <Compile Remove="Handler\ExpenseHandler\**" />
+    <Compile Remove="Handler\ReceiveMoneyHandler\**" />
+    <Compile Remove="Handler\SendMoneyHandler\**" />
+    <Compile Remove="Handler\TransferMoneyHandler\**" />
     <Compile Remove="Infrastructure\Cors\**" />
     <Content Remove="Handler\CashAndBank\**" />
+    <Content Remove="Handler\ExpenseHandler\**" />
+    <Content Remove="Handler\ReceiveMoneyHandler\**" />
+    <Content Remove="Handler\SendMoneyHandler\**" />
+    <Content Remove="Handler\TransferMoneyHandler\**" />
     <Content Remove="Infrastructure\Cors\**" />
     <EmbeddedResource Remove="Handler\CashAndBank\**" />
+    <EmbeddedResource Remove="Handler\ExpenseHandler\**" />
+    <EmbeddedResource Remove="Handler\ReceiveMoneyHandler\**" />
+    <EmbeddedResource Remove="Handler\SendMoneyHandler\**" />
+    <EmbeddedResource Remove="Handler\TransferMoneyHandler\**" />
     <EmbeddedResource Remove="Infrastructure\Cors\**" />
     <None Remove="Handler\CashAndBank\**" />
+    <None Remove="Handler\ExpenseHandler\**" />
+    <None Remove="Handler\ReceiveMoneyHandler\**" />
+    <None Remove="Handler\SendMoneyHandler\**" />
+    <None Remove="Handler\TransferMoneyHandler\**" />
     <None Remove="Infrastructure\Cors\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\AccountCashAndBankController.cs" />
+    <Compile Remove="Controllers\ExpensesController.cs" />
     <Compile Remove="Controllers\PurchaseBillingController.cs" />
     <Compile Remove="Controllers\PurchaseOfferController.cs" />
     <Compile Remove="Controllers\PurchaseOrderController.cs" />
     <Compile Remove="Controllers\PurchaseRequestController.cs" />
-    <Compile Remove="Migrations\Table_SalesDelivery.cs" />
+    <Compile Remove="Controllers\ReceiveMoneyController.cs" />
+    <Compile Remove="Controllers\SendMoneyController.cs" />
+    <Compile Remove="Controllers\TransferMoneyController.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -52,6 +72,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Handler\Auth\" />
     <Folder Include="UserUpload\" />
   </ItemGroup>
 
