@@ -16,7 +16,11 @@ public class SelectListCacheNames
     public const string PurchaseOffer = "_PurchaseOffer";
     public const string PurchaseOrder = "_PurchaseOrder";
     public const string PurchaseBilling = "_PurchaseBilling";
-   
+    public const string SalesOffer = "_SalesOffer";
+    public const string SalesOrder = "_SalesOrder";
+    public const string SalesBilling = "_SalesBilling";
+    
+
 
 
 }

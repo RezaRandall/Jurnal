@@ -16,28 +16,28 @@ public class UnitMeasuresController : ApiControllerBase
         _currentUser = currentUser;
     }
 
-    [HttpPost("/unit-measure/list")]
+    [HttpPost("list")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<UnitMeasureListDto> request)
     {
         return Result(await _mediator.Send(request));
     }
 
-    [HttpGet("/unit-measure{id}")]
+    [HttpGet("{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
         return Result(await _mediator.Send(new FetchByIdRequestDto<UnitMeasureDto>(id)));
     }
 
-    [HttpPost("/unit-measure/create")]
+    [HttpPost]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Insert([FromBody] UnitMeasureInsertDto command)
     {
         return Result(await _mediator.Send(command));
     }
 
-    [HttpPut("/unit-measure/update")]
+    [HttpPut]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Update([FromBody] UnitMeasureUpdateDto command)
     {

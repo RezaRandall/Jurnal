@@ -4,7 +4,7 @@ using TabpediaFin.Handler.ReceiveMoneyHandler;
 
 namespace TabpediaFin.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/receive-money")]
 [ApiController]
 public class ReceiveMoneyController : ApiControllerBase
 {
@@ -14,28 +14,28 @@ public class ReceiveMoneyController : ApiControllerBase
         _mediator = mediator;
     }
 
-    [HttpPost("/ReceiveMoney/list")]
+    [HttpPost("list")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<ReceiveMoneyListDto> request)
     {
         return Result(await _mediator.Send(request));
     }
 
-    [HttpGet("/ReceiveMoney{id}")]
+    [HttpGet("{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
         return Result(await _mediator.Send(new FetchByIdRequestDto<ReceiveMoneyFetchDto>(id)));
     }
 
-    [HttpPost("/ReceiveMoney/create")]
+    [HttpPost]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Insert([FromForm] ReceiveMoneyInsertDto command)
     {
         return Result(await _mediator.Send(command));
     }
 
-    [HttpPut("/ReceiveMoney/update")]
+    [HttpPut]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Update([FromBody] ReceiveMoneyUpdateDto command)
     {

@@ -21,8 +21,6 @@ public class Table_PurchaseOrder : Migration
             .WithColumn("TransDate").AsDateTime().NotNullable()
             .WithColumn("DueDate").AsDateTime().NotNullable()
             .WithColumn("TransCode").AsString(250).NotNullable()
-            .WithColumn("BudgetYear").AsString(4).NotNullable()
-            .WithColumn("UrgentLevel").AsInt32().NotNullable().WithDefaultValue(0) // 0-low;1-moderate;2-high
             .WithColumn("Status").AsInt32().NotNullable().WithDefaultValue(0) // 0-Open;1-Closed;jika status open dan due date terlewati maka akan menjadi expired
             .WithColumn("Memo").AsString(250).Nullable()
             .WithColumn("Notes").AsString(250).Nullable()

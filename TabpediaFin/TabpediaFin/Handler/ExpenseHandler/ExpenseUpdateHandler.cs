@@ -17,6 +17,8 @@ public class ExpenseUpdateHandler : IRequestHandler<ExpenseUpdateDto, RowRespons
     public async Task<RowResponse<ExpenseFetchDto>> Handle(ExpenseUpdateDto request, CancellationToken cancellationToken)
     {
         var result = new RowResponse<ExpenseFetchDto>();
+        List<ExpenseFetchTag> ExpenseFetchTagList = new List<ExpenseFetchTag>();
+        List<ExpenseFetchAttachment> ExpenseFetchAttachmentList = new List<ExpenseFetchAttachment>();
 
         try
         {
@@ -55,7 +57,7 @@ public class ExpenseUpdateHandler : IRequestHandler<ExpenseUpdateDto, RowRespons
 
             result.IsOk = true;
             result.ErrorMessage = string.Empty;
-            result.Row = row;
+            //result.Row = row;
         }
         catch (Exception ex)
         {
@@ -82,4 +84,12 @@ public class ExpenseUpdateDto : IRequest<RowResponse<ExpenseFetchDto>>
     public string Notes { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
+    public ICollection<ExpenseAttahmentFiles> AttachmentFile { get; set; }
+    public List<ExpenseUpdateTag> TagList { get; set; }
+}
+
+public class ExpenseUpdateTag
+{
+    public int Id { get; set; }
+    public int TagId { get; set; }
 }

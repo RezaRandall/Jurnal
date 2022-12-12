@@ -5,7 +5,7 @@ using TabpediaFin.Handler.ExpenseHandler;
 
 namespace TabpediaFin.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/expense")]
 [ApiController]
 public class ExpensesController : ApiControllerBase
 {
@@ -15,28 +15,28 @@ public class ExpensesController : ApiControllerBase
         _mediator = mediator;
     }
 
-    [HttpPost("/Expense/list")]
+    [HttpPost("list")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<ExpenseListDto> request)
     {
         return Result(await _mediator.Send(request));
     }
 
-    [HttpGet("/Expense{id}")]
+    [HttpGet("{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
         return Result(await _mediator.Send(new FetchByIdRequestDto<ExpenseFetchDto>(id)));
     }
 
-    [HttpPost("/Expense/create")]
+    [HttpPost]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> Insert([FromForm] ExpenseInsertDto command)
+    public async Task<IActionResult> Insert([FromBody] ExpenseInsertDto command)
     {
         return Result(await _mediator.Send(command));
     }
 
-    [HttpPut("/Expense/update")]
+    [HttpPut]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Update([FromBody] ExpenseUpdateDto command)
     {
@@ -45,11 +45,8 @@ public class ExpensesController : ApiControllerBase
 
     [HttpDelete("{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> Delete(int id)
+    public async Task Delete(int id)
     {
-
-        ExpenseDeleteDto command = new ExpenseDeleteDto();
-        command.Id = id;
-        return Result(await _mediator.Send(command));
+        await _mediator.Send(new DeleteByIdRequestDto<ExpenseFetchDto>(id));
     }
 }

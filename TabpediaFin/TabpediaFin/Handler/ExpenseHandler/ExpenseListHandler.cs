@@ -1,6 +1,4 @@
-﻿using TabpediaFin.Handler.Item;
-
-namespace TabpediaFin.Handler.ExpenseHandler;
+﻿namespace TabpediaFin.Handler.ExpenseHandler;
 
 public class ExpenseListHandler : IFetchPagedListHandler<ExpenseListDto>
 {
@@ -42,17 +40,16 @@ public class ExpenseListHandler : IFetchPagedListHandler<ExpenseListDto>
                 cn.Open();
 
                 var list = await cn.FetchListPagedAsync<ExpenseListDto>(pageNumber: req.PageNum
-                    , rowsPerPage: req.PageSize
-                    , conditions: sqlWhere
-                    , orderby: orderby
-                    , currentUser: _currentUser
-                    , parameters: parameters
-                    );
-                int recordCount = await cn.RecordCountAsync<ExpenseListDto>(sqlWhere, parameters);
+                , rowsPerPage: req.PageSize
+                , search: req.Search
+                , sortby: req.SortBy
+                , sortdesc: req.SortDesc
+                , currentUser: _currentUser);
+
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.List = list?.AsList() ?? new List<ExpenseListDto>();
-                result.RecordCount = recordCount;
+                result.List = list.List;
+                result.RecordCount = list.TotalRecord;
             }
         }
         catch (Exception ex)

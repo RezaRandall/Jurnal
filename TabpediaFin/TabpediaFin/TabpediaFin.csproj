@@ -7,10 +7,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Handler\CashAndBank\**" />
     <Compile Remove="Infrastructure\Cors\**" />
+    <Content Remove="Handler\CashAndBank\**" />
     <Content Remove="Infrastructure\Cors\**" />
+    <EmbeddedResource Remove="Handler\CashAndBank\**" />
     <EmbeddedResource Remove="Infrastructure\Cors\**" />
+    <None Remove="Handler\CashAndBank\**" />
     <None Remove="Infrastructure\Cors\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\PurchaseBillingController.cs" />
+    <Compile Remove="Controllers\PurchaseOfferController.cs" />
+    <Compile Remove="Controllers\PurchaseOrderController.cs" />
+    <Compile Remove="Controllers\PurchaseRequestController.cs" />
+    <Compile Remove="Migrations\Table_SalesDelivery.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,7 +52,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Handler\Auth\" />
     <Folder Include="UserUpload\" />
   </ItemGroup>
 
