@@ -41,6 +41,7 @@ public class AccountCashAndBankFetchHandler : IFetchByIdHandler<AccountCashAndBa
 [Table("AccountCashAndBank")]
 public class AccountCashAndBankFetchDto : BaseDto
 {
+    [Searchable]
     public string Name { get; set; } = string.Empty;
     public string AccountNumber { get; set; } = string.Empty;
     public int CashAndBankCategoryId { get; set; } = 0;

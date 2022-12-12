@@ -15,28 +15,28 @@ public class ItemController : ApiControllerBase
         _mediator = mediator;
     }
 
-    [HttpPost("/item/list")]
+    [HttpPost("list")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<ItemListDto> request)
     {
         return Result(await _mediator.Send(request));
     }
 
-    [HttpGet("/item{id}")]
+    [HttpGet("{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
         return Result(await _mediator.Send(new FetchByIdRequestDto<ItemDto>(id)));
     }
 
-    [HttpPost("/item/create")]
+    [HttpPost]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Insert([FromBody] ItemInsertDto command)
     {
         return Result(await _mediator.Send(command));
     }
 
-    [HttpPut("/item/update")]
+    [HttpPut]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Update([FromBody] ItemUpdateDto command)
     {
@@ -45,11 +45,8 @@ public class ItemController : ApiControllerBase
 
     [HttpDelete("{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> Delete(int id)
+    public async Task Delete(int id)
     {
-
-        ItemDeleteDto command = new ItemDeleteDto();
-        command.Id = id;
-        return Result(await _mediator.Send(command));
+        await _mediator.Send(new DeleteByIdRequestDto<ItemDto>(id));
     }
 }

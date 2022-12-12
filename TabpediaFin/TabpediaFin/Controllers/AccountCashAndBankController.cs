@@ -7,7 +7,7 @@ using TabpediaFin.Handler.ExpenseHandler;
 
 namespace TabpediaFin.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/account-cash-and-bank")]
 [ApiController]
 public class AccountCashAndBankController : ApiControllerBase
 {
@@ -17,42 +17,39 @@ public class AccountCashAndBankController : ApiControllerBase
         _mediator = mediator;
     }
 
-    [HttpPost("/AccountCashAndBank/list")]
+    [HttpPost("list")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<AccountCashAndBankListDto> request)
     {
         return Result(await _mediator.Send(request));
     }
 
-    [HttpGet("/AccountCashAndBank{id}")]
+    [HttpGet("{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
         return Result(await _mediator.Send(new FetchByIdRequestDto<AccountCashAndBankFetchDto>(id)));
     }
 
-    [HttpPost("/AccountCashAndBank/create")]
+    [HttpPost]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Insert([FromBody] AccountCashAndBankInsertDto command)
     {
         return Result(await _mediator.Send(command));
     }
 
-    [HttpPut("/AccountCashAndBank/update")]
+    [HttpPut]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Update([FromBody] AccountCashAndBankUpdateDto command)
     {
         return Result(await _mediator.Send(command));
     }
 
-    [HttpDelete("{id}")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> Delete(int id)
-    {
 
-        AccountCashAndBankDeleteDto command = new AccountCashAndBankDeleteDto();
-        command.Id = id;
-        return Result(await _mediator.Send(command));
+    [HttpDelete("{id}")]
+    public async Task Delete(int id)
+    {
+        await _mediator.Send(new DeleteByIdRequestDto<AccountCashAndBankFetchDto>(id));
     }
 
 }

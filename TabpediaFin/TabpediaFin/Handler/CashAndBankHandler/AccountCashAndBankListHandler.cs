@@ -43,17 +43,15 @@ public class AccountCashAndBankListHandler : IFetchPagedListHandler<AccountCashA
 
                 var list = await cn.FetchListPagedAsync<AccountCashAndBankListDto>(pageNumber: request.PageNum
                     , rowsPerPage: request.PageSize
-                    , conditions: sqlWhere
-                    , orderby: orderby
-                    , currentUser: _currentUser
-                    , parameters: parameters);
-
-                int recordCount = await cn.RecordCountAsync<AccountCashAndBankListDto>(sqlWhere, parameters);
+                    , search: request.Search
+                    , sortby: request.SortBy
+                    , sortdesc: request.SortDesc
+                    , currentUser: _currentUser);
 
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.List = list?.AsList() ?? new List<AccountCashAndBankListDto>();
-                result.RecordCount = recordCount;
+                result.List = list.List;
+                result.RecordCount = list.TotalRecord;
             }
         }
         catch (Exception ex)
@@ -72,6 +70,7 @@ public class AccountCashAndBankListDto : BaseDto
 {
     [Searchable]
     public string Name { get; set; } = string.Empty;
+    [Searchable]
     public string AccountNumber { get; set; } = string.Empty;
     public int CashAndBankCategoryId { get; set; } = 0;
     public int DetailAccountId { get; set; } = 0;

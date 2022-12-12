@@ -1,41 +1,32 @@
-﻿namespace TabpediaFin.Handler.PaymentTerm;
+﻿using TabpediaFin.Dto.Common.Request;
 
-public class PaymentTermDeleteHandler : IRequestHandler<PaymentTermDeleteDto, RowResponse<bool>>
+namespace TabpediaFin.Handler.PaymentTerm;
+
+public class PaymentTermDeleteHandler : IDeleteByIdHandler<PaymentTermDto>
 {
     private readonly FinContext _context;
-    private readonly ICurrentUser _currentUser;
+    private readonly IPaymentMethodCacheRemover _cacheRemover;
 
-    public PaymentTermDeleteHandler(FinContext db, ICurrentUser currentUser)
+    public PaymentTermDeleteHandler(FinContext db, IPaymentMethodCacheRemover cacheRemover)
     {
         _context = db;
-        _currentUser = currentUser;
-    }
-    public class CommandValidator : AbstractValidator<PaymentTermDeleteDto>
-    {
-        public CommandValidator()
-        {
-            RuleFor(x => x.Id).NotNull().NotEmpty();
-        }
+        _cacheRemover = cacheRemover;
     }
 
-    public async Task<RowResponse<bool>> Handle(PaymentTermDeleteDto request, CancellationToken cancellationToken)
+    public async Task<RowResponse<PaymentTermDto>> Handle(DeleteByIdRequestDto<PaymentTermDto> request, CancellationToken cancellationToken)
     {
-        var result = new RowResponse<bool>();
+        var result = new RowResponse<PaymentTermDto>();
         try
         {
-            var paymentTermsData = await _context.PaymentTerm.FirstOrDefaultAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-            if (paymentTermsData != null)
+            var paymentTermsData = await _context.PaymentTerm.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            if (paymentTermsData == null )
             {
-                _context.PaymentTerm.Remove(paymentTermsData);
-                result.IsOk = true;
-                result.ErrorMessage = "Payment Term with id " + request.Id + " has been deleted";
+                throw new HttpException(HttpStatusCode.NotFound, "Data not found");
             }
-            if (paymentTermsData == null)
-            {
-                result.IsOk = false;
-                result.ErrorMessage = "Data not found";
-            }
+
+            _context.PaymentTerm.Remove(paymentTermsData);
             await _context.SaveChangesAsync(cancellationToken);
+            _cacheRemover.RemoveCache();
         }
         catch (Exception ex)
         {
@@ -49,9 +40,3 @@ public class PaymentTermDeleteHandler : IRequestHandler<PaymentTermDeleteDto, Ro
 
 }
 
-[Table("UnitMeasure")]
-public class PaymentTermDeleteDto : IRequest<RowResponse<bool>>
-{
-    public int Id { get; set; } = 0;
-    public int TenantId { get; set; } = 0;
-}

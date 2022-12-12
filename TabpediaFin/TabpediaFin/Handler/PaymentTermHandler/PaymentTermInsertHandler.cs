@@ -10,16 +10,16 @@ public class PaymentTermInsertHandler : IRequestHandler<PaymentTermInsertDto, Ro
         _context = db;
     }
 
-    public class CommandValidator : AbstractValidator<PaymentTermInsertDto>
-    {
-        public CommandValidator()
-        {
-            RuleFor(x => x.Name).NotNull().NotEmpty();
-            RuleFor(x => x.Description).MaximumLength(100);
-            RuleFor(x => x.TermDays).NotNull().NotEmpty();
-            RuleFor(x => x.IsActive).NotNull().NotEmpty();
-        }
-    }
+    //public class CommandValidator : AbstractValidator<PaymentTermInsertDto>
+    //{
+    //    public CommandValidator()
+    //    {
+    //        RuleFor(x => x.Name).NotNull().NotEmpty();
+    //        RuleFor(x => x.Description).MaximumLength(100);
+    //        RuleFor(x => x.TermDays).NotNull().NotEmpty();
+    //        RuleFor(x => x.IsActive).NotNull().NotEmpty();
+    //    }
+    //}
 
     public async Task<RowResponse<PaymentTermDto>> Handle(PaymentTermInsertDto req, CancellationToken cancellationToken)
     {

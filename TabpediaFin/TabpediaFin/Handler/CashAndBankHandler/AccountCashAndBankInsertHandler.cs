@@ -34,6 +34,7 @@ public class AccountCashAndBankInsertHandler : IRequestHandler<AccountCashAndBan
 
             var row = new AccountCashAndBankFetchDto()
             {
+                Id = accountCashAndBank.Id,
                 Name = accountCashAndBank.Name,
                 AccountNumber = accountCashAndBank.AccountNumber,
                 CashAndBankCategoryId = accountCashAndBank.CashAndBankCategoryId,

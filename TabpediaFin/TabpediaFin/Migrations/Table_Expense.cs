@@ -2,7 +2,7 @@
 
 namespace TabpediaFin.Migrations;
 
-[Migration(202212051532)]
+[Migration(202212121618)]
 public class Table_Expense : Migration
 {
     public override void Down()
@@ -27,7 +27,6 @@ public class Table_Expense : Migration
             .WithColumn("Notes").AsString(250).Nullable()
             .WithColumn("Description").AsString(250).Nullable()
             .WithColumn("TaxId").AsInt32().Nullable().WithDefaultValue(0)
-            .WithColumn("FileName").AsString(250).Nullable()
             .WithColumn("CreatedUid").AsInt32().NotNullable()
             .WithColumn("CreatedUtc").AsDateTime().NotNullable()
             .WithColumn("UpdatedUid").AsInt32().Nullable()

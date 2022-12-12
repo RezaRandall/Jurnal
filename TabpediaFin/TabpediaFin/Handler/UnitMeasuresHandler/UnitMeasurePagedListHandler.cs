@@ -40,17 +40,16 @@ public class UnitMeasurePagedListHandler : IFetchPagedListHandler<UnitMeasureLis
                 cn.Open();
 
                 var list = await cn.FetchListPagedAsync<UnitMeasureListDto>(pageNumber: req.PageNum
-                    , rowsPerPage: req.PageSize
-                    , conditions: sqlWhere
-                    , orderby: orderby
-                    , currentUser: _currentUser
-                    , parameters: parameters
-                    );
-                int recordCount = await cn.RecordCountAsync<UnitMeasureListDto>(sqlWhere, parameters);
+                , rowsPerPage: req.PageSize
+                , search: req.Search
+                , sortby: req.SortBy
+                , sortdesc: req.SortDesc
+                , currentUser: _currentUser);
+
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.List = list?.AsList() ?? new List<UnitMeasureListDto>();
-                result.RecordCount = recordCount;
+                result.List = list.List;
+                result.RecordCount = list.TotalRecord;
             }
         }
         catch (Exception ex)
@@ -69,6 +68,6 @@ public class UnitMeasureListDto : BaseDto
 {
     [Searchable]
     public string Name { get; set; } = string.Empty;
-    //[Searchable]
+    [Searchable]
     public string Description { get; set; } = string.Empty;
 }

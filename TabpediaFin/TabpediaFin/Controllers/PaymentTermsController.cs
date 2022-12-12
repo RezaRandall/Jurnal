@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using TabpediaFin.Dto;
+using TabpediaFin.Handler.CashAndBank;
 using TabpediaFin.Handler.PaymentTerm;
 using TabpediaFin.Handler.UnitMeasures;
 
@@ -19,28 +20,28 @@ public class PaymentTermController : ApiControllerBase
         _currentUser = currentUser;
     }
 
-    [HttpPost("/payment-terms/list")]
+    [HttpPost("list")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<PaymentTermListDto> request)
     {
         return Result(await _mediator.Send(request));
     }
 
-    [HttpGet("/payment-terms{id}")]
+    [HttpGet("{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
         return Result(await _mediator.Send(new FetchByIdRequestDto<PaymentTermDto>(id)));
     }
 
-    [HttpPost("/payment-terms/create")]
+    [HttpPost]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Insert([FromBody] PaymentTermInsertDto command)
     {
         return Result(await _mediator.Send(command));
     }
 
-    [HttpPut("/payment-terms/update")]
+    [HttpPut]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Update([FromBody] PaymentTermUpdateDto command)
     {
@@ -49,12 +50,9 @@ public class PaymentTermController : ApiControllerBase
 
     [HttpDelete("{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> Delete(int id)
+    public async Task Delete(int id)
     {
-
-        PaymentTermDeleteDto command = new PaymentTermDeleteDto();
-        command.Id = id;
-        return Result(await _mediator.Send(command));
+        await _mediator.Send(new DeleteByIdRequestDto<PaymentTermDto>(id));
     }
 
 }

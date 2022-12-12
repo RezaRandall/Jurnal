@@ -4,7 +4,7 @@ using TabpediaFin.Handler.TransferMoneyHandler;
 
 namespace TabpediaFin.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/transfer-money")]
 [ApiController]
 public class TransferMoneyController : ApiControllerBase
 {
@@ -14,28 +14,28 @@ public class TransferMoneyController : ApiControllerBase
         _mediator = mediator;
     }
 
-    [HttpPost("/TransferMoney/list")]
+    [HttpPost("list")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<TransferMoneyListDto> request)
     {
         return Result(await _mediator.Send(request));
     }
 
-    [HttpGet("/TransferMoney{id}")]
+    [HttpGet("{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
         return Result(await _mediator.Send(new FetchByIdRequestDto<TransferMoneyFetchDto>(id)));
     }
 
-    [HttpPost("/TransferMoney/create")]
+    [HttpPost]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Insert([FromForm] TransferMoneyInsertDto command)
     {
         return Result(await _mediator.Send(command));
     }
 
-    [HttpPut("/TransferMoney/update")]
+    [HttpPut]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Update([FromBody] TransferMoneyUpdateDto command)
     {
