@@ -1,4 +1,6 @@
-﻿namespace TabpediaFin.Repository;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+
+namespace TabpediaFin.Repository;
 
 public class SelectRepository : BaseRepository, ISelectRepository
 {
@@ -13,11 +15,11 @@ public class SelectRepository : BaseRepository, ISelectRepository
 
     public async Task<List<SelectResponseDto>> FetchPaymentMethodSelectList()
     {
-        return await FetchSelectList("PaymentMethod");
+        return await FetchSelectList("PaymentMethod", true);
     }
 
 
-    private async Task<List<SelectResponseDto>> FetchSelectList(string tablename)
+    private async Task<List<SelectResponseDto>> FetchSelectList(string tableName, bool hasActiveColumn)
     {
         if (_currentUser == null)
         {
@@ -30,7 +32,12 @@ public class SelectRepository : BaseRepository, ISelectRepository
             throw new ArgumentException("Tenant is not valid");
         }
 
-        var sql = @$"SELECT ""Id"", ""Name"" FROM ""{tablename}"" WHERE ""TenantId"" = {tenantId} ORDER BY ""Name""";
+        var activeWhere = string.Empty;
+        if (hasActiveColumn)
+        {
+            activeWhere = @" ""IsActive"" = TRUE AND ";
+        }
+        var sql = @$"SELECT ""Id"", ""Name"" FROM ""{tableName}"" WHERE {activeWhere} ""TenantId"" = {tenantId} ORDER BY ""Name""";
 
         using (var cn = _dbManager.CreateConnection())
         {
