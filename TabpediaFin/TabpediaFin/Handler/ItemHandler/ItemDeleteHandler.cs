@@ -1,22 +1,22 @@
 ﻿namespace TabpediaFin.Handler.Item;
 
-public class ItemDeleteHandler : IRequestHandler<ItemDeleteDto, RowResponse<bool>>
+public class ItemDeleteHandler : IDeleteByIdHandler<ItemDto>
 {
     private readonly FinContext _context;
-    private readonly ICurrentUser _currentUser;
+    private readonly IPaymentMethodCacheRemover _cacheRemover;
 
-    public ItemDeleteHandler(FinContext db, ICurrentUser currentUser)
+    public ItemDeleteHandler(FinContext db, IPaymentMethodCacheRemover cacheRemover)
     {
         _context = db;
-        _currentUser = currentUser;
+        _cacheRemover = cacheRemover;
     }
 
-    public async Task<RowResponse<bool>> Handle(ItemDeleteDto request, CancellationToken cancellationToken)
+    public async Task<RowResponse<ItemDto>> Handle(DeleteByIdRequestDto<ItemDto> request, CancellationToken cancellationToken)
     {
-        var result = new RowResponse<bool>();
+        var result = new RowResponse<ItemDto>();
         try
         {
-            var itemData = await _context.Item.FirstOrDefaultAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var itemData = await _context.Item.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (itemData != null)
             {
                 _context.Item.Remove(itemData);
@@ -29,6 +29,7 @@ public class ItemDeleteHandler : IRequestHandler<ItemDeleteDto, RowResponse<bool
                 result.ErrorMessage = "Data not found";
             }
                 await _context.SaveChangesAsync(cancellationToken);
+                _cacheRemover.RemoveCache();
         }
         catch (Exception ex)
         {
@@ -40,10 +41,9 @@ public class ItemDeleteHandler : IRequestHandler<ItemDeleteDto, RowResponse<bool
     }
 }
 
-[Table("Item")]
-public class ItemDeleteDto : IRequest<RowResponse<bool>>
-{
-    public int Id { get; set; } = 0;
-    public int TenantId { get; set; } = 0;
-}
+//[Table("Item")]
+//public class ItemDeleteDto : IRequest<RowResponse<bool>>
+//{
+//    public int Id { get; set; } = 0;
+//}
 

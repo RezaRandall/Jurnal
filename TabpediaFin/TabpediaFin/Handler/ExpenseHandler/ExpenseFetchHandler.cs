@@ -65,7 +65,7 @@ public class ExpenseFetchDto : BaseDto
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
     public List<ExpenseFetchTag> TagList { get; set; } = new List<ExpenseFetchTag>();
-    //public List<ExpenseFetchAttachment> AttachmentList { get; set; } 
+    public List<ExpenseFetchAttachment> AttachmentList { get; set; }
 }
 
 public class ExpenseFetchAttachment : BaseDto

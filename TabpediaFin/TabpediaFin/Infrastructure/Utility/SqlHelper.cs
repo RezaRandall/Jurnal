@@ -1,9 +1,19 @@
-﻿using System.Reflection;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
+using System.Text;
+using static Dapper.SimpleCRUD;
 
 namespace TabpediaFin.Infrastructure.Utility;
 
 public static class SqlHelper
 {
+    private static readonly ConcurrentDictionary<Type, string> TableNames = new ConcurrentDictionary<Type, string>();
+    private static readonly ConcurrentDictionary<string, string> ColumnNames = new ConcurrentDictionary<string, string>();
+
+    private static ITableNameResolver _tableNameResolver = new TableNameResolver();
+    private static IColumnNameResolver _columnNameResolver = new ColumnNameResolver();
+
+
     public static string GenerateWhere<T>()
     {
         var sql = string.Empty;
@@ -21,13 +31,17 @@ public static class SqlHelper
 
                 if (attribute is SearchableAttribute)
                 {
-                    sql += @$" AND LOWER(""{fieldName}"") LIKE @Search ";
+                    if (!string.IsNullOrEmpty(sql))
+                    {
+                        sql += " OR ";
+                    }
+                    sql += @$" LOWER(""{fieldName}"") LIKE @Search ";
                 }
             }
         }
 
         // if (!string.IsNullOrWhiteSpace(sql)) sql += ") ";
-        return sql;
+        return $" {sql} ";
     }
 
 
@@ -50,5 +64,4 @@ public static class SqlHelper
 
         return $@" ""{colname}"" {order} ";
     }
-
 }

@@ -42,9 +42,9 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
             await _context.SendMoney.AddAsync(sendMoney, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
             transIdResult = sendMoney.Id;
-            UploadAttachmentService service = new UploadAttachmentService();
-            List<uploadreturn> filedata = await service.UploadAttachmentAsync(request.AttachmentFile, _currentUser.TenantId, transIdResult);
-            List<SendMoneyFetchAttachment> returnfile = await PostAttachmentAsync(filedata, cancellationToken);
+            //UploadAttachmentService service = new UploadAttachmentService();
+            //List<uploadreturn> filedata = await service.UploadAttachmentAsync(request.AttachmentFile, _currentUser.TenantId, transIdResult);
+            //List<SendMoneyFetchAttachment> returnfile = await PostAttachmentAsync(filedata, cancellationToken);
             List<SendMoneyFetchTag> TagListResult = await PostTagAsync(request.TagList, transIdResult, cancellationToken);
 
             var row = new SendMoneyFetchDto()
@@ -77,39 +77,39 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
         return result;
     }
 
-    public async Task<List<SendMoneyFetchAttachment>> PostAttachmentAsync(List<uploadreturn> filedata, CancellationToken cancellationToken)
-    {
-        List<SendMoneyAttachment> SendMoneyAttachmentList = new List<SendMoneyAttachment>();
-        List<SendMoneyFetchAttachment> SendMoneyFetchAttachmentList = new List<SendMoneyFetchAttachment>();
+    //public async Task<List<SendMoneyFetchAttachment>> PostAttachmentAsync(List<uploadreturn> filedata, CancellationToken cancellationToken)
+    //{
+    //    List<SendMoneyAttachment> SendMoneyAttachmentList = new List<SendMoneyAttachment>();
+    //    List<SendMoneyFetchAttachment> SendMoneyFetchAttachmentList = new List<SendMoneyFetchAttachment>();
 
-        if (filedata.Count > 0)
-        {
-            foreach (uploadreturn item in filedata)
-            {
-                SendMoneyAttachmentList.Add(new SendMoneyAttachment
-                {
-                    FileName = item.FileName,
-                    FileUrl = item.FileUrl,
-                    Extension = item.Extension,
-                    FileSize = item.FileSize,
-                    TransId = item.TransId,
-                });
-                SendMoneyFetchAttachmentList.Add(new SendMoneyFetchAttachment
-                {
-                    FileName = item.FileName,
-                    FileUrl = item.FileUrl,
-                    Extension = item.Extension,
-                    FileSize = item.FileSize,
-                    TransId = item.TransId,
-                });
-            }
+    //    if (filedata.Count > 0)
+    //    {
+    //        foreach (uploadreturn item in filedata)
+    //        {
+    //            SendMoneyAttachmentList.Add(new SendMoneyAttachment
+    //            {
+    //                FileName = item.FileName,
+    //                FileUrl = item.FileUrl,
+    //                Extension = item.Extension,
+    //                FileSize = item.FileSize,
+    //                TransId = item.TransId,
+    //            });
+    //            SendMoneyFetchAttachmentList.Add(new SendMoneyFetchAttachment
+    //            {
+    //                FileName = item.FileName,
+    //                FileUrl = item.FileUrl,
+    //                Extension = item.Extension,
+    //                FileSize = item.FileSize,
+    //                TransId = item.TransId,
+    //            });
+    //        }
 
-            await _context.SendMoneyAttachment.AddRangeAsync(SendMoneyAttachmentList, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
+    //        await _context.SendMoneyAttachment.AddRangeAsync(SendMoneyAttachmentList, cancellationToken);
+    //        await _context.SaveChangesAsync(cancellationToken);
+    //    }
 
-        return SendMoneyFetchAttachmentList;
-    }
+    //    return SendMoneyFetchAttachmentList;
+    //}
 
     public async Task<List<SendMoneyFetchTag>> PostTagAsync(List<SendMoneyInsertTag> filedata, int TransId, CancellationToken cancellationToken)
     {

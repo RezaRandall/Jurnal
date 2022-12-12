@@ -72,6 +72,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Handler\Auth\" />
     <Folder Include="UserUpload\" />
   </ItemGroup>
 

@@ -1,33 +1,58 @@
-﻿using TabpediaFin.Handler.ExpenseCategoryHandler;
+﻿using TabpediaFin.Domain.Expense;
+using TabpediaFin.Dto.Common.Request;
+using TabpediaFin.Handler.ExpenseCategoryHandler;
 
 namespace TabpediaFin.Handler.ExpenseHandler;
 
-public class ExpenseDeleteHandler : IRequestHandler<ExpenseDeleteDto, RowResponse<bool>>
+public class ExpenseDeleteHandler : IDeleteByIdHandler<ExpenseFetchDto>
 {
     private readonly FinContext _context;
-    private readonly ICurrentUser _currentUser;
 
     public ExpenseDeleteHandler(FinContext db, ICurrentUser currentUser)
     {
         _context = db;
-        _currentUser = currentUser;
     }
 
-    public async Task<RowResponse<bool>> Handle(ExpenseDeleteDto request, CancellationToken cancellationToken)
+    public async Task<RowResponse<ExpenseFetchDto>> Handle(DeleteByIdRequestDto<ExpenseFetchDto> request, CancellationToken cancellationToken)
     {
-        var result = new RowResponse<bool>();
+        var result = new RowResponse<ExpenseFetchDto>();
         try
         {
-            var expense = await _context.Expense.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-
-            _context.Expense.Attach(expense);
+            var expense = await _context.Expense.FirstAsync(x => x.Id == request.Id, cancellationToken);
+            if (expense == null || expense.Id == 0)
+            {
+                throw new HttpException(HttpStatusCode.NotFound, "Data not found");
+            }
             _context.Expense.Remove(expense);
-
             await _context.SaveChangesAsync(cancellationToken);
+
+            List<ExpenseAttachment> ExpenseAttachmentList = _context.ExpenseAttachment.Where<ExpenseAttachment>(x => x.TransId == request.Id).ToList();
+            if (ExpenseAttachmentList.Count > 0)
+            {
+                foreach (ExpenseAttachment item in ExpenseAttachmentList)
+                {
+                    FileInfo file = new FileInfo(item.FileUrl.Replace("https://localhost:7030/", "../TabpediaFin/"));
+                    if (file.Exists)
+                    {
+                        file.Delete();
+                    }
+                }
+                _context.ExpenseAttachment.RemoveRange(ExpenseAttachmentList);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+
+            // TAG
+            List<ExpenseTag> ExpenseTagList = _context.ExpenseTag.Where<ExpenseTag>(x => x.TransId == request.Id).ToList();
+            if (ExpenseTagList.Count > 0)
+            {
+                _context.ExpenseTag.RemoveRange(ExpenseTagList);
+                await _context.SaveChangesAsync(cancellationToken);
+
+            }
 
             result.IsOk = true;
             result.ErrorMessage = string.Empty;
-            result.Row = true;
+            result.Row = new ExpenseFetchDto();
         }
         catch (Exception ex)
         {
@@ -37,9 +62,4 @@ public class ExpenseDeleteHandler : IRequestHandler<ExpenseDeleteDto, RowRespons
 
         return result;
     }
-}
-
-public class ExpenseDeleteDto : IRequest<RowResponse<bool>>
-{
-    public int Id { get; set; }
 }

@@ -1,4 +1,6 @@
-﻿namespace TabpediaFin.Handler.PaymentTerm;
+﻿using Org.BouncyCastle.Asn1.Ocsp;
+
+namespace TabpediaFin.Handler.PaymentTerm;
 
 public class PaymentTermsPagedListHandler : IFetchPagedListHandler<PaymentTermListDto>
 {
@@ -40,17 +42,16 @@ public class PaymentTermsPagedListHandler : IFetchPagedListHandler<PaymentTermLi
                 cn.Open();
 
                 var list = await cn.FetchListPagedAsync<PaymentTermListDto>(pageNumber: req.PageNum
-                    , rowsPerPage: req.PageSize
-                    , conditions: sqlWhere
-                    , orderby: orderby
-                    , currentUser: _currentUser
-                    , parameters: parameters
-                    );
-                int recordCount = await cn.RecordCountAsync<PaymentTermListDto>(sqlWhere, parameters);
+                , rowsPerPage: req.PageSize
+                , search: req.Search
+                , sortby: req.SortBy
+                , sortdesc: req.SortDesc
+                , currentUser: _currentUser);
+                //int recordCount = await cn.RecordCountAsync<PaymentTermListDto>(sqlWhere, parameters);
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.List = list?.AsList() ?? new List<PaymentTermListDto>();
-                result.RecordCount = recordCount;
+                result.List = list.List;
+                result.RecordCount = list.TotalRecord;
             }
         }
         catch (Exception ex)
@@ -69,7 +70,7 @@ public class PaymentTermListDto : BaseDto
 {
     [Searchable]
     public string Name { get; set; } = string.Empty;
-    //[Searchable]
+    [Searchable]
     public string Description { get; set; } = string.Empty;
     public int TermDays { get; set; } = 0;
     public bool IsActive { get; set; } = true;

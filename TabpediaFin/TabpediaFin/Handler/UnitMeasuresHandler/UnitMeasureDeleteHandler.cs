@@ -1,4 +1,5 @@
-﻿using TabpediaFin.Handler.Item;
+﻿using TabpediaFin.Domain;
+using TabpediaFin.Handler.Item;
 using TabpediaFin.Handler.PaymentTerm;
 
 namespace TabpediaFin.Handler.UnitMeasures;
@@ -27,18 +28,13 @@ public class UnitMeasureDeleteHandler : IRequestHandler<UnitMeasureDeleteDto, Ro
         var result = new RowResponse<bool>();
         try
         {
-            var unitMeasureData = await _context.UnitMeasure.FirstOrDefaultAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-            if (unitMeasureData != null)
-            {
-                _context.UnitMeasure.Remove(unitMeasureData);
-                result.IsOk = true;
-                result.ErrorMessage = "Unit Measure with id " + request.Id + " has been deleted";
-            }
-            if (unitMeasureData == null)
+            var unitMeasureData = await _context.UnitMeasure.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            if (unitMeasureData == null || unitMeasureData.Id == 0)
             {
                 result.IsOk = false;
                 result.ErrorMessage = "Data not found";
             }
+            _context.UnitMeasure.Remove(unitMeasureData);
             await _context.SaveChangesAsync(cancellationToken);
         }
         catch (Exception ex)
@@ -57,5 +53,4 @@ public class UnitMeasureDeleteHandler : IRequestHandler<UnitMeasureDeleteDto, Ro
 public class UnitMeasureDeleteDto : IRequest<RowResponse<bool>>
 {
     public int Id { get; set; } = 0;
-    public int TenantId { get; set; } = 0;
 }

@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Org.BouncyCastle.Asn1.Ocsp;
 using TabpediaFin.Dto.Common.Request;
 
 namespace TabpediaFin.Handler.Item;
@@ -43,17 +44,16 @@ public class ItemPagedListHandler : IFetchPagedListHandler<ItemListDto>
                 cn.Open();
 
                 var list = await cn.FetchListPagedAsync<ItemListDto>(pageNumber: req.PageNum
-                    , rowsPerPage: req.PageSize
-                    , conditions: sqlWhere
-                    , orderby: orderby
-                    , currentUser: _currentUser
-                    , parameters: parameters
-                    );
-                int recordCount = await cn.RecordCountAsync<ItemListDto>(sqlWhere, parameters);
+                , rowsPerPage: req.PageSize
+                , search: req.Search
+                , sortby: req.SortBy
+                , sortdesc: req.SortDesc
+                , currentUser: _currentUser);
+
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.List = list?.AsList() ?? new List<ItemListDto>();
-                result.RecordCount = recordCount;
+                result.List = list.List;
+                result.RecordCount = list.TotalRecord;
             }
         }
         catch (Exception ex)
