@@ -16,6 +16,8 @@
                 FileInfo file = new FileInfo(request.FileUrl.Replace("https://localhost:7030/", "../TabpediaFin/"));
                 if (file.Exists)
                 {
+                    System.GC.Collect();
+                    System.GC.WaitForPendingFinalizers();
                     file.Delete();
                 }
 

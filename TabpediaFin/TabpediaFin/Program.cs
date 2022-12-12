@@ -33,7 +33,13 @@ builder.Services.AddDbContext<FinContext>();
 builder.Services.AddCaching();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+//builder.Services.AddSwaggerGen(); fajar yang ganti, kalau misal mempengaruhi config yang lain bisa dikembalikan, karena saya terdapat case ketika controller dengan param yang sama swagger failed load
+builder.Services.AddSwaggerGen(c => {
+    c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+    c.IgnoreObsoleteActions();
+    c.IgnoreObsoleteProperties();
+    c.CustomSchemaIds(type => type.FullName);
+});
 builder.Services.RegisterSwagger("Tabpedia Finance", "v1");
 
 builder.Services.AddControllers(options =>
