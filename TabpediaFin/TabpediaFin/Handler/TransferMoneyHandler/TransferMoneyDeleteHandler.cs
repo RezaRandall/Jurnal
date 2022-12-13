@@ -1,33 +1,60 @@
-﻿using TabpediaFin.Handler.ExpenseHandler;
+﻿using System.Linq;
+using TabpediaFin.Domain.Expense;
+using TabpediaFin.Domain.TransferMoney;
+using TabpediaFin.Handler.ExpenseHandler;
 
 namespace TabpediaFin.Handler.TransferMoneyHandler;
 
-public class TransferMoneyDeleteHandler : IRequestHandler<TransferMoneyDeleteDto, RowResponse<bool>>
+public class TransferMoneyDeleteHandler : IDeleteByIdHandler<TransferMoneyFetchDto>
 {
     private readonly FinContext _context;
-    private readonly ICurrentUser _currentUser;
 
-    public TransferMoneyDeleteHandler(FinContext db, ICurrentUser currentUser)
+    public TransferMoneyDeleteHandler(FinContext db)
     {
         _context = db;
-        _currentUser = currentUser;
     }
 
-    public async Task<RowResponse<bool>> Handle(TransferMoneyDeleteDto request, CancellationToken cancellationToken)
+    public async Task<RowResponse<TransferMoneyFetchDto>> Handle(DeleteByIdRequestDto<TransferMoneyFetchDto> request, CancellationToken cancellationToken)
     {
-        var result = new RowResponse<bool>();
+        var result = new RowResponse<TransferMoneyFetchDto>();
         try
         {
-            var transferMoney = await _context.TransferMoney.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-
-            _context.TransferMoney.Attach(transferMoney);
+            // TRANSFER MONEY
+            var transferMoney = await _context.TransferMoney.FirstAsync(x => x.Id == request.Id, cancellationToken);
+            if (transferMoney == null || transferMoney.Id == 0)
+            {
+                throw new HttpException(HttpStatusCode.NotFound, "Data not found");
+            }
             _context.TransferMoney.Remove(transferMoney);
-
             await _context.SaveChangesAsync(cancellationToken);
+
+            // TRANSFER MONEY ATTACHMENT DELETE DATA
+            List<TransferMoneyAttachment> TransferMoneyAttachmentList = _context.TransferMoneyAttachment.Where<TransferMoneyAttachment>(x => x.TransId == request.Id).ToList();
+            if (TransferMoneyAttachmentList.Count > 0)
+            {
+                foreach (TransferMoneyAttachment item in TransferMoneyAttachmentList)
+                {
+                    FileInfo file = new FileInfo(item.FileUrl.Replace("https://localhost:7030/", "../TabpediaFin/"));
+                    if (file.Exists)
+                    {
+                        file.Delete();
+                    }
+                }
+                _context.TransferMoneyAttachment.RemoveRange(TransferMoneyAttachmentList);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+
+            // TAG
+            List<TransferMoneyTag> TransferMoneyTagList = _context.TransferMoneyTag.Where<TransferMoneyTag>(x => x.TransId == request.Id).ToList();
+            if (TransferMoneyTagList.Count > 0)
+            {
+                _context.TransferMoneyTag.RemoveRange(TransferMoneyTagList);
+                await _context.SaveChangesAsync(cancellationToken);
+
+            }
 
             result.IsOk = true;
             result.ErrorMessage = string.Empty;
-            result.Row = true;
         }
         catch (Exception ex)
         {
@@ -39,8 +66,4 @@ public class TransferMoneyDeleteHandler : IRequestHandler<TransferMoneyDeleteDto
     }
 
 
-}
-public class TransferMoneyDeleteDto : IRequest<RowResponse<bool>>
-{
-    public int Id { get; set; }
 }

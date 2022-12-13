@@ -75,7 +75,6 @@ public class SendMoneyListDto : BaseDto
     public int TaxId { get; set; } = 0;
     public int Amount { get; set; } = 0;
     public string Memo { get; set; } = string.Empty;
-    //public string AttachmentFileName { get; set; } = string.Empty;
     public int TotalAmount { get; set; } = 0;
     public int DiscountAmount { get; set; } = 0;
     public int DiscountPercent { get; set; } = 0;

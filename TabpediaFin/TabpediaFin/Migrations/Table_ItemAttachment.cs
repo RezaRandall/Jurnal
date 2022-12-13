@@ -2,8 +2,8 @@
 
 namespace TabpediaFin.Migrations;
 
-[Migration(202212131700)]
-public class Table_TransferMoney : Migration
+[Migration(202212131010)]
+public class Table_ItemAttachment : Migration
 {
     public override void Down()
     {
@@ -12,19 +12,17 @@ public class Table_TransferMoney : Migration
 
     public override void Up()
     {
-        Create.Table("TransferMoney")
+        Create.Table("ItemAttachment")
             .WithColumn("Id").AsInt32().NotNullable().Identity().PrimaryKey()
             .WithColumn("TenantId").AsInt32().NotNullable()
-            .WithColumn("TransferFromAccountId").AsInt32().NotNullable()
-            .WithColumn("DepositToAccountId").AsInt32().NotNullable()
-            .WithColumn("Amount").AsDecimal(18, 2).NotNullable().WithDefaultValue(0)
-            .WithColumn("Memo").AsString(250).Nullable()
-            .WithColumn("TransactionNumber").AsString(250).NotNullable()
-            .WithColumn("TransactionDate").AsDateTime().NotNullable()
+            .WithColumn("FileName").AsString(255).NotNullable()
+            .WithColumn("FileUrl").AsString(255).NotNullable()
+            .WithColumn("Extension").AsString(255).NotNullable()
+            .WithColumn("FileSize").AsString(255).NotNullable()
+            .WithColumn("ItemId").AsInt32().NotNullable().WithDefaultValue(0)
             .WithColumn("CreatedUid").AsInt32().NotNullable()
             .WithColumn("CreatedUtc").AsDateTime().NotNullable()
             .WithColumn("UpdatedUid").AsInt32().Nullable()
             .WithColumn("UpdatedUtc").AsDateTime().Nullable();
-
     }
 }

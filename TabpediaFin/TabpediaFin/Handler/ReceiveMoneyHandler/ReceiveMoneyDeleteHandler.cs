@@ -1,31 +1,58 @@
-﻿namespace TabpediaFin.Handler.ReceiveMoneyHandler;
+﻿using TabpediaFin.Domain.ReceiveMoney;
+using TabpediaFin.Domain.TransferMoney;
 
-public class ReceiveMoneyDeleteHandler : IRequestHandler<ReceiveMoneyDeleteDto, RowResponse<bool>>
+namespace TabpediaFin.Handler.ReceiveMoneyHandler;
+
+public class ReceiveMoneyDeleteHandler : IDeleteByIdHandler<ReceiveMoneyFetchDto>
 {
     private readonly FinContext _context;
-    private readonly ICurrentUser _currentUser;
 
-    public ReceiveMoneyDeleteHandler(FinContext db, ICurrentUser currentUser)
+    public ReceiveMoneyDeleteHandler(FinContext db)
     {
         _context = db;
-        _currentUser = currentUser;
     }
 
-    public async Task<RowResponse<bool>> Handle(ReceiveMoneyDeleteDto request, CancellationToken cancellationToken)
+    public async Task<RowResponse<ReceiveMoneyFetchDto>> Handle(DeleteByIdRequestDto<ReceiveMoneyFetchDto> request, CancellationToken cancellationToken)
     {
-        var result = new RowResponse<bool>();
+        var result = new RowResponse<ReceiveMoneyFetchDto>();
         try
         {
-            var receiveMoney = await _context.ReceiveMoney.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-
-            _context.ReceiveMoney.Attach(receiveMoney);
+            // RECEIVE MONEY
+            var receiveMoney = await _context.ReceiveMoney.FirstAsync(x => x.Id == request.Id, cancellationToken);
+            if (receiveMoney == null || receiveMoney.Id == 0)
+            {
+                throw new HttpException(HttpStatusCode.NotFound, "Data not found");
+            }
             _context.ReceiveMoney.Remove(receiveMoney);
-
             await _context.SaveChangesAsync(cancellationToken);
+
+            // RECEIVE MONEY ATTACHMENT DELETE DATA
+            List<ReceiveMoneyAttachment> ReceiveMoneyAttachmentList = _context.ReceiveMoneyAttachment.Where<ReceiveMoneyAttachment>(x => x.TransId == request.Id).ToList();
+            if (ReceiveMoneyAttachmentList.Count > 0)
+            {
+                foreach (ReceiveMoneyAttachment item in ReceiveMoneyAttachmentList)
+                {
+                    FileInfo file = new FileInfo(item.FileUrl.Replace("https://localhost:7030/", "../TabpediaFin/"));
+                    if (file.Exists)
+                    {
+                        file.Delete();
+                    }
+                }
+                _context.ReceiveMoneyAttachment.RemoveRange(ReceiveMoneyAttachmentList);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+
+            // TAG
+            List<ReceiveMoneyTag> ReceiveMoneyTagList = _context.ReceiveMoneyTag.Where<ReceiveMoneyTag>(x => x.TransId == request.Id).ToList();
+            if (ReceiveMoneyTagList.Count > 0)
+            {
+                _context.ReceiveMoneyTag.RemoveRange(ReceiveMoneyTagList);
+                await _context.SaveChangesAsync(cancellationToken);
+
+            }
 
             result.IsOk = true;
             result.ErrorMessage = string.Empty;
-            result.Row = true;
         }
         catch (Exception ex)
         {
@@ -35,9 +62,4 @@ public class ReceiveMoneyDeleteHandler : IRequestHandler<ReceiveMoneyDeleteDto, 
 
         return result;
     }
-}
-
-public class ReceiveMoneyDeleteDto : IRequest<RowResponse<bool>>
-{
-    public int Id { get; set; }
 }

@@ -57,13 +57,11 @@ public class TransferMoneyFetchDto : BaseDto
     public int TransferFromAccountId { get; set; } = 0;
     public int DepositToAccountId { get; set; }
     public int Amount { get; set; } = 0;
-    public int Memo { get; set; } = 0;
-    //public int Tag { get; set; } = 0;
+    public string Memo { get; set; } = string.Empty;
     public string TransactionNumber { get; set; } = string.Empty;
-    //public string FileName { get; set; } = string.Empty;
     public DateTime TransactionDate { get; set; }
-    public List<TransferMoneyFetchTag> TagList { get; set; }
     public List<TransferMoneyFetchAttachment> AttachmentList { get; set; }
+    public List<TransferMoneyFetchTag> TagList { get; set; }
 }
 
 public class TransferMoneyFetchAttachment : BaseDto

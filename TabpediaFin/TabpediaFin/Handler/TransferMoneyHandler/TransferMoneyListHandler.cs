@@ -1,4 +1,5 @@
-﻿using TabpediaFin.Handler.ExpenseHandler;
+﻿using Org.BouncyCastle.Asn1.Ocsp;
+using TabpediaFin.Handler.ExpenseHandler;
 
 namespace TabpediaFin.Handler.TransferMoneyHandler;
 
@@ -42,16 +43,16 @@ public class TransferMoneyListHandler : IFetchPagedListHandler<TransferMoneyList
                 cn.Open();
 
                 var list = await cn.FetchListPagedAsync<TransferMoneyListDto>(pageNumber: req.PageNum
-                    , rowsPerPage: req.PageSize
-                    , conditions: sqlWhere
-                    , orderby: orderby
-                    , currentUser: _currentUser
-                    , parameters: parameters
+                , rowsPerPage: req.PageSize
+                , search: req.Search
+                , sortby: req.SortBy
+                , sortdesc: req.SortDesc
+                , currentUser: _currentUser
                     );
                 int recordCount = await cn.RecordCountAsync<TransferMoneyListDto>(sqlWhere, parameters);
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.List = list?.AsList() ?? new List<TransferMoneyListDto>();
+                result.List = list.List;
                 result.RecordCount = recordCount;
             }
         }
@@ -74,10 +75,10 @@ public class TransferMoneyListDto : BaseDto
     public int TransferFromAccountId { get; set; } = 0;
     public int DepositToAccountId { get; set; } = 0;
     public int Amount { get; set; } = 0;
-    public int Memo { get; set; } = 0;
-    //public int Tag { get; set; } = 0;
+    [Searchable]
+    public string Memo { get; set; } = "";
+    [Searchable]
     public string TransactionNumber { get; set; } = string.Empty;
-    //public string FileName { get; set; } = string.Empty;
     public DateTime TransactionDate { get; set; }
 }
 

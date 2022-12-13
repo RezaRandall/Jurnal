@@ -1,6 +1,4 @@
 ﻿using TabpediaFin.Domain.Expense;
-using TabpediaFin.Handler.ContactHandler;
-using TabpediaFin.Handler.UploadAttachmentHandler;
 
 namespace TabpediaFin.Handler.ExpenseHandler;
 
@@ -77,14 +75,14 @@ public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowRespons
         return result;
     }
 
-    public async Task<List<ExpenseFetchAttachment>> PostAttachmentAsync(List<ExpenseAttahmentFiles> filedata, int TransId, CancellationToken cancellationToken)
+    public async Task<List<ExpenseFetchAttachment>> PostAttachmentAsync(List<ExpenseAttachmentFiles> filedata, int TransId, CancellationToken cancellationToken)
     {
         List<ExpenseAttachment> ExpenseAttachmentList = new List<ExpenseAttachment>();
         List<ExpenseFetchAttachment> ExpenseFetchAttachmentList = new List<ExpenseFetchAttachment>();
 
         if (filedata.Count > 0)
         {
-            foreach (ExpenseAttahmentFiles item in filedata)
+            foreach (ExpenseAttachmentFiles item in filedata)
             {
                 ExpenseAttachmentList.Add(new ExpenseAttachment
                 {
@@ -157,11 +155,11 @@ public class ExpenseInsertDto : IRequest<RowResponse<ExpenseFetchDto>>
     public string Notes { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
-    public List<ExpenseAttahmentFiles> AttachmentFile { get; set; }
+    public List<ExpenseAttachmentFiles> AttachmentFile { get; set; }
     public List<ExpenseInsertTag> TagList { get; set; }
 }
 
-public class ExpenseAttahmentFiles
+public class ExpenseAttachmentFiles
 {
     public string FileName { get; set; } = string.Empty;
     public string FileUrl { get; set; } = string.Empty;

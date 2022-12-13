@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using TabpediaFin.Handler.TransferMoneyHandler;
 using TabpediaFin.Handler.UnitMeasures;
 
 namespace TabpediaFin.Controllers;
@@ -46,12 +47,9 @@ public class UnitMeasuresController : ApiControllerBase
 
     [HttpDelete("{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> Delete(int id)
+    public async Task Delete(int id)
     {
-
-        UnitMeasureDeleteDto command = new UnitMeasureDeleteDto();
-        command.Id = id;
-        return Result(await _mediator.Send(command));
+        await _mediator.Send(new DeleteByIdRequestDto<UnitMeasureDto>(id));
     }
 
 

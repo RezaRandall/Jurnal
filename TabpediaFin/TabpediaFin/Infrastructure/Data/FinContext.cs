@@ -26,6 +26,7 @@ public class FinContext : DbContext
 
     public DbSet<PaymentMethod> PaymentMethod { get; set; }
     public DbSet<Item> Item { get; set; }
+    public DbSet<ItemAttachment> ItemAttachment { get; set; }
     public DbSet<UnitMeasure> UnitMeasure { get; set; }
     public DbSet<ItemUnitMeasure> ItemUnitMeasure { get; set; }
     public DbSet<ItemItemCategory> ItemItemCategory { get; set; }

@@ -40,9 +40,7 @@ public class TransferMoneyInsertHandler : IRequestHandler<TransferMoneyInsertDto
             await _context.TransferMoney.AddAsync(transferMoney, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
             transIdResult = transferMoney.Id;
-            //UploadAttachmentService service = new UploadAttachmentService();
-            //List<uploadreturn> filedata = await service.UploadAttachmentAsync(request.AttachmentFile, _currentUser.TenantId, transIdResult);
-            //List<TransferMoneyFetchAttachment> returnfile = await PostAttachmentAsync(filedata, cancellationToken);
+            List<TransferMoneyFetchAttachment> returnfile = await PostAttachmentAsync(request.AttachmentFile, transIdResult, cancellationToken);
             List<TransferMoneyFetchTag> TagListResult = await PostTagAsync(request.TagList, transIdResult, cancellationToken);
 
             var row = new TransferMoneyFetchDto()
@@ -69,39 +67,39 @@ public class TransferMoneyInsertHandler : IRequestHandler<TransferMoneyInsertDto
         return result;
     }
 
-    //public async Task<List<TransferMoneyFetchAttachment>> PostAttachmentAsync(List<uploadreturn> filedata, CancellationToken cancellationToken)
-    //{
-    //    List<TransferMoneyAttachment> TransferMoneyAttachmentList = new List<TransferMoneyAttachment>();
-    //    List<TransferMoneyFetchAttachment> TransferMoneyFetchAttachmentList = new List<TransferMoneyFetchAttachment>();
+    public async Task<List<TransferMoneyFetchAttachment>> PostAttachmentAsync(List<TransferMoneyAttahmentFiles> filedata, int TransId, CancellationToken cancellationToken)
+    {
+        List<TransferMoneyAttachment> TransferMoneyAttachmentList = new List<TransferMoneyAttachment>();
+        List<TransferMoneyFetchAttachment> TransferMoneyFetchAttachmentList = new List<TransferMoneyFetchAttachment>();
 
-    //    if (filedata.Count > 0)
-    //    {
-    //        foreach (uploadreturn item in filedata)
-    //        {
-    //            TransferMoneyAttachmentList.Add(new TransferMoneyAttachment
-    //            {
-    //                FileName = item.FileName,
-    //                FileUrl = item.FileUrl,
-    //                Extension = item.Extension,
-    //                FileSize = item.FileSize,
-    //                TransId = item.TransId,
-    //            });
-    //            TransferMoneyFetchAttachmentList.Add(new TransferMoneyFetchAttachment
-    //            {
-    //                FileName = item.FileName,
-    //                FileUrl = item.FileUrl,
-    //                Extension = item.Extension,
-    //                FileSize = item.FileSize,
-    //                TransId = item.TransId,
-    //            });
-    //        }
+        if (filedata.Count > 0)
+        {
+            foreach (TransferMoneyAttahmentFiles item in filedata)
+            {
+                TransferMoneyAttachmentList.Add(new TransferMoneyAttachment
+                {
+                    FileName = item.FileName,
+                    FileUrl = item.FileUrl,
+                    Extension = item.Extension,
+                    FileSize = item.FileSize,
+                    TransId = TransId,
+                });
+                TransferMoneyFetchAttachmentList.Add(new TransferMoneyFetchAttachment
+                {
+                    FileName = item.FileName,
+                    FileUrl = item.FileUrl,
+                    Extension = item.Extension,
+                    FileSize = item.FileSize,
+                    TransId = TransId,
+                });
+            }
 
-    //        await _context.TransferMoneyAttachment.AddRangeAsync(TransferMoneyAttachmentList, cancellationToken);
-    //        await _context.SaveChangesAsync(cancellationToken);
-    //    }
+            await _context.TransferMoneyAttachment.AddRangeAsync(TransferMoneyAttachmentList, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
 
-    //    return TransferMoneyFetchAttachmentList;
-    //}
+        return TransferMoneyFetchAttachmentList;
+    }
 
     public async Task<List<TransferMoneyFetchTag>> PostTagAsync(List<TransferMoneyInsertTag> filedata, int TransId, CancellationToken cancellationToken)
     {
@@ -140,13 +138,19 @@ public class TransferMoneyInsertDto : IRequest<RowResponse<TransferMoneyFetchDto
     public int TransferFromAccountId { get; set; } = 0;
     public int DepositToAccountId { get; set; } = 0;
     public int Amount { get; set; } = 0;
-    public int Memo { get; set; } = 0;
-    //public int Tag { get; set; } = 0;
+    public string Memo { get; set; } = string.Empty;
     public string TransactionNumber { get; set; } = string.Empty;
-    //public string FileName { get; set; } = string.Empty;
     public DateTime TransactionDate { get; set; }
-    public ICollection<IFormFile> AttachmentFile { get; set; }
+    public List<TransferMoneyAttahmentFiles> AttachmentFile { get; set; }
     public List<TransferMoneyInsertTag> TagList { get; set; }
+}
+public class TransferMoneyAttahmentFiles
+{
+    public string FileName { get; set; } = string.Empty;
+    public string FileUrl { get; set; } = string.Empty;
+    public string FileSize { get; set; } = string.Empty;
+    public string Extension { get; set; } = string.Empty;
+    public int TransId { get; set; }
 }
 
 public class TransferMoneyInsertTag

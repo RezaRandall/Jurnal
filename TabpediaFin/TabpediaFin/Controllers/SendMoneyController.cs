@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TabpediaFin.Handler.CashAndBank;
 using TabpediaFin.Handler.SendMoneyHandler;
 
 namespace TabpediaFin.Controllers;
@@ -32,7 +33,7 @@ public class SendMoneyController : ApiControllerBase
 
     [HttpPost]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> Insert([FromForm] SendMoneyInsertDto command)
+    public async Task<IActionResult> Insert([FromBody] SendMoneyInsertDto command)
     {
         return Result(await _mediator.Send(command));
     }
@@ -46,11 +47,9 @@ public class SendMoneyController : ApiControllerBase
 
     [HttpDelete("{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> Delete(int id)
+    public async Task Delete(int id)
     {
-        SendMoneyDeleteDto command = new SendMoneyDeleteDto();
-        command.Id = id;
-        return Result(await _mediator.Send(command));
+        await _mediator.Send(new DeleteByIdRequestDto<SendMoneyFetchDto>(id));
     }
 
 

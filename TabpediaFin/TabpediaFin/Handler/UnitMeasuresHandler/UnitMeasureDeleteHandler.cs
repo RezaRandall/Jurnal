@@ -1,40 +1,29 @@
-﻿using TabpediaFin.Domain;
-using TabpediaFin.Handler.Item;
-using TabpediaFin.Handler.PaymentTerm;
+﻿using TabpediaFin.Handler.ItemUnitMeasureHandler;
+
 
 namespace TabpediaFin.Handler.UnitMeasures;
 
-public class UnitMeasureDeleteHandler : IRequestHandler<UnitMeasureDeleteDto, RowResponse<bool>>
+public class UnitMeasureDeleteHandler : IDeleteByIdHandler<UnitMeasureDto>
 {
     private readonly FinContext _context;
-    private readonly ICurrentUser _currentUser;
 
-    public UnitMeasureDeleteHandler(FinContext db, ICurrentUser currentUser)
+    public UnitMeasureDeleteHandler(FinContext db)
     {
         _context = db;
-        _currentUser = currentUser;
     }
 
-    public class CommandValidator : AbstractValidator<UnitMeasureDeleteDto>
-    {
-        public CommandValidator()
-        {
-            RuleFor(x => x.Id).NotNull().NotEmpty();
-        }
-    }
 
-    public async Task<RowResponse<bool>> Handle(UnitMeasureDeleteDto request, CancellationToken cancellationToken)
+    public async Task<RowResponse<UnitMeasureDto>> Handle(DeleteByIdRequestDto<UnitMeasureDto> request, CancellationToken cancellationToken)
     {
-        var result = new RowResponse<bool>();
+        var result = new RowResponse<UnitMeasureDto>();
         try
         {
-            var unitMeasureData = await _context.UnitMeasure.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-            if (unitMeasureData == null || unitMeasureData.Id == 0)
+            var unitMeasure = await _context.UnitMeasure.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            if (unitMeasure == null || unitMeasure.Id == 0)
             {
-                result.IsOk = false;
-                result.ErrorMessage = "Data not found";
+                throw new HttpException(HttpStatusCode.NotFound, "Data not found");
             }
-            _context.UnitMeasure.Remove(unitMeasureData);
+            _context.UnitMeasure.Remove(unitMeasure);
             await _context.SaveChangesAsync(cancellationToken);
         }
         catch (Exception ex)
@@ -49,8 +38,3 @@ public class UnitMeasureDeleteHandler : IRequestHandler<UnitMeasureDeleteDto, Ro
 
 }
 
-[Table("UnitMeasure")]
-public class UnitMeasureDeleteDto : IRequest<RowResponse<bool>>
-{
-    public int Id { get; set; } = 0;
-}
