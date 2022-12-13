@@ -18,7 +18,7 @@ namespace TabpediaFin.Handler.UploadAttachmentHandler
                 var uploads = Path.Combine(Directory.GetCurrentDirectory(), "UserUpload", "posts", _currentUser.TenantId.ToString());
                 string extension = System.IO.Path.GetExtension(request.fileupload.FileName);
                 var filePath = Path.Combine(uploads, uniqueFileName);
-                string host = "https://localhost:7030/";
+                string host = "https://finapidev.tabpedia.com/";
                 var FileUrl = host + "UserUpload/posts/" + _currentUser.TenantId.ToString() + "/" + uniqueFileName;
                 Directory.CreateDirectory(Path.GetDirectoryName(filePath));
 

@@ -13,11 +13,9 @@
         public async Task<RowResponse<PurchaseOrderFetchDto>> Handle(PurchaseOrderUpdateDto request, CancellationToken cancellationToken)
         {
             var result = new RowResponse<PurchaseOrderFetchDto>();
-            int PurchaseOrderidresult;
+            int transidresult;
             List<PurchaseOrderTag> PurchaseOrderAttachment = new List<PurchaseOrderTag>();
-            //List<ContactPerson> ContactPerson = new List<ContactPerson>();
             List<PurchaseOrderFetchAttachment> PurchaseOrderFetchAttachment = new List<PurchaseOrderFetchAttachment>();
-            //List<ContactPersonFetchDto> ContactPersonFetchDto = new List<ContactPersonFetchDto>();
             try
             {
                 var PurchaseOrder = await _context.PurchaseOrder.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
@@ -26,100 +24,35 @@
                 PurchaseOrder.TransDate = request.TransDate;
                 PurchaseOrder.DueDate = request.DueDate;
                 PurchaseOrder.TransCode = request.TransCode;
+                PurchaseOrder.Status = request.Status;
                 PurchaseOrder.Memo = request.Memo;
                 PurchaseOrder.Notes = request.Notes;
 
                 await _context.SaveChangesAsync(cancellationToken);
-                PurchaseOrderidresult = request.Id;
-                //if (request.TagList.Count > 0)
-                //{
-                //    foreach (PurchaseOrderUpdateTag item in request.TagList)
-                //    {
-                //        ContactAddress.Add(new ContactAddress
-                //        {
-                //            Id = item.Id,
-                //            ContactId = contactidresult,
-                //            AddressName = item.AddressName,
-                //            Address = item.Address,
-                //            CityName = item.CityName,
-                //            PostalCode = item.PostalCode,
-                //            AddressTypeId = item.AddressTypeId,
-                //            //AddresType = item.AddresType,
-                //            Notes = item.Notes,
-                //        });
-                //        ContactAddressFetchDto.Add(new ContactAddressFetchDto
-                //        {
-                //            Id = item.Id,
-                //            ContactId = contactidresult,
-                //            AddressName = item.AddressName,
-                //            Address = item.Address,
-                //            CityName = item.CityName,
-                //            PostalCode = item.PostalCode,
-                //            AddressTypeId = item.AddressTypeId,
-                //            Notes = item.Notes,
-                //        });
-                //    }
-                //    _context.ContactAddress.UpdateRange(ContactAddress);
-                //}
-                //if (request.ContactPersonList.Count > 0)
-                //{
-                //    foreach (ContactPersonUpdateDto item in request.ContactPersonList)
-                //    {
-                //        ContactPerson.Add(new ContactPerson
-                //        {
-                //            Id = item.Id,
-                //            ContactId = contactidresult,
-                //            Name = item.Name,
-                //            Email = item.Email,
-                //            Phone = item.Phone,
-                //            Fax = item.Fax,
-                //            Others = item.Others,
-                //            Notes = item.Notes,
-                //        });
-                //        ContactPersonFetchDto.Add(new ContactPersonFetchDto
-                //        {
-                //            Id = item.Id,
-                //            ContactId = contactidresult,
-                //            Name = item.Name,
-                //            Email = item.Email,
-                //            Phone = item.Phone,
-                //            Fax = item.Fax,
-                //            Others = item.Others,
-                //            Notes = item.Notes,
-                //        });
-                //    }
-                //    _context.ContactPerson.UpdateRange(ContactPerson);
-                //}
-                //if (ContactPerson.Count > 0 || ContactAddress.Count > 0)
-                //{
-                //    await _context.SaveChangesAsync(cancellationToken);
-                //}
+                transidresult = request.Id;
 
-                //var row = new ContactFetchDto()
-                //{
-                //    Id = request.Id,
-                //    Name = Contact.Name,
-                //    Address = Contact.Address,
-                //    CityName = Contact.CityName,
-                //    PostalCode = Contact.PostalCode,
-                //    Email = Contact.Email,
-                //    Phone = Contact.Phone,
-                //    Fax = Contact.Fax,
-                //    Website = Contact.Website,
-                //    Npwp = Contact.Npwp,
-                //    GroupId = Contact.GroupId,
-                //    IsCustomer = Contact.IsCustomer,
-                //    IsVendor = Contact.IsVendor,
-                //    IsEmployee = Contact.IsEmployee,
-                //    IsOther = Contact.IsOther,
-                //    Notes = Contact.Notes,
-                //    ContactAddressList = ContactAddressFetchDto,
-                //    ContactPersonList = ContactPersonFetchDto,
-                //};
+                List<PurchaseOrderFetchAttachment> returnfile = await UpdateAttachmentAsync(request.AttachmentFile, transidresult, cancellationToken);
+                List<PurchaseOrderFetchTag> TagListResult = await UpdateTagAsync(request.TagList, transidresult, cancellationToken);
+                List<PurchaseOrderFetchItem> ItemListResult = await UpdateItemAsync(request.ItemList, transidresult, cancellationToken);
+
+                var row = new PurchaseOrderFetchDto()
+                {
+                    Id = PurchaseOrder.Id,
+                    StaffId = PurchaseOrder.StaffId,
+                    VendorId = PurchaseOrder.VendorId,
+                    TransDate = PurchaseOrder.TransDate,
+                    DueDate = PurchaseOrder.DueDate,
+                    TransCode = PurchaseOrder.TransCode,
+                    Memo = PurchaseOrder.Memo,
+                    Notes = PurchaseOrder.Notes,
+                    AttachmentList = returnfile,
+                    TagList = TagListResult,
+                    ItemList = ItemListResult
+                };
 
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                //result.Row = row;
+                result.Row = row;
             }
             catch (Exception ex)
             {
@@ -129,20 +62,122 @@
 
             return result;
         }
+
+        public async Task<List<PurchaseOrderFetchAttachment>> UpdateAttachmentAsync(List<PurchestRequestAttahmentUpdateItem> filedata, int TransId, CancellationToken cancellationToken)
+        {
+            List<PurchaseOrderAttachment> PurchaseOrderAttachmentList = new List<PurchaseOrderAttachment>();
+            List<PurchaseOrderFetchAttachment> PurchaseOrderFetchAttachmentList = new List<PurchaseOrderFetchAttachment>();
+
+            if (filedata.Count > 0)
+            {
+                foreach (PurchestRequestAttahmentUpdateItem item in filedata)
+                {
+                    PurchaseOrderAttachmentList.Add(new PurchaseOrderAttachment
+                    {
+                        Id = item.Id,
+                        FileName = item.FileName,
+                        FileUrl = item.FileUrl,
+                        Extension = item.Extension,
+                        FileSize = item.FileSize,
+                        TransId = TransId,
+                    });
+                    PurchaseOrderFetchAttachmentList.Add(new PurchaseOrderFetchAttachment
+                    {
+                        Id = item.Id,
+                        FileName = item.FileName,
+                        FileUrl = item.FileUrl,
+                        Extension = item.Extension,
+                        FileSize = item.FileSize,
+                        TransId = TransId,
+                    });
+                }
+
+                _context.PurchaseOrderAttachment.UpdateRange(PurchaseOrderAttachmentList);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+
+            return PurchaseOrderFetchAttachmentList;
+        }
+        public async Task<List<PurchaseOrderFetchTag>> UpdateTagAsync(List<PurchaseOrderUpdateTag> filedata, int TransId, CancellationToken cancellationToken)
+        {
+            List<PurchaseOrderTag> PurchaseOrderTag = new List<PurchaseOrderTag>();
+            List<PurchaseOrderFetchTag> PurchaseOrderFetchTag = new List<PurchaseOrderFetchTag>();
+
+            if (filedata.Count > 0)
+            {
+                foreach (PurchaseOrderUpdateTag item in filedata)
+                {
+                    PurchaseOrderTag.Add(new PurchaseOrderTag
+                    {
+                        Id = item.Id,
+                        TagId = item.TagId,
+                        TransId = TransId
+                    });
+                    PurchaseOrderFetchTag.Add(new PurchaseOrderFetchTag
+                    {
+                        Id = item.Id,
+                        TagId = item.TagId,
+                        TransId = TransId
+                    });
+                }
+
+                _context.PurchaseOrderTag.UpdateRange(PurchaseOrderTag);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+
+            return PurchaseOrderFetchTag;
+        }
+        public async Task<List<PurchaseOrderFetchItem>> UpdateItemAsync(List<PurchaseOrderUpdateItem> filedata, int TransId, CancellationToken cancellationToken)
+        {
+            List<PurchaseOrderItem> PurchaseOrderItem = new List<PurchaseOrderItem>();
+            List<PurchaseOrderFetchItem> PurchaseOrderFetchItem = new List<PurchaseOrderFetchItem>();
+
+            if (filedata.Count > 0)
+            {
+                foreach (PurchaseOrderUpdateItem item in filedata)
+                {
+                    PurchaseOrderItem.Add(new PurchaseOrderItem
+                    {
+                        Id = item.Id,
+                        ItemId = item.ItemId,
+                        Quantity = item.Quantity,
+                        ItemUnitMeasureId = item.ItemUnitMeasureId,
+                        TransId = TransId
+
+                    });
+                    PurchaseOrderFetchItem.Add(new PurchaseOrderFetchItem
+                    {
+                        Id = item.Id,
+                        ItemId = item.ItemId,
+                        Quantity = item.Quantity,
+                        ItemUnitMeasureId = item.ItemUnitMeasureId,
+                        TransId = TransId
+                    });
+                }
+
+                await _context.PurchaseOrderItem.AddRangeAsync(PurchaseOrderItem, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+
+            return PurchaseOrderFetchItem;
+        }
     }
+
 
     public class PurchaseOrderUpdateDto : IRequest<RowResponse<PurchaseOrderFetchDto>>
     {
-        public int WarehouseId { get; set; }
         public int Id { get; set; }
         public int StaffId { get; set; }
         public int VendorId { get; set; }
         public DateTime TransDate { get; set; }
         public DateTime DueDate { get; set; }
         public string TransCode { get; set; } = string.Empty;
+        public string BudgetYear { get; set; } = string.Empty;
+        public int UrgentLevel { get; set; }
+        public int Status { get; set; }
         public string Memo { get; set; } = string.Empty;
         public string Notes { get; set; } = string.Empty;
-        public ICollection<IFormFile> AttachmentFile { get; set; }
+        public List<PurchestRequestAttahmentUpdateItem> AttachmentFile { get; set; }
         public List<PurchaseOrderUpdateTag> TagList { get; set; }
         public List<PurchaseOrderUpdateItem> ItemList { get; set; }
     }
@@ -158,7 +193,7 @@
         public int Id { get; set; }
         public int ItemId { get; set; }
         public int Quantity { get; set; }
-        public int UnitMeasureId { get; set; }
+        public int ItemUnitMeasureId { get; set; }
     }
 
     public class PurchestRequestAttahmentUpdateItem
@@ -168,6 +203,5 @@
         public string FileUrl { get; set; } = string.Empty;
         public string FileSize { get; set; } = string.Empty;
         public string Extension { get; set; } = string.Empty;
-        public int TransId { get; set; }
     }
 }

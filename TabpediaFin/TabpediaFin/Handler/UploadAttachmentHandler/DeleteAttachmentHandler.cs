@@ -13,7 +13,7 @@
 
             try
             {
-                FileInfo file = new FileInfo(request.FileUrl.Replace("https://localhost:7030/", "../TabpediaFin/"));
+                FileInfo file = new FileInfo(request.FileUrl.Replace("https://finapidev.tabpedia.com/", "../TabpediaFin/"));
                 if (file.Exists)
                 {
                     System.GC.Collect();
