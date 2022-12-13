@@ -2,7 +2,7 @@
 
 namespace TabpediaFin.Migrations;
 
-[Migration(202212071605)]
+[Migration(202212131658)]
 public class Table_ReceiveMoney : Migration
 {
     public override void Down()
@@ -14,6 +14,7 @@ public class Table_ReceiveMoney : Migration
     {
         Create.Table("ReceiveMoney")
             .WithColumn("Id").AsInt32().NotNullable().Identity().PrimaryKey()
+            .WithColumn("TenantId").AsInt32().NotNullable()
             .WithColumn("DepositToAccountId").AsInt32().NotNullable()
             .WithColumn("VendorId").AsInt32().Nullable()
             .WithColumn("TransactionDate").AsDateTime().NotNullable()

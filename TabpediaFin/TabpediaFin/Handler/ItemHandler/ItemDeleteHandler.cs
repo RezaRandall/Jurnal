@@ -1,4 +1,6 @@
-﻿namespace TabpediaFin.Handler.Item;
+﻿using TabpediaFin.Domain.Expense;
+
+namespace TabpediaFin.Handler.Item;
 
 public class ItemDeleteHandler : IDeleteByIdHandler<ItemDto>
 {
@@ -16,20 +18,44 @@ public class ItemDeleteHandler : IDeleteByIdHandler<ItemDto>
         var result = new RowResponse<ItemDto>();
         try
         {
+            //var itemData = await _context.Item.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            //if (itemData != null)
+            //{
+            //    _context.Item.Remove(itemData);
+            //    result.IsOk = true;
+            //    result.ErrorMessage = "Item with id " + request.Id + " has been deleted";
+            //}
+            //if (itemData == null)
+            //{
+            //    result.IsOk = false;
+            //    result.ErrorMessage = "Data not found";
+            //}
+            //    await _context.SaveChangesAsync(cancellationToken);
+            //    _cacheRemover.RemoveCache();
+
             var itemData = await _context.Item.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-            if (itemData != null)
+            if (itemData == null || itemData.Id == 0)
             {
-                _context.Item.Remove(itemData);
-                result.IsOk = true;
-                result.ErrorMessage = "Item with id " + request.Id + " has been deleted";
+                throw new HttpException(HttpStatusCode.NotFound, "Data not found");
             }
-            if (itemData == null)
+            _context.Item.Remove(itemData);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            // ITEM ATTACHMENT
+            List<ItemAttachment> ItemAttachmentList = _context.ItemAttachment.Where<ItemAttachment>(x => x.ItemId == request.Id).ToList();
+            if (ItemAttachmentList.Count > 0)
             {
-                result.IsOk = false;
-                result.ErrorMessage = "Data not found";
-            }
+                foreach (ItemAttachment item in ItemAttachmentList)
+                {
+                    FileInfo file = new FileInfo(item.FileUrl.Replace("https://localhost:7030/", "../TabpediaFin/"));
+                    if (file.Exists)
+                    {
+                        file.Delete();
+                    }
+                }
+                _context.ItemAttachment.RemoveRange(ItemAttachmentList);
                 await _context.SaveChangesAsync(cancellationToken);
-                _cacheRemover.RemoveCache();
+            }
         }
         catch (Exception ex)
         {

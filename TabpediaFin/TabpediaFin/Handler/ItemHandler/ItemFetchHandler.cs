@@ -1,5 +1,6 @@
 ﻿using TabpediaFin.Handler.ContactAddressHandler;
 using TabpediaFin.Handler.ContactPersonHandler;
+using TabpediaFin.Handler.ExpenseHandler;
 using TabpediaFin.Handler.ItemItemCategoryHandler;
 using TabpediaFin.Handler.ItemUnitMeasureHandler;
 
@@ -72,4 +73,14 @@ public class ItemDto : BaseDto
 
     public List<ItemItemCategoryFetchDto> ItemItemCategoryList { get; set; }
     public List<ItemUnitMeasureFetchDto> ItemUnitMeasureList { get; set; }
+    public List<ItemFetchAttachment> ItemAttachmentList { get; set; }
+}
+
+public class ItemFetchAttachment : BaseDto
+{
+    public string FileName { get; set; } = string.Empty;
+    public string FileUrl { get; set; } = string.Empty;
+    public string Extension { get; set; } = string.Empty;
+    public string FileSize { get; set; } = string.Empty;
+    public int ItemId { get; set; }
 }

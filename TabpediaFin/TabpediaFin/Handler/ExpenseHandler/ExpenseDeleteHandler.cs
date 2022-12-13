@@ -1,6 +1,5 @@
 ﻿using TabpediaFin.Domain.Expense;
-using TabpediaFin.Dto.Common.Request;
-using TabpediaFin.Handler.ExpenseCategoryHandler;
+
 
 namespace TabpediaFin.Handler.ExpenseHandler;
 
@@ -8,7 +7,7 @@ public class ExpenseDeleteHandler : IDeleteByIdHandler<ExpenseFetchDto>
 {
     private readonly FinContext _context;
 
-    public ExpenseDeleteHandler(FinContext db, ICurrentUser currentUser)
+    public ExpenseDeleteHandler(FinContext db)
     {
         _context = db;
     }
@@ -18,6 +17,7 @@ public class ExpenseDeleteHandler : IDeleteByIdHandler<ExpenseFetchDto>
         var result = new RowResponse<ExpenseFetchDto>();
         try
         {
+            // EXPENSE
             var expense = await _context.Expense.FirstAsync(x => x.Id == request.Id, cancellationToken);
             if (expense == null || expense.Id == 0)
             {
@@ -26,6 +26,7 @@ public class ExpenseDeleteHandler : IDeleteByIdHandler<ExpenseFetchDto>
             _context.Expense.Remove(expense);
             await _context.SaveChangesAsync(cancellationToken);
 
+            // EXPENSE ATTACHMENT
             List<ExpenseAttachment> ExpenseAttachmentList = _context.ExpenseAttachment.Where<ExpenseAttachment>(x => x.TransId == request.Id).ToList();
             if (ExpenseAttachmentList.Count > 0)
             {

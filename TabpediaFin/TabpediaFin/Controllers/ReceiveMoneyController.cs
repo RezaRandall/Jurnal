@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using TabpediaFin.Handler.ExpenseHandler;
 using TabpediaFin.Handler.ReceiveMoneyHandler;
+using TabpediaFin.Handler.TransferMoneyHandler;
 
 namespace TabpediaFin.Controllers;
 
@@ -30,7 +32,7 @@ public class ReceiveMoneyController : ApiControllerBase
 
     [HttpPost]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> Insert([FromForm] ReceiveMoneyInsertDto command)
+    public async Task<IActionResult> Insert([FromBody] ReceiveMoneyInsertDto command)
     {
         return Result(await _mediator.Send(command));
     }
@@ -44,10 +46,8 @@ public class ReceiveMoneyController : ApiControllerBase
 
     [HttpDelete("{id}")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> Delete(int id)
+    public async Task Delete(int id)
     {
-        ReceiveMoneyDeleteDto command = new ReceiveMoneyDeleteDto();
-        command.Id = id;
-        return Result(await _mediator.Send(command));
+        await _mediator.Send(new DeleteByIdRequestDto<ReceiveMoneyFetchDto>(id));
     }
 }

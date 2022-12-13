@@ -1,4 +1,5 @@
 ﻿using TabpediaFin.Domain;
+using TabpediaFin.Domain.Expense;
 using TabpediaFin.Handler.ExpenseCategoryHandler;
 
 namespace TabpediaFin.Handler.ExpenseHandler;
@@ -16,9 +17,12 @@ public class ExpenseUpdateHandler : IRequestHandler<ExpenseUpdateDto, RowRespons
 
     public async Task<RowResponse<ExpenseFetchDto>> Handle(ExpenseUpdateDto request, CancellationToken cancellationToken)
     {
+        int expenseId;
         var result = new RowResponse<ExpenseFetchDto>();
-        List<ExpenseFetchTag> ExpenseFetchTagList = new List<ExpenseFetchTag>();
-        List<ExpenseFetchAttachment> ExpenseFetchAttachmentList = new List<ExpenseFetchAttachment>();
+        List<ExpenseAttachment> ExpenseAttachmentList = new List<ExpenseAttachment>();
+        List<ExpenseFetchAttachment> ExpenseFetchAttachmentDto = new List<ExpenseFetchAttachment>();
+        List<ExpenseTag> ExpenseTagList = new List<ExpenseTag>();
+        List<ExpenseFetchTag> ExpenseFetchTagDto = new List<ExpenseFetchTag>();
 
         try
         {
@@ -37,8 +41,30 @@ public class ExpenseUpdateHandler : IRequestHandler<ExpenseUpdateDto, RowRespons
             expense.TaxId = request.TaxId;
 
             await _context.SaveChangesAsync(cancellationToken);
+            expenseId = request.Id;
 
-            var row = new ExpenseFetchDto()
+            if (request.AttachmentFileList.Count > 0)
+            {
+                foreach (ExpenseAttachment item in request.AttachmentFileList)
+                {
+                    ExpenseAttachmentList.Add(new ExpenseAttachment
+                    {
+                        TransId = item.Id,
+                        FileName = item.FileName,
+                        FileUrl = item.FileUrl,
+                        Extension = item.Extension,
+                        FileSize = item.FileSize,
+                        UpdatedUid = _currentUser.TenantId
+                    });
+                    //ExpenseFetchAttachmentDto.Add(new ExpenseFetchAttachment
+                    //{
+                    //    TransId
+                    //});
+                }
+            }
+
+
+                var row = new ExpenseFetchDto()
             {
                 Id = request.Id,
                 TransNum = request.TransNum,
@@ -84,7 +110,7 @@ public class ExpenseUpdateDto : IRequest<RowResponse<ExpenseFetchDto>>
     public string Notes { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
-    public ICollection<ExpenseAttahmentFiles> AttachmentFile { get; set; }
+    public List<ExpenseAttachment> AttachmentFileList { get; set; }
     public List<ExpenseUpdateTag> TagList { get; set; }
 }
 
