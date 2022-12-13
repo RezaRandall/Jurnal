@@ -44,7 +44,7 @@ namespace TabpediaFin.Handler.ContactHandler
                 contactidresult = request.Id;
                 if (request.ContactAddressList.Count > 0)
                 {
-                    foreach (ContactAddressUpdateDto item in request.ContactAddressList)
+                    foreach (ContactAddressUpdate item in request.ContactAddressList)
                     {
                         ContactAddress.Add(new ContactAddress
                         {
@@ -75,7 +75,7 @@ namespace TabpediaFin.Handler.ContactHandler
                 }
                 if (request.ContactPersonList.Count > 0)
                 {
-                    foreach (ContactPersonUpdateDto item in request.ContactPersonList)
+                    foreach (ContactPersonUpdate item in request.ContactPersonList)
                     {
                         ContactPerson.Add(new ContactPerson
                         {
@@ -162,8 +162,30 @@ namespace TabpediaFin.Handler.ContactHandler
         public bool IsEmployee { get; set; }
         public bool IsOther { get; set; }
         public string Notes { get; set; } = string.Empty;
-        public List<ContactAddressUpdateDto> ContactAddressList { get; set; }
-        public List<ContactPersonUpdateDto> ContactPersonList { get; set; }
+        public List<ContactAddressUpdate> ContactAddressList { get; set; }
+        public List<ContactPersonUpdate> ContactPersonList { get; set; }
 
+    }
+
+    public class ContactAddressUpdate
+    {
+        public int Id { get; set; }
+        public string AddressName { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
+        public string CityName { get; set; } = string.Empty;
+        public string PostalCode { get; set; } = string.Empty;
+        public int AddressTypeId { get; set; } = 0;
+        public string AddresType { get; set; } = string.Empty;
+        public string Notes { get; set; } = string.Empty;
+    }
+    public class ContactPersonUpdate
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        public string Fax { get; set; } = string.Empty;
+        public string Others { get; set; } = string.Empty;
+        public string Notes { get; set; } = string.Empty;
     }
 }
