@@ -81,6 +81,7 @@ public class FinContext : DbContext
     public DbSet<SalesBillingTag> SalesBillingTag { get; set; }
     public DbSet<SalesBillingAttachment> SalesBillingAttachment { get; set; }
     public DbSet<SalesBillingItem> SalesBillingItem { get; set; }
+    public DbSet<ItemStock> ItemStock { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
