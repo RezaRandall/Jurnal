@@ -17,7 +17,7 @@
             {
                 using (var cn = _dbManager.CreateConnection())
                 {
-                    var sql = @"SELECT i.*, c.""Name"" as AddressType FROM ""ContactAddress"" i LEFT JOIN ""AddressType"" c on i.""AddressTypeId"" = c.""Id""  WHERE i.""TenantId"" = @TenantId AND i.""Id"" = @Id";
+                    var sql = @"SELECT i.*, c.""Name"" as AddressType FROM ""ContactAddress"" i LEFT JOIN ""ContactAddressType"" c on i.""AddressTypeId"" = c.""Id""  WHERE i.""TenantId"" = @TenantId AND i.""Id"" = @Id";
 
                     var parameters = new DynamicParameters();
                     parameters.Add("TenantId", _currentUser.TenantId);
