@@ -1,6 +1,4 @@
-﻿using TabpediaFin.Handler.ExpenseHandler;
-
-namespace TabpediaFin.Handler.CashAndBank;
+﻿namespace TabpediaFin.Handler.CashAndBank;
 
 public class AccountCashAndBankInsertHandler : IRequestHandler<AccountCashAndBankInsertDto, RowResponse<AccountCashAndBankFetchDto>>
 {

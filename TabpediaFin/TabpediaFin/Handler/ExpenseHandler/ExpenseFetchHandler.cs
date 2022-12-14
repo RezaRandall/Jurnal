@@ -57,14 +57,14 @@ public class ExpenseFetchDto : BaseDto
     public int ContactId { get; set; } = 0;
     public int PaymentMethodId { get; set; } = 0;
     public int PaymentTermId { get; set; } = 0;
-    public Int64 Amount { get; set; } = 0;
+    public int Amount { get; set; } = 0;
     public int DiscountTypeId { get; set; } = 0;
     public int DiscountPercent { get; set; } = 0;
-    public Int64 DiscountAmount { get; set; } = 0;
+    public int DiscountAmount { get; set; } = 0;
     public string Notes { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
-    public List<ExpenseFetchTag> TagList { get; set; } = new List<ExpenseFetchTag>();
+    public List<ExpenseFetchTag> TagList { get; set; }
     public List<ExpenseFetchAttachment> AttachmentList { get; set; }
 }
 

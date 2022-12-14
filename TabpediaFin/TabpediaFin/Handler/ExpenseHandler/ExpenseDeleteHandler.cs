@@ -1,6 +1,5 @@
 ﻿using TabpediaFin.Domain.Expense;
 
-
 namespace TabpediaFin.Handler.ExpenseHandler;
 
 public class ExpenseDeleteHandler : IDeleteByIdHandler<ExpenseFetchDto>

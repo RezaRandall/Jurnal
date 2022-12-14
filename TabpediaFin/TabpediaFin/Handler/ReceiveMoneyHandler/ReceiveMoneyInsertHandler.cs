@@ -25,7 +25,7 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
 
         var receiveMoney = new ReceiveMoney()
         {
-            DepositFromAccountId = request.DepositFromAccountId,
+            DepositToAccountId = request.DepositToAccountId,
             VendorId = request.VendorId,
             TransactionDate = TransDate,
             TransactionNo = request.TransactionNo,
@@ -48,7 +48,7 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
 
             var row = new ReceiveMoneyFetchDto()
             {
-                DepositFromAccountId = receiveMoney.DepositFromAccountId,
+                DepositToAccountId = receiveMoney.DepositToAccountId,
                 VendorId = receiveMoney.VendorId,
                 TransactionDate = receiveMoney.TransactionDate,
                 TransactionNo = receiveMoney.TransactionNo,
@@ -142,10 +142,10 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
 
 public class ReceiveMoneyInsertDto : IRequest<RowResponse<ReceiveMoneyFetchDto>>
 {
-    public int DepositFromAccountId { get; set; } = 0;
+    public int DepositToAccountId { get; set; } = 0;
     public int VendorId { get; set; } = 0;
     public DateTime TransactionDate { get; set; }
-    public int TransactionNo { get; set; } = 0;
+    public string TransactionNo { get; set; } = String.Empty;
     public bool PriceIncludesTax { get; set; } = false;
     public int ReceiveFromAccountId { get; set; } = 0;
     public string Description { get; set; } = string.Empty;

@@ -18,21 +18,6 @@ public class ItemDeleteHandler : IDeleteByIdHandler<ItemDto>
         var result = new RowResponse<ItemDto>();
         try
         {
-            //var itemData = await _context.Item.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-            //if (itemData != null)
-            //{
-            //    _context.Item.Remove(itemData);
-            //    result.IsOk = true;
-            //    result.ErrorMessage = "Item with id " + request.Id + " has been deleted";
-            //}
-            //if (itemData == null)
-            //{
-            //    result.IsOk = false;
-            //    result.ErrorMessage = "Data not found";
-            //}
-            //    await _context.SaveChangesAsync(cancellationToken);
-            //    _cacheRemover.RemoveCache();
-
             var itemData = await _context.Item.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (itemData == null || itemData.Id == 0)
             {

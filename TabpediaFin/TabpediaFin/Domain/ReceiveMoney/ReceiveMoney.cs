@@ -2,10 +2,10 @@
 
 public class ReceiveMoney : BaseEntity
 {
-    public int DepositFromAccountId { get; set; } = 0;
+    public int DepositToAccountId { get; set; } = 0;
     public int VendorId { get; set; } = 0;
     public DateTime TransactionDate { get; set; } 
-    public int TransactionNo { get; set; } = 0;
+    public string TransactionNo { get; set; } = string.Empty;
     public bool PriceIncludesTax { get; set; } = false;
     public int ReceiveFromAccountId { get; set; } = 0;
     public string Description { get; set; } = string.Empty;

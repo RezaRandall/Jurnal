@@ -19,6 +19,7 @@ public class Table_ReceiveMoney : Migration
             .WithColumn("VendorId").AsInt32().Nullable()
             .WithColumn("TransactionDate").AsDateTime().NotNullable()
             .WithColumn("TransactionNo").AsString(100).NotNullable()
+            .WithColumn("PriceIncludesTax").AsBoolean().NotNullable().WithDefaultValue(false)
             .WithColumn("ReceiveFromAccountId").AsInt32().NotNullable()
             .WithColumn("Description").AsString(100).Nullable()
             .WithColumn("TaxId").AsInt32().Nullable()

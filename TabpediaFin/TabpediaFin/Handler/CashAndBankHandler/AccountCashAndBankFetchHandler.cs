@@ -1,6 +1,4 @@
-﻿using TabpediaFin.Handler.ExpenseCategoryHandler;
-
-namespace TabpediaFin.Handler.CashAndBank;
+﻿namespace TabpediaFin.Handler.CashAndBank;
 
 public class AccountCashAndBankFetchHandler : IFetchByIdHandler<AccountCashAndBankFetchDto>
 {

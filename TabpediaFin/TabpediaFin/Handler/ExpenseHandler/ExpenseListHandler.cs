@@ -1,4 +1,6 @@
-﻿namespace TabpediaFin.Handler.ExpenseHandler;
+﻿using Org.BouncyCastle.Asn1.Ocsp;
+
+namespace TabpediaFin.Handler.ExpenseHandler;
 
 public class ExpenseListHandler : IFetchPagedListHandler<ExpenseListDto>
 {
@@ -11,45 +13,30 @@ public class ExpenseListHandler : IFetchPagedListHandler<ExpenseListDto>
         _currentUser = currentUser;
     }
 
-    public async Task<PagedListResponse<ExpenseListDto>> Handle(FetchPagedListRequestDto<ExpenseListDto> req, CancellationToken cancellationToken)
+    public async Task<PagedListResponse<ExpenseListDto>> Handle(FetchPagedListRequestDto<ExpenseListDto> request, CancellationToken cancellationToken)
     {
-        if (req.PageNum == 0) { req.PageNum = 1; }
-        if (req.PageSize == 0) { req.PageSize = 10; }
+        if (request.PageNum == 0) { request.PageNum = 1; }
+        if (request.PageSize == 0) { request.PageSize = 10; }
 
         var result = new PagedListResponse<ExpenseListDto>();
 
         try
         {
-            string sqlWhere = " WHERE (1=1) ";
-            var parameters = new DynamicParameters();
-
-            if (!string.IsNullOrWhiteSpace(req.Search))
-            {
-                sqlWhere += SqlHelper.GenerateWhere<ExpenseListDto>();
-                parameters.Add("Search", $"%{req.Search.Trim().ToLowerInvariant()}%");
-            }
-
-            var orderby = string.Empty;
-            if (string.IsNullOrWhiteSpace(req.SortBy))
-            {
-                orderby = SqlHelper.GenerateOrderBy(req.SortBy, req.SortDesc);
-            }
-
             using (var cn = _dbManager.CreateConnection())
             {
                 cn.Open();
 
-                var list = await cn.FetchListPagedAsync<ExpenseListDto>(pageNumber: req.PageNum
-                , rowsPerPage: req.PageSize
-                , search: req.Search
-                , sortby: req.SortBy
-                , sortdesc: req.SortDesc
-                , currentUser: _currentUser);
+                var q = await cn.FetchListPagedAsync<ExpenseListDto>(pageNumber: request.PageNum
+                , rowsPerPage: request.PageSize
+                , search: request.Search
+                , sortby: request.SortBy
+                    , sortdesc: request.SortDesc
+                    , currentUser: _currentUser);
 
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.List = list.List;
-                result.RecordCount = list.TotalRecord;
+                result.List = q.List;
+                result.RecordCount = q.TotalRecord;
             }
         }
         catch (Exception ex)
@@ -57,6 +44,7 @@ public class ExpenseListHandler : IFetchPagedListHandler<ExpenseListDto>
             result.IsOk = false;
             result.ErrorMessage = ex.Message;
         }
+
         return result;
     }
 }
@@ -70,10 +58,10 @@ public class ExpenseListDto : BaseDto
     public int ContactId { get; set; } = 0;
     public int PaymentMethodId { get; set; } = 0;
     public int PaymentTermId { get; set; } = 0;
-    public Int64 Amount { get; set; } = 0;
+    public int Amount { get; set; } = 0;
     public int DiscountTypeId { get; set; } = 0;
     public int DiscountPercent { get; set; } = 0;
-    public Int64 DiscountAmount { get; set; } = 0;
+    public int DiscountAmount { get; set; } = 0;
     [Searchable]
     public string Notes { get; set; } = string.Empty;
     [Searchable]

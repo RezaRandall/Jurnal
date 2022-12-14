@@ -1,5 +1,4 @@
-﻿
-using TabpediaFin.Handler.CashAndBank;
+﻿using TabpediaFin.Handler.CashAndBank;
 
 public class AccountCashAndBankDeleteHandler : IDeleteByIdHandler<AccountCashAndBankFetchDto>
 {

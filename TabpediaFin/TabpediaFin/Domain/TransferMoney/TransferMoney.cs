@@ -6,8 +6,6 @@ public class TransferMoney : BaseEntity
     public int DepositToAccountId { get; set; }
     public int Amount { get; set; } = 0;
     public string Memo { get; set; } = string.Empty;
-    //public int Tag { get; set; } = 0;
     public string TransactionNumber { get; set; } = string.Empty;
-    //public int FileName { get; set; } = 0;
     public DateTime TransactionDate { get; set; }
 }
