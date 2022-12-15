@@ -1,7 +1,4 @@
-﻿using Org.BouncyCastle.Asn1.Ocsp;
-using TabpediaFin.Handler.ExpenseHandler;
-
-namespace TabpediaFin.Handler.TransferMoneyHandler;
+﻿namespace TabpediaFin.Handler.TransferMoneyHandler;
 
 public class TransferMoneyListHandler : IFetchPagedListHandler<TransferMoneyListDto>
 {
@@ -32,10 +29,11 @@ public class TransferMoneyListHandler : IFetchPagedListHandler<TransferMoneyList
                 parameters.Add("Search", $"%{req.Search.Trim().ToLowerInvariant()}%");
             }
 
-            var orderby = string.Empty;
+            //var orderby = string.Empty;
             if (string.IsNullOrWhiteSpace(req.SortBy))
             {
-                orderby = SqlHelper.GenerateOrderBy(req.SortBy, req.SortDesc);
+                //orderby = SqlHelper.GenerateOrderBy(req.SortBy, req.SortDesc);
+                req.SortBy = SqlHelper.GenerateOrderBy(req.SortBy, req.SortDesc, "CreatedUtc");
             }
 
             using (var cn = _dbManager.CreateConnection())
@@ -69,6 +67,11 @@ public class TransferMoneyListHandler : IFetchPagedListHandler<TransferMoneyList
 
 
 
+
+
+
+
+
 [Table("TransferMoney")]
 public class TransferMoneyListDto : BaseDto
 {
@@ -76,9 +79,8 @@ public class TransferMoneyListDto : BaseDto
     public int DepositToAccountId { get; set; } = 0;
     public int Amount { get; set; } = 0;
     [Searchable]
-    public string Memo { get; set; } = "";
+    public string Memo { get; set; } = string.Empty;
     [Searchable]
     public string TransactionNumber { get; set; } = string.Empty;
     public DateTime TransactionDate { get; set; }
 }
-

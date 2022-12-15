@@ -1,6 +1,4 @@
-﻿using Org.BouncyCastle.Asn1.Ocsp;
-
-namespace TabpediaFin.Handler.ExpenseHandler;
+﻿namespace TabpediaFin.Handler.ExpenseHandler;
 
 public class ExpenseListHandler : IFetchPagedListHandler<ExpenseListDto>
 {
@@ -15,37 +13,59 @@ public class ExpenseListHandler : IFetchPagedListHandler<ExpenseListDto>
 
     public async Task<PagedListResponse<ExpenseListDto>> Handle(FetchPagedListRequestDto<ExpenseListDto> request, CancellationToken cancellationToken)
     {
-        if (request.PageNum == 0) { request.PageNum = 1; }
+        if (request.PageNum == 0) { request.PageNum = 0; }
         if (request.PageSize == 0) { request.PageSize = 10; }
 
-        var result = new PagedListResponse<ExpenseListDto>();
+        var response = new PagedListResponse<ExpenseListDto>();
 
         try
         {
-            using (var cn = _dbManager.CreateConnection())
+            using (var conn = _dbManager.CreateConnection())
             {
-                cn.Open();
+                string sqlsort = "";
+                string sqlsearch = "";
+                string expensefilter = "";
 
-                var q = await cn.FetchListPagedAsync<ExpenseListDto>(pageNumber: request.PageNum
-                , rowsPerPage: request.PageSize
-                , search: request.Search
-                , sortby: request.SortBy
-                    , sortdesc: request.SortDesc
-                    , currentUser: _currentUser);
+                if (request.SortBy != null && request.SortBy != "")
+                {
+                    sqlsort = @" order by """ + request.SortBy + "\" ASC";
 
-                result.IsOk = true;
-                result.ErrorMessage = string.Empty;
-                result.List = q.List;
-                result.RecordCount = q.TotalRecord;
+                    if (request.SortDesc == true)
+                    {
+                        sqlsort = @" order by """ + request.SortBy + "\" ASC";
+                    }
+                }
+
+                if (request.Search != null && request.Search != "")
+                {
+                    sqlsearch = @"AND LOWER(""TransNum"") LIKE @Search OR LOWER(""Notes"") LIKE @Search OR LOWER(""Description"") LIKE @Search";
+                }
+
+                var sql = @"SELECT  *
+                          FROM ""Expense"" WHERE ""TenantId"" = @TenantId " + expensefilter + " " + sqlsearch + " " + sqlsort + " LIMIT @PageSize OFFSET @PageNum";
+
+                var parameters = new DynamicParameters();
+                parameters.Add("TenantId", _currentUser.TenantId);
+                parameters.Add("PageSize", request.PageSize);
+                parameters.Add("PageNum", request.PageNum);
+                parameters.Add("Search", $"%{request.Search.Trim().ToLowerInvariant()}%");
+
+                List<ExpenseListDto> result;
+                result = (await conn.QueryAsync<ExpenseListDto>(sql, parameters).ConfigureAwait(false)).ToList();
+
+                response.RecordCount = result.Count;
+
+                response.IsOk = true;
+                response.List = result;
+                response.ErrorMessage = string.Empty;
             }
         }
         catch (Exception ex)
         {
-            result.IsOk = false;
-            result.ErrorMessage = ex.Message;
+            response.IsOk = false;
+            response.ErrorMessage = ex.Message;
         }
-
-        return result;
+        return response;
     }
 }
 

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TabpediaFin.Domain;
 using TabpediaFin.Domain.Expense;
 using TabpediaFin.Domain.ReceiveMoney;
 using TabpediaFin.Domain.SendMoney;

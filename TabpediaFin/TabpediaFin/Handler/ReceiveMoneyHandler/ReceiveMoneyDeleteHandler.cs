@@ -1,5 +1,4 @@
 ﻿using TabpediaFin.Domain.ReceiveMoney;
-using TabpediaFin.Domain.TransferMoney;
 
 namespace TabpediaFin.Handler.ReceiveMoneyHandler;
 

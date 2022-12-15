@@ -1,6 +1,4 @@
-﻿using TabpediaFin.Handler.TransferMoneyHandler;
-
-namespace TabpediaFin.Handler.ReceiveMoneyHandler;  
+﻿namespace TabpediaFin.Handler.ReceiveMoneyHandler;  
 
 public class ReceiveMoneyListHandler : IFetchPagedListHandler<ReceiveMoneyListDto>
 {
@@ -31,10 +29,10 @@ public class ReceiveMoneyListHandler : IFetchPagedListHandler<ReceiveMoneyListDt
                 parameters.Add("Search", $"%{req.Search.Trim().ToLowerInvariant()}%");
             }
 
-            var orderby = string.Empty;
+            //var orderby = string.Empty;
             if (string.IsNullOrWhiteSpace(req.SortBy))
             {
-                orderby = SqlHelper.GenerateOrderBy(req.SortBy, req.SortDesc);
+                req.SortBy = SqlHelper.GenerateOrderBy(req.SortBy, req.SortDesc, "CreatedUtc");
             }
 
             using (var cn = _dbManager.CreateConnection())
@@ -42,16 +40,16 @@ public class ReceiveMoneyListHandler : IFetchPagedListHandler<ReceiveMoneyListDt
                 cn.Open();
 
                 var list = await cn.FetchListPagedAsync<ReceiveMoneyListDto>(pageNumber: req.PageNum
-                    , rowsPerPage: req.PageSize
-                    , conditions: sqlWhere
-                    , orderby: orderby
-                    , currentUser: _currentUser
-                    , parameters: parameters
+                   , rowsPerPage: req.PageSize
+                   , search: req.Search
+                   , sortby: req.SortBy
+                   , sortdesc: req.SortDesc
+                   , currentUser: _currentUser
                     );
                 int recordCount = await cn.RecordCountAsync<ReceiveMoneyListDto>(sqlWhere, parameters);
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.List = list?.AsList() ?? new List<ReceiveMoneyListDto>();
+                result.List = list.List;
                 result.RecordCount = recordCount;
             }
         }
@@ -69,7 +67,7 @@ public class ReceiveMoneyListHandler : IFetchPagedListHandler<ReceiveMoneyListDt
 public class ReceiveMoneyListDto : BaseDto
 {
     public int DepositToAccountId { get; set; } = 0;
-    public int ContactId { get; set; } = 0;
+    public int VendorId { get; set; } = 0;
     public DateTime TransactionDate { get; set; }
     public string TransactionNo { get; set; } = string.Empty;
     public bool PriceIncludesTax { get; set; } = false;

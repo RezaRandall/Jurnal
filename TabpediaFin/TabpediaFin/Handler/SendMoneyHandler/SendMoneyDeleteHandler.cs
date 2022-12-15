@@ -1,5 +1,4 @@
-﻿using TabpediaFin.Domain.ReceiveMoney;
-using TabpediaFin.Domain.SendMoney;
+﻿using TabpediaFin.Domain.SendMoney;
 
 namespace TabpediaFin.Handler.SendMoneyHandler;
 

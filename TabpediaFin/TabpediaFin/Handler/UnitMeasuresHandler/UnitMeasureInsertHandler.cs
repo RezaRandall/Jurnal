@@ -1,12 +1,4 @@
-﻿using TabpediaFin.Handler.ContactAddressHandler;
-using TabpediaFin.Handler.ContactHandler;
-using TabpediaFin.Handler.Item;
-using TabpediaFin.Handler.ItemUnitMeasureHandler;
-
-namespace TabpediaFin.Handler.UnitMeasures;
-
-// INSERT INTO SINGLE TABLE 
-
+﻿namespace TabpediaFin.Handler.UnitMeasures;
 public class UnitMeasureInsertHandler : IRequestHandler<UnitMeasureInsertDto, RowResponse<UnitMeasureDto>>
 {
     private readonly FinContext _context;

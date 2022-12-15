@@ -1,6 +1,4 @@
-﻿using TabpediaFin.Handler.Item;
-
-namespace TabpediaFin.Handler.UnitMeasures;
+﻿namespace TabpediaFin.Handler.UnitMeasures;
 
 public class UnitMeasureUpdateHandler : IRequestHandler<UnitMeasureUpdateDto, RowResponse<UnitMeasureDto>>
 {

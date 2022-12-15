@@ -1,6 +1,4 @@
-﻿using TabpediaFin.Domain.Expense;
-
-namespace TabpediaFin.Handler.Item;
+﻿namespace TabpediaFin.Handler.Item;
 
 public class ItemDeleteHandler : IDeleteByIdHandler<ItemDto>
 {

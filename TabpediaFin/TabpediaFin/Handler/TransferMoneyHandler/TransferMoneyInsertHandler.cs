@@ -1,9 +1,4 @@
-﻿
-
-using TabpediaFin.Domain.Expense;
-using TabpediaFin.Domain.TransferMoney;
-using TabpediaFin.Handler.ExpenseHandler;
-using TabpediaFin.Handler.UploadAttachmentHandler;
+﻿using TabpediaFin.Domain.TransferMoney;
 
 namespace TabpediaFin.Handler.TransferMoneyHandler;
 

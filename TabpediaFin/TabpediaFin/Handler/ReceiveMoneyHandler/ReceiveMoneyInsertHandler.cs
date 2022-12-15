@@ -1,9 +1,4 @@
 ﻿using TabpediaFin.Domain.ReceiveMoney;
-using TabpediaFin.Domain.TransferMoney;
-using TabpediaFin.Handler.ExpenseHandler;
-using TabpediaFin.Handler.TransferMoneyHandler;
-using TabpediaFin.Handler.UploadAttachmentHandler;
-
 namespace TabpediaFin.Handler.ReceiveMoneyHandler;
 
 public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, RowResponse<ReceiveMoneyFetchDto>>
