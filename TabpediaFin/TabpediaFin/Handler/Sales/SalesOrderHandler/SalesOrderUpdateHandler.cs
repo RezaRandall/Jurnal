@@ -71,11 +71,12 @@
         {
             List<SalesOrderAttachment> SalesOrderAttachmentList = new List<SalesOrderAttachment>();
             List<SalesOrderFetchAttachment> SalesOrderFetchAttachmentList = new List<SalesOrderFetchAttachment>();
-
+            List<int> idupdateattachment = new List<int>();
             if (filedata.Count > 0)
             {
                 foreach (PurchestRequestAttahmentUpdateItem item in filedata)
                 {
+                    idupdateattachment.Add(item.Id);
                     SalesOrderAttachmentList.Add(new SalesOrderAttachment
                     {
                         Id = item.Id,
@@ -95,7 +96,8 @@
                         TransId = TransId,
                     });
                 }
-
+                List<SalesOrderAttachment> SalesOrderAttachmentListUpdate = _context.SalesOrderAttachment.Where<SalesOrderAttachment>(x => x.TransId == TransId && x.TenantId == _currentUser.TenantId && !idupdateattachment.Contains(x.Id)).ToList();
+                _context.SalesOrderAttachment.RemoveRange(SalesOrderAttachmentListUpdate);
                 _context.SalesOrderAttachment.UpdateRange(SalesOrderAttachmentList);
                 await _context.SaveChangesAsync(cancellationToken);
             }
@@ -106,11 +108,13 @@
         {
             List<SalesOrderTag> SalesOrderTag = new List<SalesOrderTag>();
             List<SalesOrderFetchTag> SalesOrderFetchTag = new List<SalesOrderFetchTag>();
+            List<int> idupdatetag = new List<int>();
 
             if (filedata.Count > 0)
             {
                 foreach (SalesOrderUpdateTag item in filedata)
                 {
+                    idupdatetag.Add(item.Id);
                     SalesOrderTag.Add(new SalesOrderTag
                     {
                         Id = item.Id,
@@ -125,6 +129,8 @@
                     });
                 }
 
+                List<SalesOrderTag> SalesOrderTagListUpdate = _context.SalesOrderTag.Where<SalesOrderTag>(x => x.TransId == TransId && x.TenantId == _currentUser.TenantId && !idupdatetag.Contains(x.Id)).ToList();
+                _context.SalesOrderTag.RemoveRange(SalesOrderTagListUpdate);
                 _context.SalesOrderTag.UpdateRange(SalesOrderTag);
                 await _context.SaveChangesAsync(cancellationToken);
             }
@@ -135,6 +141,7 @@
         {
             List<SalesOrderItem> SalesOrderItem = new List<SalesOrderItem>();
             List<SalesOrderFetchItem> SalesOrderFetchItem = new List<SalesOrderFetchItem>();
+            List<int> idupdateitem = new List<int>();
 
             if (filedata.Count > 0)
             {
@@ -158,7 +165,8 @@
                         TransId = TransId
                     });
                 }
-
+                List<SalesOrderItem> SalesOrderItemListUpdate = _context.SalesOrderItem.Where<SalesOrderItem>(x => x.TransId == TransId && x.TenantId == _currentUser.TenantId && !idupdateitem.Contains(x.Id)).ToList();
+                _context.SalesOrderItem.RemoveRange(SalesOrderItemListUpdate);
                 await _context.SalesOrderItem.AddRangeAsync(SalesOrderItem, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
             }

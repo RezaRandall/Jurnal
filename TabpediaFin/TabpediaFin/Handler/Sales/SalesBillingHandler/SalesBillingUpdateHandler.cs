@@ -71,11 +71,12 @@
         {
             List<SalesBillingAttachment> SalesBillingAttachmentList = new List<SalesBillingAttachment>();
             List<SalesBillingFetchAttachment> SalesBillingFetchAttachmentList = new List<SalesBillingFetchAttachment>();
-
+            List<int> idupdateattachment = new List<int>();
             if (filedata.Count > 0)
             {
                 foreach (PurchestRequestAttahmentUpdateItem item in filedata)
                 {
+                    idupdateattachment.Add(item.Id);
                     SalesBillingAttachmentList.Add(new SalesBillingAttachment
                     {
                         Id = item.Id,
@@ -95,7 +96,8 @@
                         TransId = TransId,
                     });
                 }
-
+                List<SalesBillingAttachment> SalesBillingAttachmentListUpdate = _context.SalesBillingAttachment.Where<SalesBillingAttachment>(x => x.TransId == TransId && x.TenantId == _currentUser.TenantId && !idupdateattachment.Contains(x.Id)).ToList();
+                _context.SalesBillingAttachment.RemoveRange(SalesBillingAttachmentListUpdate);
                 _context.SalesBillingAttachment.UpdateRange(SalesBillingAttachmentList);
                 await _context.SaveChangesAsync(cancellationToken);
             }
@@ -106,11 +108,13 @@
         {
             List<SalesBillingTag> SalesBillingTag = new List<SalesBillingTag>();
             List<SalesBillingFetchTag> SalesBillingFetchTag = new List<SalesBillingFetchTag>();
+            List<int> idupdatetag = new List<int>();
 
             if (filedata.Count > 0)
             {
                 foreach (SalesBillingUpdateTag item in filedata)
                 {
+                    idupdatetag.Add(item.Id);
                     SalesBillingTag.Add(new SalesBillingTag
                     {
                         Id = item.Id,
@@ -125,6 +129,8 @@
                     });
                 }
 
+                List<SalesBillingTag> SalesBillingTagListUpdate = _context.SalesBillingTag.Where<SalesBillingTag>(x => x.TransId == TransId && x.TenantId == _currentUser.TenantId && !idupdatetag.Contains(x.Id)).ToList();
+                _context.SalesBillingTag.RemoveRange(SalesBillingTagListUpdate);
                 _context.SalesBillingTag.UpdateRange(SalesBillingTag);
                 await _context.SaveChangesAsync(cancellationToken);
             }
@@ -135,6 +141,7 @@
         {
             List<SalesBillingItem> SalesBillingItem = new List<SalesBillingItem>();
             List<SalesBillingFetchItem> SalesBillingFetchItem = new List<SalesBillingFetchItem>();
+            List<int> idupdateitem = new List<int>();
 
             if (filedata.Count > 0)
             {
@@ -158,7 +165,8 @@
                         TransId = TransId
                     });
                 }
-
+                List<SalesBillingItem> SalesBillingItemListUpdate = _context.SalesBillingItem.Where<SalesBillingItem>(x => x.TransId == TransId && x.TenantId == _currentUser.TenantId && !idupdateitem.Contains(x.Id)).ToList();
+                _context.SalesBillingItem.RemoveRange(SalesBillingItemListUpdate);
                 await _context.SalesBillingItem.AddRangeAsync(SalesBillingItem, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
             }
