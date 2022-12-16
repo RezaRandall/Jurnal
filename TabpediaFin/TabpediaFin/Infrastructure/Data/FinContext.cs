@@ -34,6 +34,8 @@ public class FinContext : DbContext
     public DbSet<ExpenseTag> ExpenseTag { get; set; }
     public DbSet<ExpenseAttachment> ExpenseAttachment { get; set; }
     public DbSet<AccountCashAndBank> AccountCashAndBank { get; set; }
+    public DbSet<AccountCashAndBankCategory> AccountCashAndBankCategory { get; set; }
+    public DbSet<BankName> BankName { get; set; }
     public DbSet<ItemCategory> ItemCategory { get; set; }
     public DbSet<TransferMoney> TransferMoney { get; set; }
     public DbSet<TransferMoneyAttachment> TransferMoneyAttachment { get; set; }
