@@ -71,11 +71,12 @@
         {
             List<PurchaseRequestAttachment> PurchaseRequestAttachmentList = new List<PurchaseRequestAttachment>();
             List<PurchaseRequestFetchAttachment> PurchaseRequestFetchAttachmentList = new List<PurchaseRequestFetchAttachment>();
-
+            List<int> idupdateattachment = new List<int>();
             if (filedata.Count > 0)
             {
                 foreach (PurchestRequestAttahmentUpdateItem item in filedata)
                 {
+                    idupdateattachment.Add(item.Id);
                     PurchaseRequestAttachmentList.Add(new PurchaseRequestAttachment
                     {
                         Id = item.Id,
@@ -95,7 +96,8 @@
                         TransId = TransId,
                     });
                 }
-
+                List<PurchaseRequestAttachment> PurchaseRequestAttachmentListUpdate = _context.PurchaseRequestAttachment.Where<PurchaseRequestAttachment>(x => x.TransId == TransId && x.TenantId == _currentUser.TenantId && !idupdateattachment.Contains(x.Id)).ToList();
+                _context.PurchaseRequestAttachment.RemoveRange(PurchaseRequestAttachmentListUpdate);
                 _context.PurchaseRequestAttachment.UpdateRange(PurchaseRequestAttachmentList);
                 await _context.SaveChangesAsync(cancellationToken);
             }
@@ -106,11 +108,13 @@
         {
             List<PurchaseRequestTag> PurchaseRequestTag = new List<PurchaseRequestTag>();
             List<PurchaseRequestFetchTag> PurchaseRequestFetchTag = new List<PurchaseRequestFetchTag>();
+            List<int> idupdatetag = new List<int>();
 
             if (filedata.Count > 0)
             {
                 foreach (PurchaseRequestUpdateTag item in filedata)
                 {
+                    idupdatetag.Add(item.Id);
                     PurchaseRequestTag.Add(new PurchaseRequestTag
                     {
                         Id = item.Id,
@@ -125,6 +129,8 @@
                     });
                 }
 
+                List<PurchaseRequestTag> PurchaseRequestTagListUpdate = _context.PurchaseRequestTag.Where<PurchaseRequestTag>(x => x.TransId == TransId && x.TenantId == _currentUser.TenantId && !idupdatetag.Contains(x.Id)).ToList();
+                _context.PurchaseRequestTag.RemoveRange(PurchaseRequestTagListUpdate);
                 _context.PurchaseRequestTag.UpdateRange(PurchaseRequestTag);
                 await _context.SaveChangesAsync(cancellationToken);
             }
@@ -135,11 +141,13 @@
         {
             List<PurchaseRequestItem> PurchaseRequestItem = new List<PurchaseRequestItem>();
             List<PurchaseRequestFetchItem> PurchaseRequestFetchItem = new List<PurchaseRequestFetchItem>();
+            List<int> idupdateitem = new List<int>();
 
             if (filedata.Count > 0)
             {
                 foreach (PurchaseRequestUpdateItem item in filedata)
                 {
+                    idupdateitem.Add(item.Id);
                     PurchaseRequestItem.Add(new PurchaseRequestItem
                     {
                         Id = item.Id,
@@ -159,6 +167,8 @@
                     });
                 }
 
+                List<PurchaseRequestItem> PurchaseRequestItemListUpdate = _context.PurchaseRequestItem.Where<PurchaseRequestItem>(x => x.TransId == TransId && x.TenantId == _currentUser.TenantId && !idupdateitem.Contains(x.Id)).ToList();
+                _context.PurchaseRequestItem.RemoveRange(PurchaseRequestItemListUpdate);
                 await _context.PurchaseRequestItem.AddRangeAsync(PurchaseRequestItem, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
             }

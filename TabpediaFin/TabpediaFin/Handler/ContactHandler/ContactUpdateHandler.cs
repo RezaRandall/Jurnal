@@ -5,14 +5,17 @@ namespace TabpediaFin.Handler.ContactHandler
 {
     public class ContactUpdateHandler : IRequestHandler<ContactUpdateDto, RowResponse<ContactFetchDto>>
     {
+        private readonly DbManager _dbManager;
         private readonly FinContext _context;
         private readonly ICurrentUser _currentUser;
 
-        public ContactUpdateHandler(FinContext db, ICurrentUser currentUser)
+        public ContactUpdateHandler(FinContext db, ICurrentUser currentUser, DbManager dbManager)
         {
             _context = db;
             _currentUser = currentUser;
+            _dbManager = dbManager;
         }
+
         public async Task<RowResponse<ContactFetchDto>> Handle(ContactUpdateDto request, CancellationToken cancellationToken)
         {
             var result = new RowResponse<ContactFetchDto>();
@@ -40,12 +43,14 @@ namespace TabpediaFin.Handler.ContactHandler
                 Contact.IsOther = request.IsOther;
                 Contact.Notes = request.Notes;
 
-                await _context.SaveChangesAsync(cancellationToken);
                 contactidresult = request.Id;
+                List<int> idupdateaddtess = new List<int>();
+                List<int> idupdateperson = new List<int>();
                 if (request.ContactAddressList.Count > 0)
                 {
                     foreach (ContactAddressUpdate item in request.ContactAddressList)
                     {
+                        idupdateaddtess.Add(item.Id);
                         ContactAddress.Add(new ContactAddress
                         {
                             Id = item.Id,
@@ -73,10 +78,12 @@ namespace TabpediaFin.Handler.ContactHandler
                     }
                     _context.ContactAddress.UpdateRange(ContactAddress);
                 }
+                
                 if (request.ContactPersonList.Count > 0)
                 {
                     foreach (ContactPersonUpdate item in request.ContactPersonList)
                     {
+                        idupdateperson.Add(item.Id);
                         ContactPerson.Add(new ContactPerson
                         {
                             Id = item.Id,
@@ -103,10 +110,11 @@ namespace TabpediaFin.Handler.ContactHandler
                     }
                     _context.ContactPerson.UpdateRange(ContactPerson);
                 }
-                if (ContactPerson.Count > 0 || ContactAddress.Count > 0)
-                {
-                    await _context.SaveChangesAsync(cancellationToken);
-                }
+                List<ContactPerson> ContacPersonList = _context.ContactPerson.Where<ContactPerson>(x => x.ContactId == request.Id && x.TenantId == _currentUser.TenantId && !idupdateperson.Contains(x.Id)).ToList();
+                List<ContactAddress> ContactAddressList = _context.ContactAddress.Where<ContactAddress>(x => x.ContactId == request.Id && x.TenantId == _currentUser.TenantId && !idupdateaddtess.Contains(x.Id)).ToList();
+                _context.ContactAddress.RemoveRange(ContactAddressList);
+                _context.ContactPerson.RemoveRange(ContacPersonList);
+                await _context.SaveChangesAsync(cancellationToken);
 
                 var row = new ContactFetchDto()
                 {
@@ -142,7 +150,74 @@ namespace TabpediaFin.Handler.ContactHandler
 
             return result;
         }
+
+        public async Task<ContactFetchDto> GetContact(int id)
+        {
+            ContactFetchDto returncontact = new ContactFetchDto();
+            using (var cn = _dbManager.CreateConnection())
+            {
+                var sql = @"SELECT c.""Name"" as groupName, i.""Id"", i.""TenantId"",i.""Name"", i.""Address"", i.""CityName"",i.""PostalCode"",i.""Email"",i.""Phone"",i.""Fax"",i.""Website"",i.""Npwp"",i.""GroupId"",i.""Notes"", i.""IsCustomer"", i.""IsVendor"", i.""IsEmployee"", i.""IsOther""  FROM ""Contact"" i LEFT JOIN ""ContactGroup"" c on i.""GroupId"" = c.""Id""  WHERE i.""TenantId"" = @TenantId AND i.""Id"" = @Id";
+
+                var parameters = new DynamicParameters();
+                parameters.Add("TenantId", _currentUser.TenantId);
+                parameters.Add("Id", id);
+                var result = await cn.QueryFirstOrDefaultAsync<ContactFetchDto>(sql, parameters);
+
+                if (result != null)
+                {
+                    var sqladdress = @"SELECT at.""Name"" as AddresType, i.""Id"", i.""ContactId"", i.""AddressName"",i.""Address"",i.""CityName"",i.""PostalCode"",i.""AddressTypeId"",i.""Notes""  FROM ""ContactAddress"" i LEFT JOIN ""ContactAddressType"" at ON i.""AddressTypeId"" = at.""Id"" WHERE i.""TenantId"" = @TenantId AND i.""ContactId"" = @ContactId";
+
+                    var parametersub = new DynamicParameters();
+                    parametersub.Add("TenantId", _currentUser.TenantId);
+                    parametersub.Add("ContactId", id);
+
+                    List<ContactAddressFetchDto> resultaddress;
+                    resultaddress = (await cn.QueryAsync<ContactAddressFetchDto>(sqladdress, parametersub).ConfigureAwait(false)).ToList();
+
+                    result.ContactAddressList = resultaddress;
+                    var sqlperson = @"SELECT i.""Id"", i.""ContactId"", i.""Name"",i.""Email"",i.""Phone"",i.""Fax"",i.""Others"",i.""Notes""  FROM ""ContactPerson"" i WHERE i.""TenantId"" = @TenantId AND i.""ContactId"" = @ContactId";
+
+                    List<ContactPersonFetchDto> resultperson;
+                    resultperson = (await cn.QueryAsync<ContactPersonFetchDto>(sqlperson, parametersub).ConfigureAwait(false)).ToList();
+
+                    result.ContactPersonList = resultperson;
+                }
+
+                
+                returncontact = result;
+            }
+
+
+            return returncontact;
+        }
     }
+
+    public class IdComparer : IEqualityComparer<ContactAddress>
+    {
+        public int GetHashCode(ContactAddress co)
+        {
+            if (co == null)
+            {
+                return 0;
+            }
+            return co.Id.GetHashCode();
+        }
+
+        public bool Equals(ContactAddress x1, ContactAddress x2)
+        {
+            if (object.ReferenceEquals(x1, x2))
+            {
+                return true;
+            }
+            if (object.ReferenceEquals(x1, null) ||
+                object.ReferenceEquals(x2, null))
+            {
+                return false;
+            }
+            return x1.Id == x2.Id;
+        }
+    }
+
     public class ContactUpdateDto : IRequest<RowResponse<ContactFetchDto>>
     {
         public int Id { get; set; }
