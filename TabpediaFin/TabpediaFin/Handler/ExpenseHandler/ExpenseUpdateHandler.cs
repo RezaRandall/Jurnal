@@ -1,6 +1,4 @@
-﻿using TabpediaFin.Domain;
-using TabpediaFin.Domain.Expense;
-using TabpediaFin.Handler.ExpenseCategoryHandler;
+﻿using TabpediaFin.Domain.Expense;
 
 namespace TabpediaFin.Handler.ExpenseHandler;
 

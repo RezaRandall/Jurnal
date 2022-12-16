@@ -2,7 +2,7 @@
 
 namespace TabpediaFin.Migrations;
 
-[Migration(202212131658)]
+[Migration(202212150909)]
 public class Table_ReceiveMoney : Migration
 {
     public override void Down()

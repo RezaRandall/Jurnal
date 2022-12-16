@@ -1,13 +1,5 @@
-﻿using MediatR;
-using Org.BouncyCastle.Asn1.Ocsp;
-using TabpediaFin.Domain;
-using TabpediaFin.Domain.Expense;
-using TabpediaFin.Handler.ContactAddressHandler;
-using TabpediaFin.Handler.ContactHandler;
-using TabpediaFin.Handler.ExpenseHandler;
-using TabpediaFin.Handler.ItemItemCategoryHandler;
+﻿using TabpediaFin.Handler.ItemItemCategoryHandler;
 using TabpediaFin.Handler.ItemUnitMeasureHandler;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace TabpediaFin.Handler.Item;
 public class ItemInsertHandler : IRequestHandler<ItemInsertDto, RowResponse<ItemDto>>

@@ -29,10 +29,10 @@ public class SendMoneyListHandler : IFetchPagedListHandler<SendMoneyListDto>
                 parameters.Add("Search", $"%{req.Search.Trim().ToLowerInvariant()}%");
             }
 
-            var orderby = string.Empty;
+            //var orderby = string.Empty;
             if (string.IsNullOrWhiteSpace(req.SortBy))
             {
-                orderby = SqlHelper.GenerateOrderBy(req.SortBy, req.SortDesc);
+                req.SortBy = SqlHelper.GenerateOrderBy(req.SortBy, req.SortDesc, "CreatedUtc");
             }
 
             using (var cn = _dbManager.CreateConnection())
@@ -40,16 +40,16 @@ public class SendMoneyListHandler : IFetchPagedListHandler<SendMoneyListDto>
                 cn.Open();
 
                 var list = await cn.FetchListPagedAsync<SendMoneyListDto>(pageNumber: req.PageNum
-                    , rowsPerPage: req.PageSize
-                    , conditions: sqlWhere
-                    , orderby: orderby
-                    , currentUser: _currentUser
-                    , parameters: parameters
+                   , rowsPerPage: req.PageSize
+                   , search: req.Search
+                   , sortby: req.SortBy
+                   , sortdesc: req.SortDesc
+                   , currentUser: _currentUser
                     );
                 int recordCount = await cn.RecordCountAsync<SendMoneyListDto>(sqlWhere, parameters);
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.List = list?.AsList() ?? new List<SendMoneyListDto>();
+                result.List = list.List;
                 result.RecordCount = recordCount;
             }
         }
@@ -68,7 +68,7 @@ public class SendMoneyListDto : BaseDto
     public int PayFromAccountId { get; set; } = 0;
     public int ReceiverVendorId { get; set; } = 0;
     public DateTime TransactionDate { get; set; }
-    public int TransactionNo { get; set; } = 0;
+    public string TransactionNo { get; set; } = string.Empty;
     public bool PriceIncludesTax { get; set; } = false;
     public int AccountCashAndBankId { get; set; } = 0;
     public string Description { get; set; } = string.Empty;

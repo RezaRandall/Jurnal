@@ -1,7 +1,4 @@
-﻿using TabpediaFin.Handler.ContactAddressHandler;
-using TabpediaFin.Handler.ContactPersonHandler;
-using TabpediaFin.Handler.ExpenseHandler;
-using TabpediaFin.Handler.ItemItemCategoryHandler;
+﻿using TabpediaFin.Handler.ItemItemCategoryHandler;
 using TabpediaFin.Handler.ItemUnitMeasureHandler;
 
 namespace TabpediaFin.Handler.Item

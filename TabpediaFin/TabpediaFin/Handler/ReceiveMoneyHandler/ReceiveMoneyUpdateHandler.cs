@@ -1,7 +1,4 @@
-﻿using TabpediaFin.Domain.Expense;
-using TabpediaFin.Domain.ReceiveMoney;
-using TabpediaFin.Handler.ExpenseHandler;
-using TabpediaFin.Handler.ReceiveMoneyHandler;
+﻿using TabpediaFin.Domain.ReceiveMoney;
 
 namespace TabpediaFin.Handler.ReceiveMoneyHandler;
 

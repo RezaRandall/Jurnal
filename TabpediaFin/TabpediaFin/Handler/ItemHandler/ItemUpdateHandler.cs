@@ -1,5 +1,4 @@
-﻿using Org.BouncyCastle.Asn1.Ocsp;
-using TabpediaFin.Handler.ItemItemCategoryHandler;
+﻿using TabpediaFin.Handler.ItemItemCategoryHandler;
 using TabpediaFin.Handler.ItemUnitMeasureHandler;
 
 namespace TabpediaFin.Handler.Item;

@@ -1,7 +1,7 @@
 ﻿using FluentMigrator;
 
 namespace TabpediaFin.Migrations;
-
+[Migration(202212151035)]
 public class Table_SendMoneyTag : Migration
 {
     public override void Down()

@@ -1,8 +1,9 @@
 ﻿using FluentMigrator;
+using TabpediaFin.Domain;
 
 namespace TabpediaFin.Migrations;
 
-[Migration(202212131659)]
+[Migration(202212151048)]
 public class Table_SendMoney : Migration
 {
     public override void Down()
@@ -16,10 +17,11 @@ public class Table_SendMoney : Migration
             .WithColumn("Id").AsInt32().NotNullable().Identity().PrimaryKey()
             .WithColumn("TenantId").AsInt32().NotNullable()
             .WithColumn("PayFromAccountId").AsInt32().NotNullable()
-            .WithColumn("ReceiverVendortId").AsInt32().Nullable()
+            .WithColumn("ReceiverVendorId").AsInt32().Nullable()
             .WithColumn("TransactionDate").AsDateTime().NotNullable()
             .WithColumn("TransactionNo").AsString(100).NotNullable()
-            .WithColumn("PriceIncludeTax").AsBoolean().NotNullable().WithDefaultValue(false)
+            .WithColumn("PriceIncludesTax").AsBoolean().NotNullable().WithDefaultValue(false) 
+            .WithColumn("AccountCashAndBankId").AsInt32().Nullable()
             .WithColumn("Description").AsString(250).Nullable()
             .WithColumn("TaxId").AsInt32().Nullable()
             .WithColumn("Amount").AsDecimal(18, 2).NotNullable().WithDefaultValue(0)

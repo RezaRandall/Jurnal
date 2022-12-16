@@ -1,6 +1,4 @@
-﻿using TabpediaFin.Handler.ExpenseHandler;
-
-namespace TabpediaFin.Handler.TransferMoneyHandler;
+﻿namespace TabpediaFin.Handler.TransferMoneyHandler;
 
 public class TransferMoneyFetchHandler : IFetchByIdHandler<TransferMoneyFetchDto>
 {

@@ -1,8 +1,4 @@
-﻿using TabpediaFin.Handler.ItemItemCategoryHandler;
-using TabpediaFin.Handler.ItemUnitMeasureHandler;
-using TabpediaFin.Handler.PurchaseRequestHandler;
-
-namespace TabpediaFin.Handler.ExpenseHandler;
+﻿namespace TabpediaFin.Handler.ExpenseHandler;
 
 public class ExpenseFetchHandler : IFetchByIdHandler<ExpenseFetchDto>
 {

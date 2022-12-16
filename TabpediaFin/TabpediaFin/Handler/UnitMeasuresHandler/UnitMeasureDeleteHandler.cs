@@ -1,7 +1,4 @@
-﻿using TabpediaFin.Handler.ItemUnitMeasureHandler;
-
-
-namespace TabpediaFin.Handler.UnitMeasures;
+﻿namespace TabpediaFin.Handler.UnitMeasures;
 
 public class UnitMeasureDeleteHandler : IDeleteByIdHandler<UnitMeasureDto>
 {

@@ -1,6 +1,4 @@
-﻿using TabpediaFin.Domain.SendMoney;
-using TabpediaFin.Domain.TransferMoney;
-using TabpediaFin.Handler.SendMoneyHandler;
+﻿using TabpediaFin.Domain.TransferMoney;
 
 namespace TabpediaFin.Handler.TransferMoneyHandler;
 

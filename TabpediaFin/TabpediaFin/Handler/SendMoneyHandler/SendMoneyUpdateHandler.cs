@@ -1,8 +1,4 @@
-﻿using TabpediaFin.Domain.ReceiveMoney;
-using TabpediaFin.Domain.SendMoney;
-using TabpediaFin.Domain.TransferMoney;
-using TabpediaFin.Handler.ReceiveMoneyHandler;
-
+﻿using TabpediaFin.Domain.SendMoney;
 namespace TabpediaFin.Handler.SendMoneyHandler;
 
 public class SendMoneyUpdateHandler : IRequestHandler<SendMoneyUpdateDto, RowResponse<SendMoneyFetchDto>>
@@ -151,7 +147,7 @@ public class SendMoneyUpdateDto : IRequest<RowResponse<SendMoneyFetchDto>>
     public int PayFromAccountId { get; set; } = 0;
     public int ReceiverVendorId { get; set; } = 0;
     public DateTime TransactionDate { get; set; }
-    public int TransactionNo { get; set; } = 0;
+    public string TransactionNo { get; set; } = string.Empty;
     public bool PriceIncludesTax { get; set; } = false;
     public int AccountCashAndBankId { get; set; } = 0;
     public string Description { get; set; } = string.Empty;
