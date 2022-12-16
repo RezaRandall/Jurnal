@@ -1,59 +1,148 @@
-﻿using TabpediaFin.Handler.ItemItemCategoryHandler;
+﻿using NPOI.HPSF;
+using TabpediaFin.Handler.ContactHandler;
+using TabpediaFin.Handler.ItemItemCategoryHandler;
 using TabpediaFin.Handler.ItemUnitMeasureHandler;
 
 namespace TabpediaFin.Handler.Item;
 
 public class ItemUpdateHandler : IRequestHandler<ItemUpdateDto, RowResponse<ItemDto>>
 {
+    private readonly DbManager _dbManager;
     private readonly FinContext _context;
     private readonly ICurrentUser _currentUser;
 
-    public ItemUpdateHandler(FinContext db, ICurrentUser currentUser)
+    public ItemUpdateHandler(FinContext db, ICurrentUser currentUser, DbManager dbManager)
     {
         _context = db;
         _currentUser = currentUser;
+        _dbManager = dbManager;
     }
 
-    public async Task<RowResponse<ItemDto>> Handle(ItemUpdateDto req, CancellationToken cancellationToken)
+    public async Task<RowResponse<ItemDto>> Handle(ItemUpdateDto request, CancellationToken cancellationToken)
     {
         var result = new RowResponse<ItemDto>();
         int itemIdResult;
-        int itemUnitMeasureIdResult;
-
         List<ItemItemCategory> itemItemCategory = new List<ItemItemCategory>();
         List<ItemUnitMeasure> itemUnitMeasure = new List<ItemUnitMeasure>();
+        List<ItemAttachment> itemAttachment = new List<ItemAttachment>();
+
         List<ItemItemCategoryFetchDto> itemItemCategoryFetchDto = new List<ItemItemCategoryFetchDto>();
         List<ItemUnitMeasureFetchDto> itemUnitMeasureFetchDto = new List<ItemUnitMeasureFetchDto>();
+        List<ItemFetchAttachment> itemFetchAttachment = new List<ItemFetchAttachment>();
 
-        List<ItemFetchAttachment> ItemFetchAttachment = new List<ItemFetchAttachment>();
         try
         {
-            var item = await _context.Item.FirstAsync(x => x.Id == req.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-            item.Name = req.Name;
-            item.Description = req.Description;
-            item.Code = req.Code;
-            item.Barcode = req.Barcode;
-            item.UnitMeasureId = req.UnitMeasureId;
-            item.AverageCost = req.AverageCost;
-            item.Cost = req.Cost;
-            item.Price = req.Price;
-            item.IsSales = req.IsSales;
-            item.IsPurchase = req.IsPurchase;
-            item.IsStock = req.IsStock;
-            item.StockMin = req.StockMin;
-            item.IsArchived = req.IsArchived;
-            item.ImageFileName = req.ImageFileName;
-            item.Notes = req.Notes;
+            var item = await _context.Item.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
+            item.Name = request.Name;
+            item.Description = request.Description;
+            item.Code = request.Code;
+            item.Barcode = request.Barcode;
+            item.UnitMeasureId = request.UnitMeasureId;
+            item.AverageCost = request.AverageCost;
+            item.Cost = request.Cost;
+            item.Price = request.Price;
+            item.IsSales = request.IsSales;
+            item.IsPurchase = request.IsPurchase;
+            item.IsStock = request.IsStock;
+            item.StockMin = request.StockMin;
+            item.IsArchived = request.IsArchived;
+            item.ImageFileName = request.ImageFileName;
+            item.Notes = request.Notes;
 
+            itemIdResult = request.Id;
+            List<int> idUpdateItemItemCategory = new List<int>();
+            List<int> idUpdateUnitMeasure = new List<int>();
+            List<int> idUpdateAttachment = new List<int>();
+            if (request.ItemItemCategoryList.Count > 0)
+            {
+                foreach (ItemItemCategoryUpdate itm in request.ItemItemCategoryList)
+                {
+                    idUpdateItemItemCategory.Add(item.Id);
+                    itemItemCategory.Add(new ItemItemCategory
+                    {
+                        Id = itm.Id,
+                        ItemId = itemIdResult,
+                        ItemCategoryId = itm.ItemCategoryId,
+                        UpdatedUid = _currentUser.UserId,
+                    });
+                    itemItemCategoryFetchDto.Add(new ItemItemCategoryFetchDto
+                    {
+                        Id = itm.Id,
+                        ItemId = itemIdResult,
+                        ItemCategoryId = itm.ItemCategoryId,
+                    });
+                }
+                _context.ItemItemCategory.UpdateRange(itemItemCategory);
+            }
+
+            if (request.ItemUnitMeasureList.Count > 0)
+            {
+                foreach (ItemUnitMeasureUpdate i in request.ItemUnitMeasureList)
+                {
+                    idUpdateUnitMeasure.Add(i.Id);
+                    itemUnitMeasure.Add(new ItemUnitMeasure
+                    {
+                        Id = i.Id,
+                        UnitMeasureId = itemIdResult,
+                        ItemId = i.ItemId,
+                        UnitConversion = i.UnitConversion,
+                        Cost = i.Cost,
+                        Price = i.Price,
+                        Notes = i.Notes,
+                        UpdatedUid = _currentUser.UserId,
+                    });
+                    itemUnitMeasureFetchDto.Add(new ItemUnitMeasureFetchDto
+                    {
+                        Id = item.Id,
+                        UnitMeasureId = itemIdResult,
+                        ItemId = i.ItemId,
+                        UnitConversion = i.UnitConversion,
+                        Cost = i.Cost,
+                        Price = i.Price,
+                        Notes = i.Notes,
+                    });
+                }
+                _context.ItemUnitMeasure.UpdateRange(itemUnitMeasure);
+            }
+
+            if (request.AttachmentFile.Count > 0)
+            {
+                foreach (ItemAttahmentUpdate i in request.AttachmentFile)
+                {
+                    idUpdateAttachment.Add(i.Id);
+                    itemAttachment.Add(new ItemAttachment
+                    {
+                        Id = i.Id,
+                        FileName = i.FileName,
+                        FileUrl = i.FileUrl,
+                        Extension = i.Extension,
+                        FileSize = i.FileSize,
+                        UpdatedUid = _currentUser.UserId,
+                    });
+                    itemFetchAttachment.Add(new ItemFetchAttachment
+                    {
+                        Id = i.Id,
+                        FileName = i.FileName,
+                        FileUrl = i.FileUrl,
+                        Extension = i.Extension,
+                        FileSize = i.FileSize,
+                    });
+                }
+                _context.ItemAttachment.UpdateRange(itemAttachment);
+            }
+
+
+            List<ItemItemCategory> itemItemCategoryList = _context.ItemItemCategory.Where<ItemItemCategory>(x => x.ItemId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateItemItemCategory.Contains(x.Id)).ToList();
+            List<ItemUnitMeasure> itemUnitMeasureList = _context.ItemUnitMeasure.Where<ItemUnitMeasure>(x => x.ItemId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateUnitMeasure.Contains(x.Id)).ToList();
+            List<ItemAttachment> itemAttachmentList = _context.ItemAttachment.Where<ItemAttachment>(x => x.ItemId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateAttachment.Contains(x.Id)).ToList();
+            _context.ItemItemCategory.RemoveRange(itemItemCategoryList);
+            _context.ItemUnitMeasure.RemoveRange(itemUnitMeasureList);
+            _context.ItemAttachment.RemoveRange(itemAttachmentList);
             await _context.SaveChangesAsync(cancellationToken);
-            itemIdResult = req.Id;
-            itemUnitMeasureIdResult = req.UnitMeasureId;
-
-            List<ItemFetchAttachment> returnfile = await UpdateAttachmentAsync(req.AttachmentFile, itemIdResult, cancellationToken);
 
             var row = new ItemDto()
             {
-                Id = item.Id,
+                Id = request.Id,
                 Name = item.Name,
                 Description = item.Description,
                 Code = item.Code,
@@ -70,59 +159,10 @@ public class ItemUpdateHandler : IRequestHandler<ItemUpdateDto, RowResponse<Item
                 ImageFileName = item.ImageFileName,
                 Notes = item.Notes,
                 ItemItemCategoryList = itemItemCategoryFetchDto,
-                ItemUnitMeasureList = itemUnitMeasureFetchDto
+                ItemUnitMeasureList = itemUnitMeasureFetchDto,
+                ItemAttachmentList = itemFetchAttachment,
             };
 
-            if (req.ItemItemCategoryList.Count > 0)
-            {
-                foreach (ItemItemCategoryUpdateDto itm in req.ItemItemCategoryList)
-                {
-                    itemItemCategory.Add(new ItemItemCategory
-                    {
-                        Id = itm.Id,
-                        ItemId = itemIdResult,
-                        ItemCategoryId = itm.ItemCategoryId
-                    });
-                    itemItemCategoryFetchDto.Add(new ItemItemCategoryFetchDto
-                    {
-                        Id = itm.Id,
-                        ItemId = itemIdResult,
-                        ItemCategoryId = itm.ItemCategoryId
-                    });
-                }
-                _context.ItemItemCategory.UpdateRange(itemItemCategory);
-            }
-            if (req.ItemUnitMeasureList.Count > 0)
-            {
-                foreach (ItemUnitMeasureUpdateDto itm in req.ItemUnitMeasureList)
-                {
-                    itemUnitMeasure.Add(new ItemUnitMeasure
-                    {
-                        Id = itm.Id,
-                        UnitMeasureId = itemUnitMeasureIdResult,
-                        ItemId = itemIdResult,
-                        UnitConversion = itm.UnitConversion,
-                        Cost = itm.Cost,
-                        Price = itm.Price,
-                        Notes = itm.Notes
-                    });
-                    itemUnitMeasureFetchDto.Add(new ItemUnitMeasureFetchDto
-                    {
-                        Id = itm.Id,
-                        UnitMeasureId = itemUnitMeasureIdResult,
-                        ItemId = itemIdResult,
-                        UnitConversion = itm.UnitConversion,
-                        Cost = itm.Cost,
-                        Price = itm.Price,
-                        Notes = itm.Notes
-                    });
-                }
-                _context.ItemUnitMeasure.UpdateRange(itemUnitMeasure);
-            }
-            if (itemUnitMeasure.Count > 0 || itemItemCategory.Count > 0)
-            {
-                await _context.SaveChangesAsync(cancellationToken);
-            }
             result.IsOk = true;
             result.ErrorMessage = string.Empty;
             result.Row = row;
@@ -132,45 +172,102 @@ public class ItemUpdateHandler : IRequestHandler<ItemUpdateDto, RowResponse<Item
             result.IsOk = false;
             result.ErrorMessage = ex.Message;
         }
-
         return result;
     }
-
-    public async Task<List<ItemFetchAttachment>> UpdateAttachmentAsync(List<ItemAttahmentUpdate> filedata, int TransId, CancellationToken cancellationToken)
+    public async Task<ItemDto> GetItem(int id)
     {
-        List<ItemAttachment> ItemAttachmentList = new List<ItemAttachment>();
-        List<ItemFetchAttachment> ItemFetchAttachmentList = new List<ItemFetchAttachment>();
-
-        if (filedata.Count > 0)
+        ItemDto returnItem = new ItemDto();
+        using (var cn = _dbManager.CreateConnection())
         {
-            foreach (ItemAttahmentUpdate item in filedata)
+            //var sql = @"SELECT c.""Name"" as groupName
+            //        ,i.""Id""
+            //        ,i.""TenantId""
+            //        ,i.""Name""
+            //        ,i.""Address""
+            //        ,i.""CityName""
+            //        ,i.""PostalCode""
+            //        ,i.""Email""
+            //        ,i.""Phone""
+            //        ,i.""Fax""
+            //        ,i.""Website""
+            //        ,i.""Npwp""
+            //        ,i.""GroupId""
+            //        ,i.""Notes""
+            //        ,i.""IsCustomer""
+            //        ,i.""IsVendor""
+            //        ,i.""IsEmployee""
+            //        ,i.""IsOther""  
+            //        FROM ""Contact"" i 
+            //        LEFT JOIN ""ContactGroup"" c on i.""GroupId"" = c.""Id""  
+            //        WHERE i.""TenantId"" = @TenantId AND i.""Id"" = @Id";
+
+            var sql = @"SELECT ""*""  
+                    FROM ""Item""   
+                    WHERE ""TenantId"" = @TenantId";
+
+            var parameters = new DynamicParameters();
+            parameters.Add("TenantId", _currentUser.TenantId);
+            parameters.Add("Id", id);
+            var result = await cn.QueryFirstOrDefaultAsync<ItemDto>(sql, parameters);
+
+            if (result != null)
             {
-                ItemAttachmentList.Add(new ItemAttachment
-                {
-                    Id = item.Id,
-                    FileName = item.FileName,
-                    FileUrl = item.FileUrl,
-                    Extension = item.Extension,
-                    FileSize = item.FileSize,
-                    ItemId = TransId,
-                });
-                ItemFetchAttachmentList.Add(new ItemFetchAttachment
-                {
-                    Id = item.Id,
-                    FileName = item.FileName,
-                    FileUrl = item.FileUrl,
-                    Extension = item.Extension,
-                    FileSize = item.FileSize,
-                    ItemId = TransId,
-                });
+                var sqladdress = @"SELECT ""*""
+                    FROM ""ItemItemCategory""  
+                    WHERE ""TenantId"" = @TenantId";
+
+                var parametersub = new DynamicParameters();
+                parametersub.Add("TenantId", _currentUser.TenantId);
+                parametersub.Add("ItemId", id);
+
+                List<ItemItemCategoryFetchDto> itemItemCategory;
+                itemItemCategory = (await cn.QueryAsync<ItemItemCategoryFetchDto>(sqladdress, parametersub).ConfigureAwait(false)).ToList();
+
+                result.ItemItemCategoryList = itemItemCategory;
+                var sqlItemUnitMeasure = @"SELECT ""*""
+                    FROM ""ItemUnitMeasure""  
+                    WHERE ""TenantId"" = @TenantId";
+
+                List<ItemUnitMeasureFetchDto> resultItemUnitMeasure;
+                resultItemUnitMeasure = (await cn.QueryAsync<ItemUnitMeasureFetchDto>(sqlItemUnitMeasure, parametersub).ConfigureAwait(false)).ToList();
+
+                result.ItemUnitMeasureList = resultItemUnitMeasure;
             }
 
-            _context.ItemAttachment.UpdateRange(ItemAttachmentList);
-            await _context.SaveChangesAsync(cancellationToken);
+
+            returnItem = result;
         }
 
-        return ItemFetchAttachmentList;
+
+        return returnItem;
     }
+
+    public class IdComparer : IEqualityComparer<ItemItemCategory>
+    {
+        public int GetHashCode(ItemItemCategory co)
+        {
+            if (co == null)
+            {
+                return 0;
+            }
+            return co.Id.GetHashCode();
+        }
+
+        public bool Equals(ItemItemCategory x1, ItemItemCategory x2)
+        {
+            if (object.ReferenceEquals(x1, x2))
+            {
+                return true;
+            }
+            if (object.ReferenceEquals(x1, null) ||
+                object.ReferenceEquals(x2, null))
+            {
+                return false;
+            }
+            return x1.Id == x2.Id;
+        }
+    }
+
 }
 
 [Table("Item")]
@@ -192,11 +289,26 @@ public class ItemUpdateDto : IRequest<RowResponse<ItemDto>>
     public bool IsArchived { get; set; } = true;
     public string ImageFileName { get; set; } = string.Empty;
     public string Notes { get; set; } = string.Empty;
-    public List<ItemItemCategoryUpdateDto> ItemItemCategoryList { get; set; }
-    public List<ItemUnitMeasureUpdateDto> ItemUnitMeasureList { get; set; }
+    public List<ItemItemCategoryUpdate> ItemItemCategoryList { get; set; }
+    public List<ItemUnitMeasureUpdate> ItemUnitMeasureList { get; set; }
     public List<ItemAttahmentUpdate> AttachmentFile { get; set; }
 }
-
+public class ItemItemCategoryUpdate
+{
+    public int Id { get; set; } = 0;
+    public int ItemId { get; set; } = 0;
+    public int ItemCategoryId { get; set; } = 0;
+}
+public class ItemUnitMeasureUpdate
+{
+    public int Id { get; set; } = 0;
+    public int UnitMeasureId { get; set; } = 0;
+    public int ItemId { get; set; } = 0;
+    public int UnitConversion { get; set; } = 0;
+    public int Cost { get; set; } = 0;
+    public int Price { get; set; } = 0;
+    public string Notes { get; set; } = string.Empty;
+}
 public class ItemAttahmentUpdate
 {
     public int Id { get; set; }
