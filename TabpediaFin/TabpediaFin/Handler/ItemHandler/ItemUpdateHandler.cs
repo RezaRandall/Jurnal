@@ -61,14 +61,14 @@ public class ItemUpdateHandler : IRequestHandler<ItemUpdateDto, RowResponse<Item
                     itemItemCategory.Add(new ItemItemCategory
                     {
                         Id = itm.Id,
-                        ItemId = itemIdResult,
+                        ItemId = itm.ItemId,
                         ItemCategoryId = itm.ItemCategoryId,
-                        UpdatedUid = _currentUser.UserId,
+                        CreatedUid = _currentUser.UserId,
                     });
                     itemItemCategoryFetchDto.Add(new ItemItemCategoryFetchDto
                     {
                         Id = itm.Id,
-                        ItemId = itemIdResult,
+                        ItemId = itm.ItemId,
                         ItemCategoryId = itm.ItemCategoryId,
                     });
                 }
@@ -83,18 +83,18 @@ public class ItemUpdateHandler : IRequestHandler<ItemUpdateDto, RowResponse<Item
                     itemUnitMeasure.Add(new ItemUnitMeasure
                     {
                         Id = i.Id,
-                        UnitMeasureId = itemIdResult,
+                        UnitMeasureId = i.UnitMeasureId,
                         ItemId = i.ItemId,
                         UnitConversion = i.UnitConversion,
                         Cost = i.Cost,
                         Price = i.Price,
                         Notes = i.Notes,
-                        UpdatedUid = _currentUser.UserId,
+                        CreatedUid = _currentUser.UserId,
                     });
                     itemUnitMeasureFetchDto.Add(new ItemUnitMeasureFetchDto
                     {
                         Id = item.Id,
-                        UnitMeasureId = itemIdResult,
+                        UnitMeasureId = i.UnitMeasureId,
                         ItemId = i.ItemId,
                         UnitConversion = i.UnitConversion,
                         Cost = i.Cost,
@@ -117,7 +117,8 @@ public class ItemUpdateHandler : IRequestHandler<ItemUpdateDto, RowResponse<Item
                         FileUrl = i.FileUrl,
                         Extension = i.Extension,
                         FileSize = i.FileSize,
-                        UpdatedUid = _currentUser.UserId,
+                        CreatedUid = _currentUser.UserId,
+                        ItemId = itemIdResult
                     });
                     itemFetchAttachment.Add(new ItemFetchAttachment
                     {
@@ -126,6 +127,7 @@ public class ItemUpdateHandler : IRequestHandler<ItemUpdateDto, RowResponse<Item
                         FileUrl = i.FileUrl,
                         Extension = i.Extension,
                         FileSize = i.FileSize,
+                        ItemId = itemIdResult
                     });
                 }
                 _context.ItemAttachment.UpdateRange(itemAttachment);
@@ -173,99 +175,6 @@ public class ItemUpdateHandler : IRequestHandler<ItemUpdateDto, RowResponse<Item
             result.ErrorMessage = ex.Message;
         }
         return result;
-    }
-    public async Task<ItemDto> GetItem(int id)
-    {
-        ItemDto returnItem = new ItemDto();
-        using (var cn = _dbManager.CreateConnection())
-        {
-            //var sql = @"SELECT c.""Name"" as groupName
-            //        ,i.""Id""
-            //        ,i.""TenantId""
-            //        ,i.""Name""
-            //        ,i.""Address""
-            //        ,i.""CityName""
-            //        ,i.""PostalCode""
-            //        ,i.""Email""
-            //        ,i.""Phone""
-            //        ,i.""Fax""
-            //        ,i.""Website""
-            //        ,i.""Npwp""
-            //        ,i.""GroupId""
-            //        ,i.""Notes""
-            //        ,i.""IsCustomer""
-            //        ,i.""IsVendor""
-            //        ,i.""IsEmployee""
-            //        ,i.""IsOther""  
-            //        FROM ""Contact"" i 
-            //        LEFT JOIN ""ContactGroup"" c on i.""GroupId"" = c.""Id""  
-            //        WHERE i.""TenantId"" = @TenantId AND i.""Id"" = @Id";
-
-            var sql = @"SELECT ""*""  
-                    FROM ""Item""   
-                    WHERE ""TenantId"" = @TenantId";
-
-            var parameters = new DynamicParameters();
-            parameters.Add("TenantId", _currentUser.TenantId);
-            parameters.Add("Id", id);
-            var result = await cn.QueryFirstOrDefaultAsync<ItemDto>(sql, parameters);
-
-            if (result != null)
-            {
-                var sqladdress = @"SELECT ""*""
-                    FROM ""ItemItemCategory""  
-                    WHERE ""TenantId"" = @TenantId";
-
-                var parametersub = new DynamicParameters();
-                parametersub.Add("TenantId", _currentUser.TenantId);
-                parametersub.Add("ItemId", id);
-
-                List<ItemItemCategoryFetchDto> itemItemCategory;
-                itemItemCategory = (await cn.QueryAsync<ItemItemCategoryFetchDto>(sqladdress, parametersub).ConfigureAwait(false)).ToList();
-
-                result.ItemItemCategoryList = itemItemCategory;
-                var sqlItemUnitMeasure = @"SELECT ""*""
-                    FROM ""ItemUnitMeasure""  
-                    WHERE ""TenantId"" = @TenantId";
-
-                List<ItemUnitMeasureFetchDto> resultItemUnitMeasure;
-                resultItemUnitMeasure = (await cn.QueryAsync<ItemUnitMeasureFetchDto>(sqlItemUnitMeasure, parametersub).ConfigureAwait(false)).ToList();
-
-                result.ItemUnitMeasureList = resultItemUnitMeasure;
-            }
-
-
-            returnItem = result;
-        }
-
-
-        return returnItem;
-    }
-
-    public class IdComparer : IEqualityComparer<ItemItemCategory>
-    {
-        public int GetHashCode(ItemItemCategory co)
-        {
-            if (co == null)
-            {
-                return 0;
-            }
-            return co.Id.GetHashCode();
-        }
-
-        public bool Equals(ItemItemCategory x1, ItemItemCategory x2)
-        {
-            if (object.ReferenceEquals(x1, x2))
-            {
-                return true;
-            }
-            if (object.ReferenceEquals(x1, null) ||
-                object.ReferenceEquals(x2, null))
-            {
-                return false;
-            }
-            return x1.Id == x2.Id;
-        }
     }
 
 }
@@ -316,4 +225,5 @@ public class ItemAttahmentUpdate
     public string FileUrl { get; set; } = string.Empty;
     public string FileSize { get; set; } = string.Empty;
     public string Extension { get; set; } = string.Empty;
+    public int ItemId { get; set; }
 }
