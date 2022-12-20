@@ -1,4 +1,7 @@
-﻿namespace TabpediaFin.Handler.ExpenseHandler;
+﻿using TabpediaFin.Handler.ItemItemCategoryHandler;
+using TabpediaFin.Handler.ItemUnitMeasureHandler;
+
+namespace TabpediaFin.Handler.ExpenseHandler;
 
 public class ExpenseFetchHandler : IFetchByIdHandler<ExpenseFetchDto>
 {
@@ -15,23 +18,84 @@ public class ExpenseFetchHandler : IFetchByIdHandler<ExpenseFetchDto>
     {
         var response = new RowResponse<ExpenseFetchDto>();
 
+        //try
+        //{
+        //    using (var cn = _dbManager.CreateConnection())
+        //    {
+        //        var row = await cn.FetchAsync<ExpenseFetchDto>(request.Id, _currentUser);
+        //        if (row == null)
+        //        {
+        //            response.IsOk = false;
+        //            response.Row = row;
+        //            response.ErrorMessage = "Data not found";
+        //        }
+        //        else
+        //        {
+        //            response.IsOk = true;
+        //            response.Row = row;
+        //            response.ErrorMessage = string.Empty;
+        //        }
+        //    }
+        //}
+        //catch (Exception ex)
+        //{
+        //    response.IsOk = false;
+        //    response.Row = null;
+        //    response.ErrorMessage = ex.Message;
+        //}
+
+        //return response;
+
+
+
+
+
         try
         {
             using (var cn = _dbManager.CreateConnection())
             {
-                var row = await cn.FetchAsync<ExpenseFetchDto>(request.Id, _currentUser);
-                if (row == null)
+                var parameters = new DynamicParameters();
+                parameters.Add("TenantId", _currentUser.TenantId);
+                parameters.Add("Id", request.Id);
+
+                var sql = @"SELECT * FROM ""Expense"" WHERE ""TenantId"" = @TenantId AND ""Id"" = @Id ";
+                var result = await cn.QueryFirstOrDefaultAsync<ExpenseFetchDto>(sql, parameters);
+
+                if (result != null)
                 {
-                    response.IsOk = false;
-                    response.Row = row;
-                    response.ErrorMessage = "Data not found";
+                    var sqlExpensetag = @"SELECT et.""Id""
+                                                ,et.""TagId""
+                                                ,et.""TransId""
+                                                 FROM ""ExpenseTag"" et
+                                                 INNER JOIN ""Expense"" e ON et.""TransId"" = e.""Id"" 
+                                                 WHERE e.""TenantId"" = @TenantId AND e.""Id"" = @Id ";
+
+                    //var parametersub = new DynamicParameters();
+                    //parametersub.Add("TenantId", _currentUser.TenantId);
+                    //parametersub.Add("IdItem", request.Id);
+
+                    List<ExpenseFetchTag> resultExpenseTag;
+                    resultExpenseTag = (await cn.QueryAsync<ExpenseFetchTag>(sqlExpensetag, parameters).ConfigureAwait(false)).ToList();
+                    result.ExpenseTagList = resultExpenseTag;
+
+                    var sqlExpenseAttachment = @"SELECT ea.""Id""
+                                        , ea.""FileName""
+                                        , ea.""FileUrl""
+                                        , ea.""Extension""
+                                        , ea.""FileSize""
+                                        , ea.""TransId"" 
+                                        FROM ""ExpenseAttachment"" ea
+                                        INNER JOIN ""Expense"" e ON ea.""TransId"" = e.""Id"" 
+                                        WHERE e.""TenantId"" = @TenantId AND e.""Id"" = @Id ";
+                    List<ExpenseFetchAttachment> resultExpenseAttachment;
+                    resultExpenseAttachment = (await cn.QueryAsync<ExpenseFetchAttachment>(sqlExpenseAttachment, parameters).ConfigureAwait(false)).ToList();
+                    result.ExpenseAttachmentList = resultExpenseAttachment;
+
                 }
-                else
-                {
-                    response.IsOk = true;
-                    response.Row = row;
-                    response.ErrorMessage = string.Empty;
-                }
+
+                response.IsOk = true;
+                response.Row = result;
+                response.ErrorMessage = string.Empty;
             }
         }
         catch (Exception ex)
@@ -42,6 +106,9 @@ public class ExpenseFetchHandler : IFetchByIdHandler<ExpenseFetchDto>
         }
 
         return response;
+
+
+
     }
 }
 
@@ -60,8 +127,8 @@ public class ExpenseFetchDto : BaseDto
     public string Notes { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
-    public List<ExpenseFetchTag> TagList { get; set; }
-    public List<ExpenseFetchAttachment> AttachmentList { get; set; }
+    public List<ExpenseFetchTag> ExpenseTagList { get; set; }
+    public List<ExpenseFetchAttachment> ExpenseAttachmentList { get; set; }
 }
 
 public class ExpenseFetchAttachment : BaseDto

@@ -11,8 +11,8 @@ namespace TabpediaFin.Handler.ItemUnitMeasureHandler;
 //[Table("ItemUnitMeasure")]
 public class ItemUnitMeasureInsertDto : IRequest<RowResponse<ItemUnitMeasureFetchDto>>
 {
+    public int Id { get; set; } = 0;
     public int UnitMeasureId { get; set; } = 0;
-    //public int ItemId { get; set; } = 0;
     public int UnitConversion { get; set; } = 0;
     public int Cost { get; set; } = 0;
     public int Price { get; set; } = 0;

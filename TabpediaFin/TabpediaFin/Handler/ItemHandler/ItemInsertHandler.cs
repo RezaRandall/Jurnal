@@ -66,7 +66,8 @@ public class ItemInsertHandler : IRequestHandler<ItemInsertDto, RowResponse<Item
                     itemItemCategoryFetchDto.Add(new ItemItemCategoryFetchDto
                     {
                         ItemId = itemIdResult,
-                        ItemCategoryId = itm.ItemCategoryId
+                        ItemCategoryId = itm.ItemCategoryId,
+                        Id = itm.Id
                     });
                 }
                 await _context.ItemItemCategory.AddRangeAsync(itemItemCategory, cancellationToken);
@@ -91,7 +92,8 @@ public class ItemInsertHandler : IRequestHandler<ItemInsertDto, RowResponse<Item
                         UnitConversion = itm.UnitConversion,
                         Cost = itm.Cost,
                         Price = itm.Price,
-                        Notes = itm.Notes
+                        Notes = itm.Notes,
+                        Id = itm.Id
                     });
                 }
                 await _context.ItemUnitMeasure.AddRangeAsync(itemUnitMeasure, cancellationToken);
@@ -199,5 +201,5 @@ public class ItemAttahmentFiles
     public string FileUrl { get; set; } = string.Empty;
     public string FileSize { get; set; } = string.Empty;
     public string Extension { get; set; } = string.Empty;
-    public int ItemId { get; set; }
+    //public int ItemId { get; set; }
 }
