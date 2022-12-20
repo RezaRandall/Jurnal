@@ -4,11 +4,13 @@ public class ItemDeleteHandler : IDeleteByIdHandler<ItemDto>
 {
     private readonly FinContext _context;
     private readonly IPaymentMethodCacheRemover _cacheRemover;
+    private readonly ICurrentUser _currentUser;
 
-    public ItemDeleteHandler(FinContext db, IPaymentMethodCacheRemover cacheRemover)
+    public ItemDeleteHandler(FinContext db, IPaymentMethodCacheRemover cacheRemover, ICurrentUser currentUser)
     {
         _context = db;
         _cacheRemover = cacheRemover;
+        _currentUser = currentUser;
     }
 
     public async Task<RowResponse<ItemDto>> Handle(DeleteByIdRequestDto<ItemDto> request, CancellationToken cancellationToken)
@@ -23,6 +25,20 @@ public class ItemDeleteHandler : IDeleteByIdHandler<ItemDto>
             }
             _context.Item.Remove(itemData);
             await _context.SaveChangesAsync(cancellationToken);
+
+            List<ItemItemCategory> itemItemCategory = _context.ItemItemCategory.Where<ItemItemCategory>(x => x.ItemId == request.Id && x.TenantId == _currentUser.TenantId).ToList();
+            if (itemItemCategory.Count > 0)
+            {
+                _context.ItemItemCategory.RemoveRange(itemItemCategory);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+
+            List<ItemUnitMeasure> itemUnitMeasure = _context.ItemUnitMeasure.Where<ItemUnitMeasure>(x => x.ItemId == request.Id && x.TenantId == _currentUser.TenantId).ToList();
+            if (itemUnitMeasure.Count > 0)
+            {
+                _context.ItemUnitMeasure.RemoveRange(itemUnitMeasure);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
 
             // ITEM ATTACHMENT
             List<ItemAttachment> ItemAttachmentList = _context.ItemAttachment.Where<ItemAttachment>(x => x.ItemId == request.Id).ToList();
