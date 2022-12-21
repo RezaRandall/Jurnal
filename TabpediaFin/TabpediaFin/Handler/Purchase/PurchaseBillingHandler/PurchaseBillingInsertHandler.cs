@@ -144,7 +144,8 @@ namespace TabpediaFin.Handler.PurchaseBillingHandler
                         ItemId = item.ItemId,
                         Quantity = item.Quantity,
                         ItemUnitMeasureId = item.ItemUnitMeasureId,
-                        TransId = TransId
+                        TransId = TransId,
+                        TaxId = item.TaxId
 
                     });
                     PurchaseBillingFetchItem.Add(new PurchaseBillingFetchItem
@@ -152,7 +153,8 @@ namespace TabpediaFin.Handler.PurchaseBillingHandler
                         ItemId = item.ItemId,
                         Quantity = item.Quantity,
                         ItemUnitMeasureId = item.ItemUnitMeasureId,
-                        TransId = TransId
+                        TransId = TransId,
+                        TaxId = item.TaxId
                     });
                 }
 
@@ -190,6 +192,7 @@ namespace TabpediaFin.Handler.PurchaseBillingHandler
     public class PurchaseBillingInsertItem
     {
         public int ItemId { get; set; }
+        public int TaxId { get; set; }
         public int Quantity { get; set; }
         public int ItemUnitMeasureId { get; set; }
     }
@@ -200,6 +203,5 @@ namespace TabpediaFin.Handler.PurchaseBillingHandler
         public string FileUrl { get; set; } = string.Empty;
         public string FileSize { get; set; } = string.Empty;
         public string Extension { get; set; } = string.Empty;
-        public int TransId { get; set; }
     }
 }

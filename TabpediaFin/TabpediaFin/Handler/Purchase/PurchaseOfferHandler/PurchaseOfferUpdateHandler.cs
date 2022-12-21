@@ -149,7 +149,8 @@
                         ItemId = item.ItemId,
                         Quantity = item.Quantity,
                         ItemUnitMeasureId = item.ItemUnitMeasureId,
-                        TransId = TransId
+                        TransId = TransId,
+                        TaxId = item.TaxId
 
                     });
                     PurchaseOfferFetchItem.Add(new PurchaseOfferFetchItem
@@ -158,7 +159,8 @@
                         ItemId = item.ItemId,
                         Quantity = item.Quantity,
                         ItemUnitMeasureId = item.ItemUnitMeasureId,
-                        TransId = TransId
+                        TransId = TransId,
+                        TaxId = item.TaxId
                     });
                 }
                 List<PurchaseOfferItem> PurchaseOfferItemListUpdate = _context.PurchaseOfferItem.Where<PurchaseOfferItem>(x => x.TransId == TransId && x.TenantId == _currentUser.TenantId && !idupdateitem.Contains(x.Id)).ToList();
@@ -200,6 +202,7 @@
     {
         public int Id { get; set; }
         public int ItemId { get; set; }
+        public int TaxId { get; set; }
         public int Quantity { get; set; }
         public int ItemUnitMeasureId { get; set; }
     }

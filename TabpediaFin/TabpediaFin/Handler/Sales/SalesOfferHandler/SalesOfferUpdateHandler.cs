@@ -153,7 +153,8 @@
                         ItemId = item.ItemId,
                         Quantity = item.Quantity,
                         ItemUnitMeasureId = item.ItemUnitMeasureId,
-                        TransId = TransId
+                        TransId = TransId,
+                        TaxId = item.TaxId,
 
                     });
                     SalesOfferFetchItem.Add(new SalesOfferFetchItem
@@ -162,7 +163,8 @@
                         ItemId = item.ItemId,
                         Quantity = item.Quantity,
                         ItemUnitMeasureId = item.ItemUnitMeasureId,
-                        TransId = TransId
+                        TransId = TransId,
+                        TaxId = item.TaxId
                     });
                 }
                 List<SalesOfferItem> SalesOfferItemListUpdate = _context.SalesOfferItem.Where<SalesOfferItem>(x => x.TransId == TransId && x.TenantId == _currentUser.TenantId && !idupdateitem.Contains(x.Id)).ToList();
@@ -208,6 +210,7 @@
         public int ItemId { get; set; }
         public int Quantity { get; set; }
         public int ItemUnitMeasureId { get; set; }
+        public int TaxId { get; set; }
     }
 
     public class PurchestRequestAttahmentUpdateItem

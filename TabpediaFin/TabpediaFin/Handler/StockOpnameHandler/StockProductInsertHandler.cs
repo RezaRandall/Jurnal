@@ -32,12 +32,16 @@ public class StockOpnameInsertHandler : IRequestHandler<StockOpnameInsertList, P
                     WarehouseId = Item.WarehouseId,
                     ItemId = Item.ItemId,
                     Quantity = Item.Quantity,
+                    Cost = Item.Cost,
+                    Price = Item.Price,
                 });
                 row.Add(new StockProductListDto
                 {
                     WarehouseId = Item.WarehouseId,
                     ItemId = Item.ItemId,
                     Stock = Item.Quantity,
+                    Cost = Item.Cost,
+                    Price = Item.Price,
                 });
             }
 
@@ -70,6 +74,8 @@ public class StockOpnameInsert
     public int WarehouseId { get; set; } = 0;
     public int ItemId { get; set; } = 0;
     public double Quantity { get; set; } = 0;
+    public double Cost { get; set; } = 0;
+    public double Price { get; set; } = 0;
 }
 //public class StockOpnameInsertValidator : AbstractValidator<StockOpnameInsertList>
 //{

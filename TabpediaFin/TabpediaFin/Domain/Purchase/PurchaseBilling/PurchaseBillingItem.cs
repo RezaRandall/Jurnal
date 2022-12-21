@@ -7,5 +7,6 @@
         public int Quantity { get; set; }
         public int ItemUnitMeasureId { get; set; }
         public int TransId { get; set; }
+        public int TaxId { get; set; }
     }
 }

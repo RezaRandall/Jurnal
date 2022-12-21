@@ -144,15 +144,16 @@ namespace TabpediaFin.Handler.PurchaseOrderHandler
                         ItemId = item.ItemId,
                         Quantity = item.Quantity,
                         ItemUnitMeasureId = item.ItemUnitMeasureId,
-                        TransId = TransId
-
+                        TransId = TransId,
+                        TaxId = item.TaxId
                     });
                     PurchaseOrderFetchItem.Add(new PurchaseOrderFetchItem
                     {
                         ItemId = item.ItemId,
                         Quantity = item.Quantity,
                         ItemUnitMeasureId = item.ItemUnitMeasureId,
-                        TransId = TransId
+                        TransId = TransId,
+                        TaxId = item.TaxId
                     });
                 }
 
@@ -188,6 +189,7 @@ namespace TabpediaFin.Handler.PurchaseOrderHandler
     public class PurchaseOrderInsertItem
     {
         public int ItemId { get; set; }
+        public int TaxId { get; set; }
         public int Quantity { get; set; }
         public int ItemUnitMeasureId { get; set; }
     }
@@ -198,6 +200,5 @@ namespace TabpediaFin.Handler.PurchaseOrderHandler
         public string FileUrl { get; set; } = string.Empty;
         public string FileSize { get; set; } = string.Empty;
         public string Extension { get; set; } = string.Empty;
-        public int TransId { get; set; }
     }
 }

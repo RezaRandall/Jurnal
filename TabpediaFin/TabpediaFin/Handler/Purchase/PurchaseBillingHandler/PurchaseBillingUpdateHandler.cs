@@ -153,7 +153,8 @@
                         ItemId = item.ItemId,
                         Quantity = item.Quantity,
                         ItemUnitMeasureId = item.ItemUnitMeasureId,
-                        TransId = TransId
+                        TransId = TransId,
+                        TaxId = item.TaxId
 
                     });
                     PurchaseBillingFetchItem.Add(new PurchaseBillingFetchItem
@@ -162,7 +163,8 @@
                         ItemId = item.ItemId,
                         Quantity = item.Quantity,
                         ItemUnitMeasureId = item.ItemUnitMeasureId,
-                        TransId = TransId
+                        TransId = TransId,
+                        TaxId = item.TaxId
                     });
                 }
                 List<PurchaseBillingItem> PurchaseBillingItemListUpdate = _context.PurchaseBillingItem.Where<PurchaseBillingItem>(x => x.TransId == TransId && x.TenantId == _currentUser.TenantId && !idupdateitem.Contains(x.Id)).ToList();
@@ -206,6 +208,7 @@
     {
         public int Id { get; set; }
         public int ItemId { get; set; }
+        public int TaxId { get; set; }
         public int Quantity { get; set; }
         public int ItemUnitMeasureId { get; set; }
     }

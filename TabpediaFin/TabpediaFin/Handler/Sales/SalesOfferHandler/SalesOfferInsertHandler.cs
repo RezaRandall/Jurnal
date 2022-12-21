@@ -142,7 +142,8 @@ namespace TabpediaFin.Handler.SalesOfferHandler
                         ItemId = item.ItemId,
                         Quantity = item.Quantity,
                         ItemUnitMeasureId = item.ItemUnitMeasureId,
-                        TransId = TransId
+                        TransId = TransId,
+                        TaxId = item.TaxId
 
                     });
                     SalesOfferFetchItem.Add(new SalesOfferFetchItem
@@ -150,7 +151,8 @@ namespace TabpediaFin.Handler.SalesOfferHandler
                         ItemId = item.ItemId,
                         Quantity = item.Quantity,
                         ItemUnitMeasureId = item.ItemUnitMeasureId,
-                        TransId = TransId
+                        TransId = TransId,
+                        TaxId = item.TaxId
                     });
                 }
 
@@ -189,6 +191,7 @@ namespace TabpediaFin.Handler.SalesOfferHandler
         public int ItemId { get; set; }
         public int Quantity { get; set; }
         public int ItemUnitMeasureId { get; set; }
+        public int TaxId { get; set; }
     }
 
     public class PurchestRequestAttahmentItem
@@ -197,6 +200,5 @@ namespace TabpediaFin.Handler.SalesOfferHandler
         public string FileUrl { get; set; } = string.Empty;
         public string FileSize { get; set; } = string.Empty;
         public string Extension { get; set; } = string.Empty;
-        public int TransId { get; set; }
     }
 }

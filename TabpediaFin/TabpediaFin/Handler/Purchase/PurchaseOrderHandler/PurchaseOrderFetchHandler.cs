@@ -72,7 +72,7 @@
 
                         result.AttachmentList = resultattachment;
 
-                        var sqlitem = @"SELECT It.""AverageCost"" as ItemAverageCost, It.""Cost"" as ItemCost, It.""Name"" as ItemName, It.""Description"" as ItemDescription, um.""Id"" as UnitMeasureId,um.""Name"" as UnitMeasureName, um.""Description"" as UnitMeasureDescription, i.""Id"", i.""ItemId"", i.""TransId"", i.""Quantity"", i.""ItemUnitMeasureId""  FROM ""PurchaseOrderItem"" i LEFT JOIN ""Item"" It ON i.""ItemId"" = It.""Id"" LEFT JOIN ""ItemUnitMeasure"" ium ON i.""ItemUnitMeasureId"" = ium.""Id"" LEFT JOIN ""UnitMeasure"" um ON ium.""UnitMeasureId"" = um.""Id"" WHERE i.""TenantId"" = @TenantId AND i.""TransId"" = @TransId";
+                        var sqlitem = @"SELECT It.""AverageCost"" as ItemAverageCost, It.""Cost"" as ItemCost, It.""Name"" as ItemName, It.""Description"" as ItemDescription, um.""Id"" as UnitMeasureId,um.""Name"" as UnitMeasureName, um.""Description"" as UnitMeasureDescription, i.""Id"", i.""ItemId"", i.""TransId"", i.""TaxId"", i.""Quantity"", i.""ItemUnitMeasureId""  FROM ""PurchaseOrderItem"" i LEFT JOIN ""Item"" It ON i.""ItemId"" = It.""Id"" LEFT JOIN ""ItemUnitMeasure"" ium ON i.""ItemUnitMeasureId"" = ium.""Id"" LEFT JOIN ""UnitMeasure"" um ON ium.""UnitMeasureId"" = um.""Id"" WHERE i.""TenantId"" = @TenantId AND i.""TransId"" = @TransId";
 
                         List<PurchaseOrderFetchItem> resultitem;
                         resultitem = (await cn.QueryAsync<PurchaseOrderFetchItem>(sqlitem, parametersub).ConfigureAwait(false)).ToList();
@@ -136,6 +136,7 @@
         public string UnitMeasureName { get; set; } = string.Empty;
         public string UnitMeasureDescription { get; set; } = string.Empty;
         public int TransId { get; set; }
+        public int TaxId { get; set; }
     }
     public class PurchaseOrderFetchAttachment : BaseDto
     {

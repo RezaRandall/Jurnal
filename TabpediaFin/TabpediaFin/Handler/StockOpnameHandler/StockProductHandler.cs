@@ -67,6 +67,8 @@
         public int ItemId { get; set; } = 0;
         public string ItemName { get; set; } = string.Empty;
         public double Stock { get; set; } = 0;
+        public double Cost { get; set; } = 0;
+        public double Price { get; set; } = 0;
     }
 
     public class FetchPagedListStockItem<T> : IRequest<PagedListResponse<T>>
