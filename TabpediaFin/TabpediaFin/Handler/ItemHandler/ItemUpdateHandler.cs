@@ -55,21 +55,21 @@ public class ItemUpdateHandler : IRequestHandler<ItemUpdateDto, RowResponse<Item
             List<int> idUpdateAttachment = new List<int>();
             if (request.ItemItemCategoryList.Count > 0)
             {
-                foreach (ItemItemCategoryUpdate itm in request.ItemItemCategoryList)
+                foreach (ItemItemCategoryUpdate i in request.ItemItemCategoryList)
                 {
-                    idUpdateItemItemCategory.Add(item.Id);
+                    idUpdateItemItemCategory.Add(i.Id);
                     itemItemCategory.Add(new ItemItemCategory
                     {
-                        Id = itm.Id,
-                        ItemId = itm.ItemId,
-                        ItemCategoryId = itm.ItemCategoryId,
+                        Id = i.Id,
+                        ItemId = itemIdResult,
+                        ItemCategoryId = i.ItemCategoryId,
                         CreatedUid = _currentUser.UserId,
                     });
                     itemItemCategoryFetchDto.Add(new ItemItemCategoryFetchDto
                     {
-                        Id = itm.Id,
-                        ItemId = itm.ItemId,
-                        ItemCategoryId = itm.ItemCategoryId,
+                        Id = i.Id,
+                        ItemId = itemIdResult,
+                        ItemCategoryId = i.ItemCategoryId,
                     });
                 }
                 _context.ItemItemCategory.UpdateRange(itemItemCategory);
@@ -84,7 +84,7 @@ public class ItemUpdateHandler : IRequestHandler<ItemUpdateDto, RowResponse<Item
                     {
                         Id = i.Id,
                         UnitMeasureId = i.UnitMeasureId,
-                        ItemId = i.ItemId,
+                        ItemId = itemIdResult,
                         UnitConversion = i.UnitConversion,
                         Cost = i.Cost,
                         Price = i.Price,
@@ -95,7 +95,7 @@ public class ItemUpdateHandler : IRequestHandler<ItemUpdateDto, RowResponse<Item
                     {
                         Id = item.Id,
                         UnitMeasureId = i.UnitMeasureId,
-                        ItemId = i.ItemId,
+                        ItemId = itemIdResult,
                         UnitConversion = i.UnitConversion,
                         Cost = i.Cost,
                         Price = i.Price,
