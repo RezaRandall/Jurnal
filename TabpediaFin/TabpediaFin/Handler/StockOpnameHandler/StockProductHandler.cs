@@ -22,15 +22,15 @@
 
                     if (request.WarehouseId != 0 && request.ItemId != 0)
                     {
-                        stockfilter = @"and i.""WarehouseId"" = " + request.WarehouseId + @"and i.""ItemId"" = " + request.ItemId + "";
+                        stockfilter = @" and i.""WarehouseId"" = " + request.WarehouseId + @" and i.""ItemId"" = " + request.ItemId + "";
                     }
                     else if (request.WarehouseId != 0 && request.ItemId == 0)
                     {
-                        stockfilter = @"and i.""WarehouseId"" = " + request.WarehouseId + "";
+                        stockfilter = @" and i.""WarehouseId"" = " + request.WarehouseId + "";
                     }
                     else if (request.ItemId != 0 && request.WarehouseId == 0)
                     {
-                        stockfilter = @"and i.""WarehouseId"" = " + request.WarehouseId + @"and i.""ItemId"" = " + request.ItemId + "";
+                        stockfilter = @"and i.""ItemId"" = " + request.ItemId + "";
                     }
 
                     var sql = @"SELECT it.""Name"" as ItemName,i.""ItemId"", w.""Name"" as WarehouseName, i.""WarehouseId"", ""sum""(i.""Quantity"") as Stock FROM ""ItemStock"" i LEFT JOIN ""Warehouse"" w ON i.""WarehouseId"" = w.""Id"" LEFT JOIN ""Item"" it ON i.""ItemId"" = it.""Id"" WHERE i.""TenantId"" = @TenantId " + stockfilter + @" GROUP BY i.""ItemId"", i.""WarehouseId"", w.""Name"",it.""Name""";
