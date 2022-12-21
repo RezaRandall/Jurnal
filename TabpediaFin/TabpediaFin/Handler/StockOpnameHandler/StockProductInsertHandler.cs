@@ -34,6 +34,7 @@ public class StockOpnameInsertHandler : IRequestHandler<StockOpnameInsertList, P
                     Quantity = Item.Quantity,
                     Cost = Item.Cost,
                     Price = Item.Price,
+                    Description = "Stock Opname"
                 });
                 row.Add(new StockProductListDto
                 {
@@ -42,6 +43,7 @@ public class StockOpnameInsertHandler : IRequestHandler<StockOpnameInsertList, P
                     Stock = Item.Quantity,
                     Cost = Item.Cost,
                     Price = Item.Price,
+                    Description = "Stock Opname"
                 });
             }
 
