@@ -1,4 +1,5 @@
 ﻿using TabpediaFin.Domain.ReceiveMoney;
+using TabpediaFin.Handler.ReceiveMoneyHandler;
 
 namespace TabpediaFin.Handler.ReceiveMoneyHandler;
 
@@ -15,10 +16,13 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
 
     public async Task<RowResponse<ReceiveMoneyFetchDto>> Handle(ReceiveMoneyUpdateDto request, CancellationToken cancellationToken)
     {
-        int transferMoneyId;
+        int receiveMoneyId;
         var result = new RowResponse<ReceiveMoneyFetchDto>();
-        List<ReceiveMoneyTag> ReceiveMoneyAttachment = new List<ReceiveMoneyTag>();
-        List<ReceiveMoneyFetchAttachment> ReceiveMoneyFetchAttachment = new List<ReceiveMoneyFetchAttachment>();
+
+        List<ReceiveMoneyTag> receiveMoneyTag = new List<ReceiveMoneyTag>();
+        List<ReceiveMoneyAttachment> receiveMoneyAttachment = new List<ReceiveMoneyAttachment>();
+        List<ReceiveMoneyFetchTag> receiveMoneyFetchTag = new List<ReceiveMoneyFetchTag>();
+        List<ReceiveMoneyFetchAttachment> receiveMoneyFetchAttachment = new List<ReceiveMoneyFetchAttachment>();
 
         try
         {
@@ -35,11 +39,66 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
             receiveMoney.Memo = request.Memo;
             receiveMoney.TotalAmount = request.TotalAmount;
 
-            await _context.SaveChangesAsync(cancellationToken);
-            transferMoneyId = request.Id;
 
-            List<ReceiveMoneyFetchAttachment> returnfile = await UpdateAttachmentAsync(request.AttachmentFile, transferMoneyId, cancellationToken);
-            List<ReceiveMoneyFetchTag> TagListResult = await UpdateTagAsync(request.TagList, transferMoneyId, cancellationToken);
+            receiveMoneyId = request.Id;
+            List<int> idUpdateReceiveMoneyTag = new List<int>();
+            List<int> idUpdateReceiveMoneyAttachment = new List<int>();
+
+            if (request.ReceiveMoneyTagList.Count > 0)
+            {
+                foreach (ReceiveMoneyUpdateTag i in request.ReceiveMoneyTagList)
+                {
+                    idUpdateReceiveMoneyTag.Add(i.Id);
+                    receiveMoneyTag.Add(new ReceiveMoneyTag
+                    {
+                        Id = i.Id,
+                        TagId = i.TagId,
+                        TransId = receiveMoneyId,
+                        CreatedUid = _currentUser.UserId
+                    });
+                    receiveMoneyFetchTag.Add(new ReceiveMoneyFetchTag
+                    {
+                        Id = i.Id,
+                        TagId = i.TagId,
+                        TransId = receiveMoneyId
+                    });
+                }
+                _context.ReceiveMoneyTag.UpdateRange(receiveMoneyTag);
+            }
+
+            if (request.ReceiveMoneyAttachmentFile.Count > 0)
+            {
+                foreach (ReceiveMoneyAttachmentUpdate i in request.ReceiveMoneyAttachmentFile)
+                {
+                    idUpdateReceiveMoneyAttachment.Add(i.Id);
+                    receiveMoneyAttachment.Add(new ReceiveMoneyAttachment
+                    {
+                        Id = i.Id,
+                        FileName = i.FileName,
+                        FileUrl = i.FileUrl,
+                        Extension = i.Extension,
+                        FileSize = i.FileSize,
+                        CreatedUid = _currentUser.UserId,
+                        TransId = receiveMoneyId
+                    });
+                    receiveMoneyFetchAttachment.Add(new ReceiveMoneyFetchAttachment
+                    {
+                        Id = i.Id,
+                        FileName = i.FileName,
+                        FileUrl = i.FileUrl,
+                        Extension = i.Extension,
+                        FileSize = i.FileSize,
+                        TransId = receiveMoneyId
+                    });
+                }
+                _context.ReceiveMoneyAttachment.UpdateRange(receiveMoneyAttachment);
+            }
+
+            List<ReceiveMoneyTag> receiveMoneyTagList = _context.ReceiveMoneyTag.Where<ReceiveMoneyTag>(x => x.TransId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateReceiveMoneyTag.Contains(x.Id)).ToList();
+            List<ReceiveMoneyAttachment> receiveMoneyAttachmentList = _context.ReceiveMoneyAttachment.Where<ReceiveMoneyAttachment>(x => x.TransId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateReceiveMoneyAttachment.Contains(x.Id)).ToList();
+            _context.ReceiveMoneyTag.RemoveRange(receiveMoneyTagList);
+            _context.ReceiveMoneyAttachment.RemoveRange(receiveMoneyAttachmentList);
+            await _context.SaveChangesAsync(cancellationToken);
 
             var row = new ReceiveMoneyFetchDto()
             {
@@ -55,6 +114,8 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
                 Amount = request.Amount,
                 Memo = request.Memo,
                 TotalAmount = request.TotalAmount,
+                ReceiveMoneyTagList = receiveMoneyFetchTag,
+                ReceiveMoneyAttachmentList = receiveMoneyFetchAttachment,
             };
 
             result.IsOk = true;
@@ -67,70 +128,6 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
             result.ErrorMessage = ex.Message;
         }
         return result;
-    }
-
-    public async Task<List<ReceiveMoneyFetchAttachment>> UpdateAttachmentAsync(List<ReceiveMoneyAttachmentUpdate> filedata, int TransId, CancellationToken cancellationToken)
-    {
-        List<ReceiveMoneyAttachment> ReceiveMoneyAttachmentList = new List<ReceiveMoneyAttachment>();
-        List<ReceiveMoneyFetchAttachment> ReceiveMoneyFetchAttachmentList = new List<ReceiveMoneyFetchAttachment>();
-
-        if (filedata.Count > 0)
-        {
-            foreach (ReceiveMoneyAttachmentUpdate item in filedata)
-            {
-                ReceiveMoneyAttachmentList.Add(new ReceiveMoneyAttachment
-                {
-                    Id = item.Id,
-                    FileName = item.FileName,
-                    FileUrl = item.FileUrl,
-                    Extension = item.Extension,
-                    FileSize = item.FileSize,
-                    TransId = TransId,
-                });
-                ReceiveMoneyFetchAttachmentList.Add(new ReceiveMoneyFetchAttachment
-                {
-                    Id = item.Id,
-                    FileName = item.FileName,
-                    FileUrl = item.FileUrl,
-                    Extension = item.Extension,
-                    FileSize = item.FileSize,
-                    TransId = TransId,
-                });
-            }
-
-            _context.ReceiveMoneyAttachment.UpdateRange(ReceiveMoneyAttachmentList);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-
-        return ReceiveMoneyFetchAttachmentList;
-    }
-
-    public async Task<List<ReceiveMoneyFetchTag>> UpdateTagAsync(List<ReceiveMoneyUpdateTag> filedata, int TransId, CancellationToken cancellationToken)
-    {
-        List<ReceiveMoneyTag> ReceiveMoneyTag = new List<ReceiveMoneyTag>();
-        List<ReceiveMoneyFetchTag> ReceiveMoneyFetchTag = new List<ReceiveMoneyFetchTag>();
-
-        if (filedata.Count > 0)
-        {
-            foreach (ReceiveMoneyUpdateTag item in filedata)
-            {
-                ReceiveMoneyTag.Add(new ReceiveMoneyTag
-                {
-                    Id = item.Id,
-                    TagId = item.TagId,
-                    TransId = TransId
-                });
-                ReceiveMoneyFetchTag.Add(new ReceiveMoneyFetchTag
-                {
-                    Id = item.Id,
-                    TagId = item.TagId,
-                    TransId = TransId
-                });
-            }
-            _context.ReceiveMoneyTag.UpdateRange(ReceiveMoneyTag);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-        return ReceiveMoneyFetchTag;
     }
 
 
@@ -150,8 +147,8 @@ public class ReceiveMoneyUpdateDto : IRequest<RowResponse<ReceiveMoneyFetchDto>>
     public int Amount { get; set; } = 0;
     public string Memo { get; set; } = string.Empty;
     public int TotalAmount { get; set; } = 0;
-    public List<ReceiveMoneyAttachmentUpdate> AttachmentFile { get; set; }
-    public List<ReceiveMoneyUpdateTag> TagList { get; set; }
+    public List<ReceiveMoneyAttachmentUpdate> ReceiveMoneyAttachmentFile { get; set; }
+    public List<ReceiveMoneyUpdateTag> ReceiveMoneyTagList { get; set; }
 }
 
 public class ReceiveMoneyAttachmentUpdate

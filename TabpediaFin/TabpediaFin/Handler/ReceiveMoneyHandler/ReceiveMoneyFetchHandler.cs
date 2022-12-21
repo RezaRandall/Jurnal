@@ -1,4 +1,6 @@
-﻿namespace TabpediaFin.Handler.ReceiveMoneyHandler;
+﻿using TabpediaFin.Handler.ExpenseHandler;
+
+namespace TabpediaFin.Handler.ReceiveMoneyHandler;
 
 public class ReceiveMoneyFetchHandler : IFetchByIdHandler<ReceiveMoneyFetchDto>
 {
@@ -19,19 +21,48 @@ public class ReceiveMoneyFetchHandler : IFetchByIdHandler<ReceiveMoneyFetchDto>
         {
             using (var cn = _dbManager.CreateConnection())
             {
-                var row = await cn.FetchAsync<ReceiveMoneyFetchDto>(request.Id, _currentUser);
-                if (row == null)
+                var parameters = new DynamicParameters();
+                parameters.Add("TenantId", _currentUser.TenantId);
+                parameters.Add("Id", request.Id);
+
+                var sql = @"SELECT * FROM ""ReceiveMoney"" WHERE ""TenantId"" = @TenantId AND ""Id"" = @Id ";
+                var result = await cn.QueryFirstOrDefaultAsync<ReceiveMoneyFetchDto>(sql, parameters);
+
+                if (result != null)
                 {
-                    response.IsOk = false;
-                    response.Row = row;
-                    response.ErrorMessage = "Data not found";
+                    var sqlReceiveMoneyTag = @"SELECT rmt.""Id""
+                                                ,rmt.""TagId""
+                                                ,rmt.""TransId""
+                                                 FROM ""ReceiveMoneyTag"" rmt
+                                                 INNER JOIN ""ReceiveMoney"" rm ON rmt.""TransId"" = rm.""Id"" 
+                                                 WHERE rm.""TenantId"" = @TenantId AND rm.""Id"" = @Id ";
+
+                    //var parametersub = new DynamicParameters();
+                    //parametersub.Add("TenantId", _currentUser.TenantId);
+                    //parametersub.Add("IdItem", request.Id);
+
+                    List<ReceiveMoneyFetchTag> resultReceiveMoneyTag;
+                    resultReceiveMoneyTag = (await cn.QueryAsync<ReceiveMoneyFetchTag>(sqlReceiveMoneyTag, parameters).ConfigureAwait(false)).ToList();
+                    result.ReceiveMoneyTagList = resultReceiveMoneyTag;
+
+                    var sqlReceiveMoneyAttachment = @"SELECT rma.""Id""
+                                        , rma.""FileName""
+                                        , rma.""FileUrl""
+                                        , rma.""Extension""
+                                        , rma.""FileSize""
+                                        , rma.""TransId"" 
+                                        FROM ""ReceiveMoneyAttachment"" rma
+                                        INNER JOIN ""ReceiveMoney"" rm ON rma.""TransId"" = rm.""Id"" 
+                                        WHERE rm.""TenantId"" = @TenantId AND rm.""Id"" = @Id ";
+                    List<ReceiveMoneyFetchAttachment> resultReceiveMoneyAttachment;
+                    resultReceiveMoneyAttachment = (await cn.QueryAsync<ReceiveMoneyFetchAttachment>(sqlReceiveMoneyAttachment, parameters).ConfigureAwait(false)).ToList();
+                    result.ReceiveMoneyAttachmentList = resultReceiveMoneyAttachment;
+
                 }
-                else
-                {
-                    response.IsOk = true;
-                    response.Row = row;
-                    response.ErrorMessage = string.Empty;
-                }
+
+                response.IsOk = true;
+                response.Row = result;
+                response.ErrorMessage = string.Empty;
             }
         }
         catch (Exception ex)
@@ -40,7 +71,6 @@ public class ReceiveMoneyFetchHandler : IFetchByIdHandler<ReceiveMoneyFetchDto>
             response.Row = null;
             response.ErrorMessage = ex.Message;
         }
-
         return response;
     }
 
@@ -61,8 +91,8 @@ public class ReceiveMoneyFetchDto : BaseDto
     public int Amount { get; set; } = 0;
     public string Memo { get; set; } = string.Empty;
     public int TotalAmount { get; set; } = 0;
-    public List<ReceiveMoneyFetchTag> TagList { get; set; }
-    public List<ReceiveMoneyFetchAttachment> AttachmentList { get; set; }
+    public List<ReceiveMoneyFetchTag> ReceiveMoneyTagList { get; set; }
+    public List<ReceiveMoneyFetchAttachment> ReceiveMoneyAttachmentList { get; set; }
 }
 
 public class ReceiveMoneyFetchAttachment : BaseDto

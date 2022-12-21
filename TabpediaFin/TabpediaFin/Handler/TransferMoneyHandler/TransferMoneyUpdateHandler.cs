@@ -1,4 +1,6 @@
-﻿using TabpediaFin.Domain.TransferMoney;
+﻿using TabpediaFin.Domain.SendMoney;
+using TabpediaFin.Domain.TransferMoney;
+using TabpediaFin.Handler.SendMoneyHandler;
 
 namespace TabpediaFin.Handler.TransferMoneyHandler;
 
@@ -17,24 +19,75 @@ public class TransferMoneyUpdateHandler : IRequestHandler<TransferMoneyUpdateDto
     {
         int transferMoneyId;
         var result = new RowResponse<TransferMoneyFetchDto>();
-        List<TransferMoneyTag> TransferMoneyAttachment = new List<TransferMoneyTag>();
-        List<TransferMoneyFetchAttachment> TransferMoneyFetchAttachment = new List<TransferMoneyFetchAttachment>();
+
+        List<TransferMoneyTag> transferMoneyTag = new List<TransferMoneyTag>();
+        List<TransferMoneyAttachment> transferMoneyAttachment = new List<TransferMoneyAttachment>();
+        List<TransferMoneyFetchTag> transferMoneyFetchTag = new List<TransferMoneyFetchTag>();
+        List<TransferMoneyFetchAttachment> transferMoneyFetchAttachment = new List<TransferMoneyFetchAttachment>();
 
         try
         {
-            var tranferMoney = await _context.TransferMoney.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-            tranferMoney.TransferFromAccountId = request.TransferFromAccountId;
-            tranferMoney.DepositToAccountId = request.DepositToAccountId;
-            tranferMoney.Amount = request.Amount;
-            tranferMoney.Memo = request.Memo;
-            tranferMoney.TransactionNumber = request.TransactionNumber;
-            tranferMoney.TransactionDate = request.TransactionDate;
+            var transferMoney = await _context.TransferMoney.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
+            transferMoney.TransferFromAccountId = request.TransferFromAccountId;
+            transferMoney.DepositToAccountId = request.DepositToAccountId;
+            transferMoney.Amount = request.Amount;
+            transferMoney.Memo = request.Memo;
+            transferMoney.TransactionNumber = request.TransactionNumber;
+            transferMoney.TransactionDate = request.TransactionDate;
 
-            await _context.SaveChangesAsync(cancellationToken);
             transferMoneyId = request.Id;
+            List<int> idUpdateTransferMoneyTag = new List<int>();
+            List<int> idUpdateTransferMoneyAttachment = new List<int>();
 
-            List<TransferMoneyFetchAttachment> returnfile = await UpdateAttachmentAsync(request.AttachmentFile, transferMoneyId, cancellationToken);
-            List<TransferMoneyFetchTag> TagListResult = await UpdateTagAsync(request.TagList, transferMoneyId, cancellationToken);
+            if (request.TransferMoneyTagList.Count > 0)
+            {
+                foreach (TransferMoneyUpdateTag i in request.TransferMoneyTagList)
+                {
+                    idUpdateTransferMoneyTag.Add(i.Id);
+                    transferMoneyTag.Add(new TransferMoneyTag
+                    {
+                        Id = i.Id,
+                        TagId = i.TagId,
+                        TransId = transferMoneyId,
+                        CreatedUid = _currentUser.UserId
+                    });
+                    transferMoneyFetchTag.Add(new TransferMoneyFetchTag
+                    {
+                        Id = i.Id,
+                        TagId = i.TagId,
+                        TransId = transferMoneyId
+                    });
+                }
+                _context.TransferMoneyTag.UpdateRange(transferMoneyTag);
+            }
+
+            if (request.TransferMoneyAttachmentFile.Count > 0)
+            {
+                foreach (TransferMoneyAttachmentUpdate i in request.TransferMoneyAttachmentFile)
+                {
+                    idUpdateTransferMoneyAttachment.Add(i.Id);
+                    transferMoneyAttachment.Add(new TransferMoneyAttachment
+                    {
+                        Id = i.Id,
+                        FileName = i.FileName,
+                        FileUrl = i.FileUrl,
+                        Extension = i.Extension,
+                        FileSize = i.FileSize,
+                        CreatedUid = _currentUser.UserId,
+                        TransId = transferMoneyId
+                    });
+                    transferMoneyFetchAttachment.Add(new TransferMoneyFetchAttachment
+                    {
+                        Id = i.Id,
+                        FileName = i.FileName,
+                        FileUrl = i.FileUrl,
+                        Extension = i.Extension,
+                        FileSize = i.FileSize,
+                        TransId = transferMoneyId
+                    });
+                }
+                _context.TransferMoneyAttachment.UpdateRange(transferMoneyAttachment);
+            }
 
             var row = new TransferMoneyFetchDto()
             {
@@ -45,6 +98,8 @@ public class TransferMoneyUpdateHandler : IRequestHandler<TransferMoneyUpdateDto
                 Memo = request.Memo,
                 TransactionNumber = request.TransactionNumber,
                 TransactionDate = request.TransactionDate,
+                TransferMoneyTagList = transferMoneyFetchTag,
+                TransferMoneyAttachmentList = transferMoneyFetchAttachment,
             };
 
             result.IsOk = true;
@@ -138,8 +193,8 @@ public class TransferMoneyUpdateDto : IRequest<RowResponse<TransferMoneyFetchDto
     public string Memo { get; set; } = string.Empty;
     public string TransactionNumber { get; set; } = string.Empty;
     public DateTime TransactionDate { get; set; }
-    public List<TransferMoneyAttachmentUpdate> AttachmentFile { get; set; }
-    public List<TransferMoneyUpdateTag> TagList { get; set; }
+    public List<TransferMoneyAttachmentUpdate> TransferMoneyAttachmentFile { get; set; }
+    public List<TransferMoneyUpdateTag> TransferMoneyTagList { get; set; }
 }
 
 public class TransferMoneyAttachmentUpdate

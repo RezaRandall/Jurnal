@@ -1,4 +1,6 @@
-﻿namespace TabpediaFin.Handler.TransferMoneyHandler;
+﻿using TabpediaFin.Handler.TransferMoneyHandler;
+
+namespace TabpediaFin.Handler.TransferMoneyHandler;
 
 public class TransferMoneyFetchHandler : IFetchByIdHandler<TransferMoneyFetchDto>
 {
@@ -19,19 +21,45 @@ public class TransferMoneyFetchHandler : IFetchByIdHandler<TransferMoneyFetchDto
         {
             using (var cn = _dbManager.CreateConnection())
             {
-                var row = await cn.FetchAsync<TransferMoneyFetchDto>(request.Id, _currentUser);
-                if (row == null)
+                var parameters = new DynamicParameters();
+                parameters.Add("TenantId", _currentUser.TenantId);
+                parameters.Add("Id", request.Id);
+
+                var sql = @"SELECT * FROM ""TransferMoney"" WHERE ""TenantId"" = @TenantId AND ""Id"" = @Id ";
+                var result = await cn.QueryFirstOrDefaultAsync<TransferMoneyFetchDto>(sql, parameters);
+
+                if (result != null)
                 {
-                    response.IsOk = false;
-                    response.Row = row;
-                    response.ErrorMessage = "Data not found";
+                    var sqlTransferMoneyTag = @"SELECT tmt.""Id""
+                                                ,tmt.""TagId""
+                                                ,tmt.""TransId""
+                                                 FROM ""TransferMoneyTag"" tmt
+                                                 INNER JOIN ""TransferMoney"" sm ON tmt.""TransId"" = sm.""Id"" 
+                                                 WHERE sm.""TenantId"" = @TenantId AND sm.""Id"" = @Id ";
+
+
+                    List<TransferMoneyFetchTag> resultTransferMoneyTag;
+                    resultTransferMoneyTag = (await cn.QueryAsync<TransferMoneyFetchTag>(sqlTransferMoneyTag, parameters).ConfigureAwait(false)).ToList();
+                    result.TransferMoneyTagList = resultTransferMoneyTag;
+
+                    var sqlTransferMoneyAttachment = @"SELECT sma.""Id""
+                                        , sma.""FileName""
+                                        , sma.""FileUrl""
+                                        , sma.""Extension""
+                                        , sma.""FileSize""
+                                        , sma.""TransId"" 
+                                        FROM ""TransferMoneyAttachment"" sma
+                                        INNER JOIN ""TransferMoney"" sm ON sma.""TransId"" = sm.""Id"" 
+                                        WHERE sm.""TenantId"" = @TenantId AND sm.""Id"" = @Id ";
+                    List<TransferMoneyFetchAttachment> resultTransferMoneyAttachment;
+                    resultTransferMoneyAttachment = (await cn.QueryAsync<TransferMoneyFetchAttachment>(sqlTransferMoneyAttachment, parameters).ConfigureAwait(false)).ToList();
+                    result.TransferMoneyAttachmentList = resultTransferMoneyAttachment;
+
                 }
-                else
-                {
-                    response.IsOk = true;
-                    response.Row = row;
-                    response.ErrorMessage = string.Empty;
-                }
+
+                response.IsOk = true;
+                response.Row = result;
+                response.ErrorMessage = string.Empty;
             }
         }
         catch (Exception ex)
@@ -40,7 +68,6 @@ public class TransferMoneyFetchHandler : IFetchByIdHandler<TransferMoneyFetchDto
             response.Row = null;
             response.ErrorMessage = ex.Message;
         }
-
         return response;
     }
 
@@ -58,8 +85,8 @@ public class TransferMoneyFetchDto : BaseDto
     public string Memo { get; set; } = string.Empty;
     public string TransactionNumber { get; set; } = string.Empty;
     public DateTime TransactionDate { get; set; }
-    public List<TransferMoneyFetchAttachment> AttachmentList { get; set; }
-    public List<TransferMoneyFetchTag> TagList { get; set; }
+    public List<TransferMoneyFetchAttachment> TransferMoneyAttachmentList { get; set; }
+    public List<TransferMoneyFetchTag> TransferMoneyTagList { get; set; }
 }
 
 public class TransferMoneyFetchAttachment : BaseDto

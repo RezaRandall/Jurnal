@@ -18,38 +18,6 @@ public class ExpenseFetchHandler : IFetchByIdHandler<ExpenseFetchDto>
     {
         var response = new RowResponse<ExpenseFetchDto>();
 
-        //try
-        //{
-        //    using (var cn = _dbManager.CreateConnection())
-        //    {
-        //        var row = await cn.FetchAsync<ExpenseFetchDto>(request.Id, _currentUser);
-        //        if (row == null)
-        //        {
-        //            response.IsOk = false;
-        //            response.Row = row;
-        //            response.ErrorMessage = "Data not found";
-        //        }
-        //        else
-        //        {
-        //            response.IsOk = true;
-        //            response.Row = row;
-        //            response.ErrorMessage = string.Empty;
-        //        }
-        //    }
-        //}
-        //catch (Exception ex)
-        //{
-        //    response.IsOk = false;
-        //    response.Row = null;
-        //    response.ErrorMessage = ex.Message;
-        //}
-
-        //return response;
-
-
-
-
-
         try
         {
             using (var cn = _dbManager.CreateConnection())

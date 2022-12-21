@@ -1,4 +1,7 @@
-﻿using TabpediaFin.Domain.SendMoney;
+﻿using TabpediaFin.Domain.ReceiveMoney;
+using TabpediaFin.Domain.SendMoney;
+using TabpediaFin.Handler.ReceiveMoneyHandler;
+
 namespace TabpediaFin.Handler.SendMoneyHandler;
 
 public class SendMoneyUpdateHandler : IRequestHandler<SendMoneyUpdateDto, RowResponse<SendMoneyFetchDto>>
@@ -16,8 +19,11 @@ public class SendMoneyUpdateHandler : IRequestHandler<SendMoneyUpdateDto, RowRes
     {
         int sendMoneyId;
         var result = new RowResponse<SendMoneyFetchDto>();
-        List<SendMoneyTag> SendMoneyAttachment = new List<SendMoneyTag>();
-        List<SendMoneyFetchAttachment> SendMoneyFetchAttachment = new List<SendMoneyFetchAttachment>();
+
+        List<SendMoneyTag> sendMoneyTag = new List<SendMoneyTag>();
+        List<SendMoneyAttachment> sendMoneyAttachment = new List<SendMoneyAttachment>();
+        List<SendMoneyFetchTag> sendMoneyFetchTag = new List<SendMoneyFetchTag>();
+        List<SendMoneyFetchAttachment> sendMoneyFetchAttachment = new List<SendMoneyFetchAttachment>();
 
         try
         {
@@ -36,11 +42,59 @@ public class SendMoneyUpdateHandler : IRequestHandler<SendMoneyUpdateDto, RowRes
             sendMoney.DiscountAmount = request.DiscountAmount;
             sendMoney.DiscountPercent = request.DiscountPercent;
 
-            await _context.SaveChangesAsync(cancellationToken);
             sendMoneyId = request.Id;
+            List<int> idUpdateSendMoneyTag = new List<int>();
+            List<int> idUpdateSendMoneyAttachment = new List<int>();
 
-            List<SendMoneyFetchAttachment> returnfile = await UpdateAttachmentAsync(request.AttachmentFile, sendMoneyId, cancellationToken);
-            List<SendMoneyFetchTag> TagListResult = await UpdateTagAsync(request.TagList, sendMoneyId, cancellationToken);
+            if (request.SendMoneyTagList.Count > 0)
+            {
+                foreach (SendMoneyUpdateTag i in request.SendMoneyTagList)
+                {
+                    idUpdateSendMoneyTag.Add(i.Id);
+                    sendMoneyTag.Add(new SendMoneyTag
+                    {
+                        Id = i.Id,
+                        TagId = i.TagId,
+                        TransId = sendMoneyId,
+                        CreatedUid = _currentUser.UserId
+                    });
+                    sendMoneyFetchTag.Add(new SendMoneyFetchTag
+                    {
+                        Id = i.Id,
+                        TagId = i.TagId,
+                        TransId = sendMoneyId
+                    });
+                }
+                _context.SendMoneyTag.UpdateRange(sendMoneyTag);
+            }
+
+            if (request.SendMoneyAttachmentFile.Count > 0)
+            {
+                foreach (SendMoneyAttachmentUpdate i in request.SendMoneyAttachmentFile)
+                {
+                    idUpdateSendMoneyAttachment.Add(i.Id);
+                    sendMoneyAttachment.Add(new SendMoneyAttachment
+                    {
+                        Id = i.Id,
+                        FileName = i.FileName,
+                        FileUrl = i.FileUrl,
+                        Extension = i.Extension,
+                        FileSize = i.FileSize,
+                        CreatedUid = _currentUser.UserId,
+                        TransId = sendMoneyId
+                    });
+                    sendMoneyFetchAttachment.Add(new SendMoneyFetchAttachment
+                    {
+                        Id = i.Id,
+                        FileName = i.FileName,
+                        FileUrl = i.FileUrl,
+                        Extension = i.Extension,
+                        FileSize = i.FileSize,
+                        TransId = sendMoneyId
+                    });
+                }
+                _context.SendMoneyAttachment.UpdateRange(sendMoneyAttachment);
+            }
 
             var row = new SendMoneyFetchDto()
             {
@@ -58,6 +112,8 @@ public class SendMoneyUpdateHandler : IRequestHandler<SendMoneyUpdateDto, RowRes
                 TotalAmount = request.TotalAmount,
                 DiscountAmount = request.DiscountAmount,
                 DiscountPercent = request.DiscountPercent,
+                SendMoneyTagList = sendMoneyFetchTag,
+                SendMoneyAttachmentList = sendMoneyFetchAttachment,
             };
 
             result.IsOk = true;
@@ -72,71 +128,6 @@ public class SendMoneyUpdateHandler : IRequestHandler<SendMoneyUpdateDto, RowRes
 
         return result;
     }
-
-    public async Task<List<SendMoneyFetchAttachment>> UpdateAttachmentAsync(List<SendMoneyAttachmentUpdate> filedata, int TransId, CancellationToken cancellationToken)
-    {
-        List<SendMoneyAttachment> SendMoneyAttachmentList = new List<SendMoneyAttachment>();
-        List<SendMoneyFetchAttachment> SendMoneyFetchAttachmentList = new List<SendMoneyFetchAttachment>();
-
-        if (filedata.Count > 0)
-        {
-            foreach (SendMoneyAttachmentUpdate item in filedata)
-            {
-                SendMoneyAttachmentList.Add(new SendMoneyAttachment
-                {
-                    Id = item.Id,
-                    FileName = item.FileName,
-                    FileUrl = item.FileUrl,
-                    Extension = item.Extension,
-                    FileSize = item.FileSize,
-                    TransId = TransId,
-                });
-                SendMoneyFetchAttachmentList.Add(new SendMoneyFetchAttachment
-                {
-                    Id = item.Id,
-                    FileName = item.FileName,
-                    FileUrl = item.FileUrl,
-                    Extension = item.Extension,
-                    FileSize = item.FileSize,
-                    TransId = TransId,
-                });
-            }
-
-            _context.SendMoneyAttachment.UpdateRange(SendMoneyAttachmentList);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-
-        return SendMoneyFetchAttachmentList;
-    }
-
-    public async Task<List<SendMoneyFetchTag>> UpdateTagAsync(List<SendMoneyUpdateTag> filedata, int TransId, CancellationToken cancellationToken)
-    {
-        List<SendMoneyTag> SendMoneyTag = new List<SendMoneyTag>();
-        List<SendMoneyFetchTag> SendMoneyFetchTag = new List<SendMoneyFetchTag>();
-
-        if (filedata.Count > 0)
-        {
-            foreach (SendMoneyUpdateTag item in filedata)
-            {
-                SendMoneyTag.Add(new SendMoneyTag
-                {
-                    Id = item.Id,
-                    TagId = item.TagId,
-                    TransId = TransId
-                });
-                SendMoneyFetchTag.Add(new SendMoneyFetchTag
-                {
-                    Id = item.Id,
-                    TagId = item.TagId,
-                    TransId = TransId
-                });
-            }
-            _context.SendMoneyTag.UpdateRange(SendMoneyTag);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-        return SendMoneyFetchTag;
-    }
-
 
 
 }
@@ -157,8 +148,8 @@ public class SendMoneyUpdateDto : IRequest<RowResponse<SendMoneyFetchDto>>
     public int TotalAmount { get; set; } = 0;
     public int DiscountAmount { get; set; } = 0;
     public int DiscountPercent { get; set; } = 0;
-    public List<SendMoneyAttachmentUpdate> AttachmentFile { get; set; }
-    public List<SendMoneyUpdateTag> TagList { get; set; }
+    public List<SendMoneyAttachmentUpdate> SendMoneyAttachmentFile { get; set; }
+    public List<SendMoneyUpdateTag> SendMoneyTagList { get; set; }
 }
 
 public class SendMoneyAttachmentUpdate
