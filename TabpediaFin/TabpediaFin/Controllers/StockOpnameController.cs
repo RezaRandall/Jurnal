@@ -26,6 +26,13 @@ namespace TabpediaFin.Controllers
             return Result(await _mediator.Send(request));
         }
 
+        [HttpGet("gethistorystock/{productId:int}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetListHistopry(int productId)
+        {
+            return Result(await _mediator.Send(new FetchByIdRequestDto<HistoryStockDto>(productId)));   
+        }
+
 
         //[HttpGet("{id}")]
         //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]

@@ -20,6 +20,8 @@ public class Table_ItemStock : Migration
             .WithColumn("Quantity").AsDecimal(18,0).NotNullable().WithDefaultValue(0)
             //.WithColumn("Type").AsInt32().NotNullable()//0 : pengurangan, 1: penjumlahan
             .WithColumn("Description").AsString(250).NotNullable()
+            .WithColumn("Cost").AsDecimal(18, 2).NotNullable().WithDefaultValue(0)
+            .WithColumn("Price").AsDecimal(18, 2).NotNullable().WithDefaultValue(0)
             .WithColumn("CreatedUid").AsInt32().NotNullable()
             .WithColumn("CreatedUtc").AsDateTime().NotNullable()
             .WithColumn("UpdatedUid").AsInt32().Nullable()
