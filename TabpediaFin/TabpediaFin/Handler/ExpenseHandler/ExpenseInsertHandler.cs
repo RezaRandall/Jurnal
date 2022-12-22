@@ -1,4 +1,5 @@
-﻿using TabpediaFin.Domain.Expense;
+﻿using TabpediaFin.Domain;
+using TabpediaFin.Domain.Expense;
 
 namespace TabpediaFin.Handler.ExpenseHandler;
 
@@ -33,7 +34,9 @@ public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowRespons
             Notes = request.Notes,
             Description = request.Description,
             TaxId = request.TaxId,
-
+            AccountCashAndBankId = request.AccountCashAndBankId,
+            PayLater = request.PayLater,
+            PriceIncludesTax = request.PriceIncludesTax
         };
 
         try
@@ -44,6 +47,7 @@ public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowRespons
 
             List<ExpenseFetchAttachment> returnfile = await PostAttachmentAsync(request.AttachmentFile, transIdResult, cancellationToken);
             List<ExpenseFetchTag> TagListResult = await PostTagAsync(request.TagList, transIdResult, cancellationToken);
+
 
             var row = new ExpenseFetchDto()
             {
@@ -60,6 +64,9 @@ public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowRespons
                 Notes = expense.Notes,
                 Description = expense.Description,
                 TaxId = expense.TaxId,
+                AccountCashAndBankId = expense.AccountCashAndBankId,
+                PayLater = expense.PayLater,
+                PriceIncludesTax = expense.PriceIncludesTax
             };
 
             result.IsOk = true;
@@ -155,6 +162,9 @@ public class ExpenseInsertDto : IRequest<RowResponse<ExpenseFetchDto>>
     public string Notes { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
+    public int AccountCashAndBankId { get; set; } = 0;
+    public Boolean PayLater { get; set; } = false;
+    public Boolean PriceIncludesTax { get; set; } = false;
     public List<ExpenseAttachmentFiles> AttachmentFile { get; set; }
     public List<ExpenseInsertTag> TagList { get; set; }
 }

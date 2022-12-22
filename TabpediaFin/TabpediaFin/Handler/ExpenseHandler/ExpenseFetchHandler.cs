@@ -95,6 +95,9 @@ public class ExpenseFetchDto : BaseDto
     public string Notes { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
+    public int AccountCashAndBankId { get; set; } = 0;
+    public Boolean PayLater { get; set; } = false;
+    public Boolean PriceIncludesTax { get; set; } = false;
     public List<ExpenseFetchTag> ExpenseTagList { get; set; }
     public List<ExpenseFetchAttachment> ExpenseAttachmentList { get; set; }
 }

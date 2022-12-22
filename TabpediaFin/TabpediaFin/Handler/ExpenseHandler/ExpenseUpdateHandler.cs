@@ -42,6 +42,9 @@ public class ExpenseUpdateHandler : IRequestHandler<ExpenseUpdateDto, RowRespons
             expenses.Notes = request.Notes;
             expenses.Description = request.Description;
             expenses.TaxId = request.TaxId;
+            expenses.AccountCashAndBankId = request.AccountCashAndBankId;
+            expenses.PayLater = request.PayLater;
+            expenses.PriceIncludesTax = request.PriceIncludesTax;
 
             expenseId = request.Id;
             List<int> idUpdateExpenseTag = new List<int>();
@@ -119,6 +122,9 @@ public class ExpenseUpdateHandler : IRequestHandler<ExpenseUpdateDto, RowRespons
                 Notes = request.Notes,
                 Description = request.Description,
                 TaxId = request.TaxId,
+                AccountCashAndBankId = request.AccountCashAndBankId,
+                PayLater = request.PayLater,
+                PriceIncludesTax = request.PriceIncludesTax,
                 ExpenseTagList = expenseFetchTag,
                 ExpenseAttachmentList = expenseFetchAttachment,
             };
@@ -154,6 +160,9 @@ public class ExpenseUpdateDto : IRequest<RowResponse<ExpenseFetchDto>>
     public string Notes { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
+    public int AccountCashAndBankId { get; set; } = 0;
+    public Boolean PayLater { get; set; } = false;
+    public Boolean PriceIncludesTax { get; set; } = false;
     public List<ExpenseAttachmentUpdate> AttachmentFile { get; set; }
     public List<ExpenseUpdateTag> ExpenseTagList { get; set; }
 }
