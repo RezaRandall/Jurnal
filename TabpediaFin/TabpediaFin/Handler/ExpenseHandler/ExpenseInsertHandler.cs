@@ -1,5 +1,6 @@
 ﻿using TabpediaFin.Domain;
 using TabpediaFin.Domain.Expense;
+using TabpediaFin.Handler.ExpenseAccountHandler;
 
 namespace TabpediaFin.Handler.ExpenseHandler;
 
@@ -47,7 +48,7 @@ public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowRespons
 
             List<ExpenseFetchAttachment> returnfile = await PostAttachmentAsync(request.AttachmentFile, transIdResult, cancellationToken);
             List<ExpenseFetchTag> TagListResult = await PostTagAsync(request.TagList, transIdResult, cancellationToken);
-
+            //List<ExpenseAccount> expenseAccount = await PostExpenseAccount(request.ExpenseAccountList, transIdResult, cancellationToken);
 
             var row = new ExpenseFetchDto()
             {
@@ -140,10 +141,25 @@ public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowRespons
             await _context.ExpenseTag.AddRangeAsync(ExpenseTag, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
         }
-
         return ExpenseFetchTag;
     }
 
+    //public async Task<List<ExpenseAccountFetchDto>> PostExpenseAccount(List<ExpenseAccountInsertDto> fileData, int transId, CancellationToken cancellationToken)
+    //{
+    //    List<ExpenseAccount> expenseAccount = new List<ExpenseAccount>();
+    //    List<ExpenseAccountFetchDto> expenseAccountFetchDtos = new List<ExpenseAccountFetchDto>();
+
+    //    if (fileData.Count > 0)
+    //    {
+    //        foreach (ExpenseAccountInsertDto i in fileData)
+    //        {
+    //            ExpenseAccount.Add(new ExpenseAccount
+    //            {
+
+    //            });
+    //        }
+    //    }
+    //}
 
 }
 
@@ -167,6 +183,7 @@ public class ExpenseInsertDto : IRequest<RowResponse<ExpenseFetchDto>>
     public Boolean PriceIncludesTax { get; set; } = false;
     public List<ExpenseAttachmentFiles> AttachmentFile { get; set; }
     public List<ExpenseInsertTag> TagList { get; set; }
+    //public List<ExpenseAccount> ExpenseAccountList { get; set; }
 }
 
 public class ExpenseAttachmentFiles
@@ -183,3 +200,10 @@ public class ExpenseInsertTag
     public int TagId { get; set; } = 0;
 }
 
+//public class ExpenseAccount
+//{
+//    public string Name { get; set; } = string.Empty;
+//    public string ExpenseAccountNumber { get; set; } = string.Empty;
+//    public int ExpenseCategoryId { get; set; } = 0;
+//    public int TaxId { get; set; } = 0;
+//}

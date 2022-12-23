@@ -35,6 +35,10 @@ public class TransferMoneyUpdateHandler : IRequestHandler<TransferMoneyUpdateDto
             transferMoney.TransactionNumber = request.TransactionNumber;
             transferMoney.TransactionDate = request.TransactionDate;
 
+            //var accountCashAndBankGetData = await _context.AccountCashAndBank.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
+            //var balanceAccount = accountCashAndBankGetData.Balance;
+
+
             transferMoneyId = request.Id;
             List<int> idUpdateTransferMoneyTag = new List<int>();
             List<int> idUpdateTransferMoneyAttachment = new List<int>();
