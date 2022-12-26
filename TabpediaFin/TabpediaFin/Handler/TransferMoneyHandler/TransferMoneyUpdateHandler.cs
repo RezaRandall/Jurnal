@@ -1,4 +1,5 @@
-﻿using TabpediaFin.Domain.SendMoney;
+﻿using NPOI.XWPF.UserModel;
+using TabpediaFin.Domain.SendMoney;
 using TabpediaFin.Domain.TransferMoney;
 using TabpediaFin.Handler.SendMoneyHandler;
 
@@ -28,16 +29,66 @@ public class TransferMoneyUpdateHandler : IRequestHandler<TransferMoneyUpdateDto
         try
         {
             var transferMoney = await _context.TransferMoney.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-            transferMoney.TransferFromAccountId = request.TransferFromAccountId;
-            transferMoney.DepositToAccountId = request.DepositToAccountId;
-            transferMoney.Amount = request.Amount;
-            transferMoney.Memo = request.Memo;
-            transferMoney.TransactionNumber = request.TransactionNumber;
-            transferMoney.TransactionDate = request.TransactionDate;
 
-            //var accountCashAndBankGetData = await _context.AccountCashAndBank.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-            //var balanceAccount = accountCashAndBankGetData.Balance;
 
+            var balanceAccountCashAndBankTrans = await _context.AccountCashAndBank.FirstAsync(x => x.Id == transferMoney.TransferFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var balanceAccountCashAndBankDepo = await _context.AccountCashAndBank.FirstAsync(x => x.Id == transferMoney.DepositToAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+
+            var balanceTrans = balanceAccountCashAndBankTrans.Balance;
+            var balanceDepo = balanceAccountCashAndBankDepo.Balance;
+
+            if (request.Amount > transferMoney.Amount && request.Amount < balanceTrans)
+            {
+                var backBalanceTrans = request.Amount - transferMoney.Amount;
+                balanceAccountCashAndBankTrans.Balance = balanceTrans - backBalanceTrans;
+                balanceAccountCashAndBankDepo.Balance = balanceDepo + backBalanceTrans;
+                transferMoney.TransferFromAccountId = request.TransferFromAccountId;
+                transferMoney.DepositToAccountId = request.DepositToAccountId;
+                transferMoney.Amount = request.Amount;
+                transferMoney.Memo = request.Memo;
+                transferMoney.TransactionNumber = request.TransactionNumber;
+                transferMoney.TransactionDate = request.TransactionDate;
+            }
+            if (request.Amount < transferMoney.Amount)
+            {
+                var backBalanceTrans = transferMoney.Amount - request.Amount;
+                balanceAccountCashAndBankTrans.Balance = balanceTrans + backBalanceTrans;
+                balanceAccountCashAndBankDepo.Balance = balanceDepo - backBalanceTrans;
+                transferMoney.TransferFromAccountId = request.TransferFromAccountId;
+                transferMoney.DepositToAccountId = request.DepositToAccountId;
+                transferMoney.Amount = request.Amount;
+                transferMoney.Memo = request.Memo;
+                transferMoney.TransactionNumber = request.TransactionNumber;
+                transferMoney.TransactionDate = request.TransactionDate;
+            }
+            if (request.Amount == 0)
+            {
+                var valSum = balanceTrans + balanceDepo;
+                balanceAccountCashAndBankTrans.Balance = valSum;
+                balanceAccountCashAndBankDepo.Balance = balanceDepo - balanceDepo;
+                transferMoney.TransferFromAccountId = request.TransferFromAccountId;
+                transferMoney.DepositToAccountId = request.DepositToAccountId;
+                transferMoney.Amount = request.Amount;
+                transferMoney.Memo = request.Memo;
+                transferMoney.TransactionNumber = request.TransactionNumber;
+                transferMoney.TransactionDate = request.TransactionDate;
+            }
+            if (request.Amount == transferMoney.Amount)
+            {
+                balanceAccountCashAndBankTrans.Balance = balanceTrans;
+                balanceAccountCashAndBankDepo.Balance = balanceDepo;
+                transferMoney.TransferFromAccountId = request.TransferFromAccountId;
+                transferMoney.DepositToAccountId = request.DepositToAccountId;
+                transferMoney.Amount = request.Amount;
+                transferMoney.Memo = request.Memo;
+                transferMoney.TransactionNumber = request.TransactionNumber;
+                transferMoney.TransactionDate = request.TransactionDate;
+            }
+            if (balanceTrans < request.Amount)
+            {
+                result.IsOk = false;
+                result.ErrorMessage = "Insufficient balance for this transaction, Failed!";
+            }
 
             transferMoneyId = request.Id;
             List<int> idUpdateTransferMoneyTag = new List<int>();
@@ -93,6 +144,8 @@ public class TransferMoneyUpdateHandler : IRequestHandler<TransferMoneyUpdateDto
                 _context.TransferMoneyAttachment.UpdateRange(transferMoneyAttachment);
             }
 
+            await _context.SaveChangesAsync(cancellationToken);
+
             var row = new TransferMoneyFetchDto()
             {
                 Id = request.Id,
@@ -106,9 +159,16 @@ public class TransferMoneyUpdateHandler : IRequestHandler<TransferMoneyUpdateDto
                 TransferMoneyAttachmentList = transferMoneyFetchAttachment,
             };
 
-            result.IsOk = true;
-            result.ErrorMessage = string.Empty;
-            result.Row = row;
+            if (result.IsOk == false)
+            {
+                return result;
+            }
+            else 
+            {
+                result.IsOk = true;
+                result.ErrorMessage = string.Empty;
+                result.Row = row;
+            }
         }
         catch (Exception ex)
         {
