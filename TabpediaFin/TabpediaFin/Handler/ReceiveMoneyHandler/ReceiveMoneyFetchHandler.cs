@@ -81,18 +81,14 @@ public class ReceiveMoneyFetchHandler : IFetchByIdHandler<ReceiveMoneyFetchDto>
 public class ReceiveMoneyFetchDto : BaseDto
 {
     public int DepositToAccountId { get; set; } = 0;
-    public int VendorId { get; set; } = 0;
+    public int PayerId { get; set; } = 0;
     public DateTime TransactionDate { get; set; }
     public string TransactionNo { get; set; } = string.Empty;
-    public bool PriceIncludesTax { get; set; } = false;
-    public int ReceiveFromAccountId { get; set; } = 0;
-    public string Description { get; set; } = string.Empty;
-    public int TaxId { get; set; } = 0;
-    public int Amount { get; set; } = 0;
     public string Memo { get; set; } = string.Empty;
-    public int TotalAmount { get; set; } = 0;
+    public Int64 TotalAmount { get; set; } = 0;
     public List<ReceiveMoneyFetchTag> ReceiveMoneyTagList { get; set; }
     public List<ReceiveMoneyFetchAttachment> ReceiveMoneyAttachmentList { get; set; }
+    public List<ReceiveMoneyFetchList> ReceiveMoneyList { get; set; }
 }
 
 public class ReceiveMoneyFetchAttachment : BaseDto
@@ -108,4 +104,14 @@ public class ReceiveMoneyFetchTag : BaseDto
 {
     public int TagId { get; set; }
     public int TransId { get; set; }
+}
+
+public class ReceiveMoneyFetchList : BaseDto
+{
+    public int ReceiveMoneyId { get; set; } = 0;
+    public bool PriceIncludesTax { get; set; } = false;
+    public int ReceiveFromAccountId { get; set; } = 0;
+    public string Description { get; set; } = string.Empty;
+    public int TaxId { get; set; } = 0;
+    public Int64 Amount { get; set; } = 0;
 }

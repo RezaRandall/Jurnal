@@ -43,6 +43,7 @@ public class FinContext : DbContext
     public DbSet<TransferMoneyTag> TransferMoneyTag { get; set; }
     public DbSet<ReceiveMoney> ReceiveMoney { get; set; }
     public DbSet<ReceiveMoneyAttachment> ReceiveMoneyAttachment { get; set; }
+    public DbSet<ReceiveMoneyList> ReceiveMoneyList { get; set; }
     public DbSet<ReceiveMoneyTag> ReceiveMoneyTag { get; set; }
     public DbSet<SendMoney> SendMoney { get; set; }
     public DbSet<SendMoneyAttachment> SendMoneyAttachment { get; set; }

@@ -77,7 +77,7 @@ public class TransferMoneyListDto : BaseDto
 {
     public int TransferFromAccountId { get; set; } = 0;
     public int DepositToAccountId { get; set; } = 0;
-    public int Amount { get; set; } = 0;
+    public Int64 Amount { get; set; } = 0;
     [Searchable]
     public string Memo { get; set; } = string.Empty;
     [Searchable]

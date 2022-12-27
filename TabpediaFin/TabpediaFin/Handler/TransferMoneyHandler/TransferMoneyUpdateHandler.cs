@@ -88,6 +88,7 @@ public class TransferMoneyUpdateHandler : IRequestHandler<TransferMoneyUpdateDto
             {
                 result.IsOk = false;
                 result.ErrorMessage = "Insufficient balance for this transaction, Failed!";
+                return result;
             }
 
             transferMoneyId = request.Id;
@@ -144,6 +145,10 @@ public class TransferMoneyUpdateHandler : IRequestHandler<TransferMoneyUpdateDto
                 _context.TransferMoneyAttachment.UpdateRange(transferMoneyAttachment);
             }
 
+            List<TransferMoneyAttachment> transferMoneyAttachmentList = _context.TransferMoneyAttachment.Where<TransferMoneyAttachment>(x => x.TransId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateTransferMoneyAttachment.Contains(x.Id)).ToList();
+            List<TransferMoneyTag> transferMoneyTagList = _context.TransferMoneyTag.Where<TransferMoneyTag>(x => x.TransId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateTransferMoneyTag.Contains(x.Id)).ToList();
+            _context.TransferMoneyAttachment.RemoveRange(transferMoneyAttachmentList);
+            _context.TransferMoneyTag.RemoveRange(transferMoneyTagList);
             await _context.SaveChangesAsync(cancellationToken);
 
             var row = new TransferMoneyFetchDto()
@@ -159,16 +164,9 @@ public class TransferMoneyUpdateHandler : IRequestHandler<TransferMoneyUpdateDto
                 TransferMoneyAttachmentList = transferMoneyFetchAttachment,
             };
 
-            if (result.IsOk == false)
-            {
-                return result;
-            }
-            else 
-            {
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
                 result.Row = row;
-            }
         }
         catch (Exception ex)
         {
@@ -180,72 +178,6 @@ public class TransferMoneyUpdateHandler : IRequestHandler<TransferMoneyUpdateDto
     }
 
 
-    public async Task<List<TransferMoneyFetchAttachment>> UpdateAttachmentAsync(List<TransferMoneyAttachmentUpdate> filedata, int TransId, CancellationToken cancellationToken)
-    {
-        List<TransferMoneyAttachment> TransferMoneyAttachmentList = new List<TransferMoneyAttachment>();
-        List<TransferMoneyFetchAttachment> TransferMoneyFetchAttachmentList = new List<TransferMoneyFetchAttachment>();
-
-        if (filedata.Count > 0)
-        {
-            foreach (TransferMoneyAttachmentUpdate item in filedata)
-            {
-                TransferMoneyAttachmentList.Add(new TransferMoneyAttachment
-                {
-                    Id = item.Id,
-                    FileName = item.FileName,
-                    FileUrl = item.FileUrl,
-                    Extension = item.Extension,
-                    FileSize = item.FileSize,
-                    TransId = TransId,
-                });
-                TransferMoneyFetchAttachmentList.Add(new TransferMoneyFetchAttachment
-                {
-                    Id = item.Id,
-                    FileName = item.FileName,
-                    FileUrl = item.FileUrl,
-                    Extension = item.Extension,
-                    FileSize = item.FileSize,
-                    TransId = TransId,
-                });
-            }
-
-            _context.TransferMoneyAttachment.UpdateRange(TransferMoneyAttachmentList);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-
-        return TransferMoneyFetchAttachmentList;
-    }
-
-    public async Task<List<TransferMoneyFetchTag>> UpdateTagAsync(List<TransferMoneyUpdateTag> filedata, int TransId, CancellationToken cancellationToken)
-    {
-        List<TransferMoneyTag> TransferMoneyTag = new List<TransferMoneyTag>();
-        List<TransferMoneyFetchTag> TransferMoneyFetchTag = new List<TransferMoneyFetchTag>();
-
-        if (filedata.Count > 0)
-        {
-            foreach (TransferMoneyUpdateTag item in filedata)
-            {
-                TransferMoneyTag.Add(new TransferMoneyTag
-                {
-                    Id = item.Id,
-                    TagId = item.TagId,
-                    TransId = TransId
-                });
-                TransferMoneyFetchTag.Add(new TransferMoneyFetchTag
-                {
-                    Id = item.Id,
-                    TagId = item.TagId,
-                    TransId = TransId
-                });
-            }
-            _context.TransferMoneyTag.UpdateRange(TransferMoneyTag);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-        return TransferMoneyFetchTag;
-    }
-
-
-
 }
 
 public class TransferMoneyUpdateDto : IRequest<RowResponse<TransferMoneyFetchDto>>
@@ -253,7 +185,7 @@ public class TransferMoneyUpdateDto : IRequest<RowResponse<TransferMoneyFetchDto
     public int Id { get; set; }
     public int TransferFromAccountId { get; set; } = 0;
     public int DepositToAccountId { get; set; } = 0;
-    public int Amount { get; set; } = 0;
+    public Int64 Amount { get; set; } = 0;
     public string Memo { get; set; } = string.Empty;
     public string TransactionNumber { get; set; } = string.Empty;
     public DateTime TransactionDate { get; set; }

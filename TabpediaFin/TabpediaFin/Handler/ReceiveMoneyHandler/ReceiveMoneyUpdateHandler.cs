@@ -28,14 +28,9 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
         {
             var receiveMoney = await _context.ReceiveMoney.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
             receiveMoney.DepositToAccountId = request.DepositToAccountId;
-            receiveMoney.VendorId = request.VendorId;
+            receiveMoney.PayerId = request.PayerId;
             receiveMoney.TransactionDate = request.TransactionDate;
             receiveMoney.TransactionNo = request.TransactionNo;
-            receiveMoney.PriceIncludesTax = request.PriceIncludesTax;
-            receiveMoney.ReceiveFromAccountId = request.ReceiveFromAccountId;
-            receiveMoney.Description = request.Description;
-            receiveMoney.TaxId = request.TaxId;
-            receiveMoney.Amount = request.Amount;
             receiveMoney.Memo = request.Memo;
             receiveMoney.TotalAmount = request.TotalAmount;
 
@@ -104,14 +99,9 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
             {
                 Id = request.Id,
                 DepositToAccountId = request.DepositToAccountId,
-                VendorId = request.VendorId,
+                PayerId = request.PayerId,
                 TransactionDate = request.TransactionDate,
                 TransactionNo = request.TransactionNo,
-                PriceIncludesTax = request.PriceIncludesTax,
-                ReceiveFromAccountId = request.ReceiveFromAccountId,
-                Description = request.Description,
-                TaxId = request.TaxId,
-                Amount = request.Amount,
                 Memo = request.Memo,
                 TotalAmount = request.TotalAmount,
                 ReceiveMoneyTagList = receiveMoneyFetchTag,
@@ -137,16 +127,11 @@ public class ReceiveMoneyUpdateDto : IRequest<RowResponse<ReceiveMoneyFetchDto>>
 {
     public int Id { get; set; }
     public int DepositToAccountId { get; set; } = 0;
-    public int VendorId { get; set; } = 0;
+    public int PayerId { get; set; } = 0;
     public DateTime TransactionDate { get; set; }
     public string TransactionNo { get; set; } = string.Empty;
-    public bool PriceIncludesTax { get; set; } = false;
-    public int ReceiveFromAccountId { get; set; } = 0;
-    public string Description { get; set; } = string.Empty;
-    public int TaxId { get; set; } = 0;
-    public int Amount { get; set; } = 0;
     public string Memo { get; set; } = string.Empty;
-    public int TotalAmount { get; set; } = 0;
+    public Int64 TotalAmount { get; set; } = 0;
     public List<ReceiveMoneyAttachmentUpdate> ReceiveMoneyAttachmentFile { get; set; }
     public List<ReceiveMoneyUpdateTag> ReceiveMoneyTagList { get; set; }
 }
