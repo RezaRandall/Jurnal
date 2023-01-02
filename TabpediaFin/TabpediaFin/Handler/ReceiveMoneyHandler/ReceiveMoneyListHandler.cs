@@ -32,6 +32,7 @@ public class ReceiveMoneyListHandler : IFetchPagedListHandler<ReceiveMoneyListDt
             //var orderby = string.Empty;
             if (string.IsNullOrWhiteSpace(req.SortBy))
             {
+                //orderby = SqlHelper.GenerateOrderBy(req.SortBy, req.SortDesc);
                 req.SortBy = SqlHelper.GenerateOrderBy(req.SortBy, req.SortDesc, "CreatedUtc");
             }
 
@@ -67,9 +68,11 @@ public class ReceiveMoneyListHandler : IFetchPagedListHandler<ReceiveMoneyListDt
 public class ReceiveMoneyListDto : BaseDto
 {
     public int DepositToAccountId { get; set; } = 0;
-    public int PeyerId { get; set; } = 0;
+    public int PayerId { get; set; } = 0;
     public DateTime TransactionDate { get; set; }
+    [Searchable]
     public string TransactionNo { get; set; } = string.Empty;
+    [Searchable]
     public string Memo { get; set; } = string.Empty;
     public Int64 TotalAmount { get; set; } = 0;
 }

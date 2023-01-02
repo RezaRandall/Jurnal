@@ -1,4 +1,5 @@
-﻿using TabpediaFin.Domain.ReceiveMoney;
+﻿using TabpediaFin.Domain;
+using TabpediaFin.Domain.ReceiveMoney;
 using TabpediaFin.Handler.ReceiveMoneyHandler;
 
 namespace TabpediaFin.Handler.ReceiveMoneyHandler;
@@ -21,8 +22,12 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
 
         List<ReceiveMoneyTag> receiveMoneyTag = new List<ReceiveMoneyTag>();
         List<ReceiveMoneyAttachment> receiveMoneyAttachment = new List<ReceiveMoneyAttachment>();
+        List<ReceiveMoneyList> receiveMoneyUpdateList = new List<ReceiveMoneyList>();
+
         List<ReceiveMoneyFetchTag> receiveMoneyFetchTag = new List<ReceiveMoneyFetchTag>();
         List<ReceiveMoneyFetchAttachment> receiveMoneyFetchAttachment = new List<ReceiveMoneyFetchAttachment>();
+        List<ReceiveMoneyFetchList> receiveMoneyFetchList = new List<ReceiveMoneyFetchList>();
+
 
         try
         {
@@ -38,6 +43,7 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
             receiveMoneyId = request.Id;
             List<int> idUpdateReceiveMoneyTag = new List<int>();
             List<int> idUpdateReceiveMoneyAttachment = new List<int>();
+            List<int> idUpdateReceiveMoneyList = new List<int>();
 
             if (request.ReceiveMoneyTagList.Count > 0)
             {
@@ -89,10 +95,44 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
                 _context.ReceiveMoneyAttachment.UpdateRange(receiveMoneyAttachment);
             }
 
+            if (request.ReceiveMoneyListUpdate.Count > 0)
+            {
+                foreach (ReceiveMoneyUpdateList i in request.ReceiveMoneyListUpdate)
+                {
+                    idUpdateReceiveMoneyList.Add(i.Id);
+                    receiveMoneyUpdateList.Add(new ReceiveMoneyList
+                    {
+                        Id = i.Id,
+                        ReceiveMoneyId = i.ReceiveMoneyId,
+                        PriceIncludesTax = i.PriceIncludesTax,
+                        ReceiveFromAccountId = i.ReceiveFromAccountId,
+                        Description = i.Description,
+                        TaxId = i.TaxId,
+                        Amount = i.Amount,
+                        CreatedUid = _currentUser.UserId,
+                        TransId = receiveMoneyId
+                    });
+                    receiveMoneyFetchList.Add(new ReceiveMoneyFetchList
+                    {
+                        Id = i.Id,
+                        ReceiveMoneyId = i.ReceiveMoneyId,
+                        PriceIncludesTax = i.PriceIncludesTax,
+                        ReceiveFromAccountId = i.ReceiveFromAccountId,
+                        Description = i.Description,
+                        TaxId = i.TaxId,
+                        Amount = i.Amount,
+                        TransId = receiveMoneyId
+                    });
+                }
+                _context.ReceiveMoneyList.UpdateRange(receiveMoneyUpdateList);
+            }
+
             List<ReceiveMoneyTag> receiveMoneyTagList = _context.ReceiveMoneyTag.Where<ReceiveMoneyTag>(x => x.TransId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateReceiveMoneyTag.Contains(x.Id)).ToList();
             List<ReceiveMoneyAttachment> receiveMoneyAttachmentList = _context.ReceiveMoneyAttachment.Where<ReceiveMoneyAttachment>(x => x.TransId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateReceiveMoneyAttachment.Contains(x.Id)).ToList();
+            List<ReceiveMoneyList> receiveMoneyList = _context.ReceiveMoneyList.Where<ReceiveMoneyList>(x => x.TransId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateReceiveMoneyList.Contains(x.Id)).ToList();
             _context.ReceiveMoneyTag.RemoveRange(receiveMoneyTagList);
             _context.ReceiveMoneyAttachment.RemoveRange(receiveMoneyAttachmentList);
+            _context.ReceiveMoneyList.RemoveRange(receiveMoneyList);
             await _context.SaveChangesAsync(cancellationToken);
 
             var row = new ReceiveMoneyFetchDto()
@@ -106,6 +146,7 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
                 TotalAmount = request.TotalAmount,
                 ReceiveMoneyTagList = receiveMoneyFetchTag,
                 ReceiveMoneyAttachmentList = receiveMoneyFetchAttachment,
+                ReceiveMoneyList = receiveMoneyFetchList
             };
 
             result.IsOk = true;
@@ -134,6 +175,7 @@ public class ReceiveMoneyUpdateDto : IRequest<RowResponse<ReceiveMoneyFetchDto>>
     public Int64 TotalAmount { get; set; } = 0;
     public List<ReceiveMoneyAttachmentUpdate> ReceiveMoneyAttachmentFile { get; set; }
     public List<ReceiveMoneyUpdateTag> ReceiveMoneyTagList { get; set; }
+    public List<ReceiveMoneyUpdateList> ReceiveMoneyListUpdate { get; set; }
 }
 
 public class ReceiveMoneyAttachmentUpdate
@@ -149,4 +191,15 @@ public class ReceiveMoneyUpdateTag
 {
     public int Id { get; set; }
     public int TagId { get; set; }
+}
+
+public class ReceiveMoneyUpdateList
+{
+    public int Id { get; set; }
+    public int ReceiveMoneyId { get; set; } = 0;
+    public bool PriceIncludesTax { get; set; } = false;
+    public int ReceiveFromAccountId { get; set; } = 0;
+    public string Description { get; set; } = string.Empty;
+    public int TaxId { get; set; } = 0;
+    public Int64 Amount { get; set; } = 0;
 }

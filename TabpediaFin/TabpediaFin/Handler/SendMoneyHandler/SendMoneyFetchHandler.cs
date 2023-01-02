@@ -30,6 +30,7 @@ public class SendMoneyFetchHandler : IFetchByIdHandler<SendMoneyFetchDto>
 
                 if (result != null)
                 {
+                    // TAG
                     var sqlSendMoneyTag = @"SELECT smt.""Id""
                                                 ,smt.""TagId""
                                                 ,smt.""TransId""
@@ -45,6 +46,8 @@ public class SendMoneyFetchHandler : IFetchByIdHandler<SendMoneyFetchDto>
                     resultSendMoneyTag = (await cn.QueryAsync<SendMoneyFetchTag>(sqlSendMoneyTag, parameters).ConfigureAwait(false)).ToList();
                     result.SendMoneyTagList = resultSendMoneyTag;
 
+
+                    //  ATTACHMENT
                     var sqlSendMoneyAttachment = @"SELECT sma.""Id""
                                         , sma.""FileName""
                                         , sma.""FileUrl""
@@ -58,6 +61,21 @@ public class SendMoneyFetchHandler : IFetchByIdHandler<SendMoneyFetchDto>
                     resultSendMoneyAttachment = (await cn.QueryAsync<SendMoneyFetchAttachment>(sqlSendMoneyAttachment, parameters).ConfigureAwait(false)).ToList();
                     result.SendMoneyAttachmentList = resultSendMoneyAttachment;
 
+
+                    //  LIST AMOUNT
+                    var sqlSendMoneyList = @"SELECT sml.""Id""
+                                        , sml.""PriceIncludesTax""
+                                        , sml.""PaymentForAccountCashAndBanktId""
+                                        , sml.""Description""
+                                        , sml.""TaxId""
+                                        , sml.""Amount"" 
+                                        , sml.""TransId"" 
+                                        FROM ""SendMoneyList"" sml
+                                        INNER JOIN ""SendMoney"" sm ON sml.""TransId"" = sm.""Id"" 
+                                        WHERE sm.""TenantId"" = @TenantId AND sm.""Id"" = @Id ";
+                    List<SendMoneyFetchList> resultSendMoneyList;
+                    resultSendMoneyList = (await cn.QueryAsync<SendMoneyFetchList>(sqlSendMoneyList, parameters).ConfigureAwait(false)).ToList();
+                    result.SendMoneyList = resultSendMoneyList;
                 }
 
                 response.IsOk = true;
@@ -79,20 +97,16 @@ public class SendMoneyFetchHandler : IFetchByIdHandler<SendMoneyFetchDto>
 public class SendMoneyFetchDto : BaseDto
 {
     public int PayFromAccountId { get; set; } = 0;
-    public int ReceiverVendorId { get; set; } = 0;
+    public int ReceiverId { get; set; } = 0;
     public DateTime TransactionDate { get; set; }
     public string TransactionNo { get; set; } = string.Empty;
-    public bool PriceIncludesTax { get; set; } = false;
-    public int AccountCashAndBankId { get; set; } = 0;
-    public string Description { get; set; } = string.Empty;
-    public int TaxId { get; set; } = 0;
-    public int Amount { get; set; } = 0;
     public string Memo { get; set; } = string.Empty;
     public int TotalAmount { get; set; } = 0;
     public int DiscountAmount { get; set; } = 0;
     public int DiscountPercent { get; set; } = 0;
     public List<SendMoneyFetchTag> SendMoneyTagList { get; set; }
     public List<SendMoneyFetchAttachment> SendMoneyAttachmentList { get; set; }
+    public List<SendMoneyFetchList> SendMoneyList { get; set; }
 }
 
 public class SendMoneyFetchAttachment : BaseDto
@@ -107,5 +121,15 @@ public class SendMoneyFetchAttachment : BaseDto
 public class SendMoneyFetchTag : BaseDto
 {
     public int TagId { get; set; }
+    public int TransId { get; set; }
+}
+
+public class SendMoneyFetchList : BaseDto
+{
+    public bool PriceIncludesTax { get; set; } = false;
+    public int PaymentForAccountCashAndBanktId { get; set; } = 0;
+    public string Description { get; set; } = string.Empty;
+    public int TaxId { get; set; } = 0;
+    public Int64 Amount { get; set; } = 0;
     public int TransId { get; set; }
 }

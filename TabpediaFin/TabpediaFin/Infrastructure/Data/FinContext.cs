@@ -48,6 +48,7 @@ public class FinContext : DbContext
     public DbSet<SendMoney> SendMoney { get; set; }
     public DbSet<SendMoneyAttachment> SendMoneyAttachment { get; set; }
     public DbSet<SendMoneyTag> SendMoneyTag { get; set; }
+    public DbSet<SendMoneyList> SendMoneyList { get; set; }
     public DbSet<Tag> Tag { get; set; }
     public DbSet<Tax> Tax { get; set; }
     public DbSet<ContactAddressType> ContactAddressType { get; set; }
