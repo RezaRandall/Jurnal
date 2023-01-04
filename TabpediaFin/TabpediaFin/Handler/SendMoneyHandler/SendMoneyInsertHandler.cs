@@ -1,4 +1,6 @@
-﻿using TabpediaFin.Domain.SendMoney;
+﻿using TabpediaFin.Domain;
+using TabpediaFin.Domain.ReceiveMoney;
+using TabpediaFin.Domain.SendMoney;
 
 namespace TabpediaFin.Handler.SendMoneyHandler;
 
@@ -22,14 +24,9 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
         var sendMoney = new SendMoney()
         {
             PayFromAccountId = request.PayFromAccountId,
-            ReceiverVendorId = request.ReceiverVendorId,
+            ReceiverId = request.ReceiverId,
             TransactionDate = TransDate,
             TransactionNo = request.TransactionNo,
-            PriceIncludesTax = request.PriceIncludesTax,
-            AccountCashAndBankId = request.AccountCashAndBankId,
-            Description = request.Description,
-            TaxId = request.TaxId,
-            Amount = request.Amount,
             Memo = request.Memo,
             TotalAmount = request.TotalAmount,
             DiscountAmount = request.DiscountAmount,
@@ -41,20 +38,17 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
             await _context.SendMoney.AddAsync(sendMoney, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
             transIdResult = sendMoney.Id;
+
             List<SendMoneyFetchAttachment> returnfile = await PostAttachmentAsync(request.AttachmentFile, transIdResult, cancellationToken);
             List<SendMoneyFetchTag> TagListResult = await PostTagAsync(request.TagList, transIdResult, cancellationToken);
+            List<SendMoneyFetchList> ReceiveMoneyListResult = await PostSendMoneyListAsync(request.ReceiveMoneyList, transIdResult, cancellationToken);
 
             var row = new SendMoneyFetchDto()
             {
                 PayFromAccountId = sendMoney.PayFromAccountId,
-                ReceiverVendorId = sendMoney.ReceiverVendorId,
+                ReceiverId = sendMoney.ReceiverId,
                 TransactionDate = sendMoney.TransactionDate,
                 TransactionNo = sendMoney.TransactionNo,
-                PriceIncludesTax = sendMoney.PriceIncludesTax,
-                AccountCashAndBankId = sendMoney.AccountCashAndBankId,
-                Description = sendMoney.Description,
-                TaxId = sendMoney.TaxId,
-                Amount = sendMoney.Amount,
                 Memo = sendMoney.Memo,
                 TotalAmount = sendMoney.TotalAmount,
                 DiscountAmount = sendMoney.DiscountAmount,
@@ -100,11 +94,9 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
                     TransId = transId,
                 });
             }
-
             await _context.SendMoneyAttachment.AddRangeAsync(SendMoneyAttachmentList, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
         }
-
         return SendMoneyFetchAttachmentList;
     }
 
@@ -128,12 +120,45 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
                     TransId = TransId
                 });
             }
-
             await _context.SendMoneyTag.AddRangeAsync(SendMoneyTag, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
         }
-
         return SendMoneyFetchTag;
+    }
+
+
+    public async Task<List<SendMoneyFetchList>> PostSendMoneyListAsync(List<SendMoneyInsertList> filedata, int TransId, CancellationToken cancellationToken)
+    {
+        List<SendMoneyList> SendMoneyList = new List<SendMoneyList>();
+        List<SendMoneyFetchList> SendMoneyFetchList = new List<SendMoneyFetchList>();
+
+        if (filedata.Count > 0)
+        {
+            foreach (SendMoneyInsertList item in filedata)
+            {
+                SendMoneyList.Add(new SendMoneyList
+                {
+                    PriceIncludesTax = item.PriceIncludesTax,
+                    PaymentForAccountCashAndBanktId = item.PaymentForAccountCashAndBanktId,
+                    Description = item.Description,
+                    TaxId = item.TaxId,
+                    Amount = item.Amount,
+                    TransId = TransId
+                });
+                SendMoneyFetchList.Add(new SendMoneyFetchList
+                {
+                    PriceIncludesTax = item.PriceIncludesTax,
+                    PaymentForAccountCashAndBanktId = item.PaymentForAccountCashAndBanktId,
+                    Description = item.Description,
+                    TaxId = item.TaxId,
+                    Amount = item.Amount,
+                    TransId = TransId
+                });
+            }
+            await _context.SendMoneyList.AddRangeAsync(SendMoneyList, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+        return SendMoneyFetchList;
     }
 
 
@@ -144,20 +169,16 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
 public class SendMoneyInsertDto : IRequest<RowResponse<SendMoneyFetchDto>>
 {
     public int PayFromAccountId { get; set; } = 0;
-    public int ReceiverVendorId { get; set; } = 0;
+    public int ReceiverId { get; set; } = 0;
     public DateTime TransactionDate { get; set; }
     public string TransactionNo { get; set; } = string.Empty;
-    public bool PriceIncludesTax { get; set; } = false;
-    public int AccountCashAndBankId { get; set; } = 0;
-    public string Description { get; set; } = string.Empty;
-    public int TaxId { get; set; } = 0;
-    public int Amount { get; set; } = 0;
     public string Memo { get; set; } = string.Empty;
     public int TotalAmount { get; set; } = 0;
     public int DiscountAmount { get; set; } = 0;
     public int DiscountPercent { get; set; } = 0;
     public List<SendMoneyAttachmentFiles> AttachmentFile { get; set; }
     public List<SendMoneyInsertTag> TagList { get; set; }
+    public List<SendMoneyInsertList> ReceiveMoneyList { get; set; }
 }
 
 public class SendMoneyAttachmentFiles
@@ -166,10 +187,19 @@ public class SendMoneyAttachmentFiles
     public string FileUrl { get; set; } = string.Empty;
     public string FileSize { get; set; } = string.Empty;
     public string Extension { get; set; } = string.Empty;
-    public int TransId { get; set; }
 }
 
 public class SendMoneyInsertTag
 {
     public int TagId { get; set; } = 0;
+}
+
+public class SendMoneyInsertList
+{
+    public bool PriceIncludesTax { get; set; } = false;
+    public int PaymentForAccountCashAndBanktId { get; set; } = 0;
+    public string Description { get; set; } = string.Empty;
+    public int TaxId { get; set; } = 0;
+    public Int64 Amount { get; set; } = 0;
+
 }

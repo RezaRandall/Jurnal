@@ -31,7 +31,7 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
         try
         {
             await _context.ReceiveMoney.AddAsync(receiveMoney, cancellationToken);
-            //await _context.SaveChangesAsync(cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
             transIdResult = receiveMoney.Id;
 
             var accountCahAndBank = await _context.AccountCashAndBank.FirstAsync(x => x.Id == request.DepositToAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
@@ -62,42 +62,6 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
         }
 
         return result;
-    }
-
-    public async Task<List<ReceiveMoneyFetchList>> PostReceiveMoneyListAsync(List<ReceiveMoneyInsertList> listOfReceiveMoney, int transIdResult, CancellationToken cancellationToken)
-    {
-        List<ReceiveMoneyList> receiveMoneyList = new List<ReceiveMoneyList>();
-        List<ReceiveMoneyFetchList> receiveMoneyFetchList = new List<ReceiveMoneyFetchList>();
-
-        if (listOfReceiveMoney.Count > 0)
-        {
-            foreach (ReceiveMoneyInsertList item in listOfReceiveMoney)
-            {
-                receiveMoneyList.Add(new ReceiveMoneyList
-                {
-                    ReceiveMoneyId = transIdResult,
-                    PriceIncludesTax = item.PriceIncludesTax,
-                    ReceiveFromAccountId = item.ReceiveFromAccountId,
-                    Description = item.Description,
-                    TaxId = item.TaxId,
-                    Amount = item.Amount,
-                });
-                receiveMoneyFetchList.Add(new ReceiveMoneyFetchList
-                {
-                    ReceiveMoneyId = transIdResult,
-                    PriceIncludesTax = item.PriceIncludesTax,
-                    ReceiveFromAccountId = item.ReceiveFromAccountId,
-                    Description = item.Description,
-                    TaxId = item.TaxId,
-                    Amount = item.Amount,
-                });
-            }
-
-            await _context.ReceiveMoneyList.AddRangeAsync(receiveMoneyList, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-
-        return receiveMoneyFetchList;
     }
 
 
@@ -163,6 +127,44 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
         return ReceiveMoneyFetchTag;
     }
 
+    public async Task<List<ReceiveMoneyFetchList>> PostReceiveMoneyListAsync(List<ReceiveMoneyInsertList> filedata, int TransId, CancellationToken cancellationToken)
+    {
+        List<ReceiveMoneyList> ReceiveMoneyList = new List<ReceiveMoneyList>();
+        List<ReceiveMoneyFetchList> ReceiveMoneyFetchList = new List<ReceiveMoneyFetchList>();
+
+        if (filedata.Count > 0)
+        {
+            foreach (ReceiveMoneyInsertList item in filedata)
+            {
+                ReceiveMoneyList.Add(new ReceiveMoneyList
+                {
+                    ReceiveMoneyId = item.ReceiveMoneyId,
+                    PriceIncludesTax = item.PriceIncludesTax,
+                    ReceiveFromAccountId = item.ReceiveFromAccountId,
+                    Description = item.Description,
+                    TaxId = item.TaxId,
+                    Amount = item.Amount,
+                    TransId = TransId
+                });
+                ReceiveMoneyFetchList.Add(new ReceiveMoneyFetchList
+                {
+                    ReceiveMoneyId = item.ReceiveMoneyId,
+                    PriceIncludesTax = item.PriceIncludesTax,
+                    ReceiveFromAccountId = item.ReceiveFromAccountId,
+                    Description = item.Description,
+                    TaxId = item.TaxId,
+                    Amount = item.Amount,
+                    TransId = TransId
+                });
+            }
+
+            await _context.ReceiveMoneyList.AddRangeAsync(ReceiveMoneyList, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        return ReceiveMoneyFetchList;
+    }
+
 
 
 }
@@ -186,7 +188,6 @@ public class ReceiveMoneyAttachmentFiles
     public string FileUrl { get; set; } = string.Empty;
     public string FileSize { get; set; } = string.Empty;
     public string Extension { get; set; } = string.Empty;
-    public int TransId { get; set; }
 }
 public class ReceiveMoneyInsertTag
 {

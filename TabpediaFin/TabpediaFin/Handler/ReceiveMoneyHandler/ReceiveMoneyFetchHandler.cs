@@ -30,6 +30,7 @@ public class ReceiveMoneyFetchHandler : IFetchByIdHandler<ReceiveMoneyFetchDto>
 
                 if (result != null)
                 {
+                    // TAG
                     var sqlReceiveMoneyTag = @"SELECT rmt.""Id""
                                                 ,rmt.""TagId""
                                                 ,rmt.""TransId""
@@ -45,6 +46,8 @@ public class ReceiveMoneyFetchHandler : IFetchByIdHandler<ReceiveMoneyFetchDto>
                     resultReceiveMoneyTag = (await cn.QueryAsync<ReceiveMoneyFetchTag>(sqlReceiveMoneyTag, parameters).ConfigureAwait(false)).ToList();
                     result.ReceiveMoneyTagList = resultReceiveMoneyTag;
 
+
+                    // ATTACHMENT
                     var sqlReceiveMoneyAttachment = @"SELECT rma.""Id""
                                         , rma.""FileName""
                                         , rma.""FileUrl""
@@ -57,6 +60,23 @@ public class ReceiveMoneyFetchHandler : IFetchByIdHandler<ReceiveMoneyFetchDto>
                     List<ReceiveMoneyFetchAttachment> resultReceiveMoneyAttachment;
                     resultReceiveMoneyAttachment = (await cn.QueryAsync<ReceiveMoneyFetchAttachment>(sqlReceiveMoneyAttachment, parameters).ConfigureAwait(false)).ToList();
                     result.ReceiveMoneyAttachmentList = resultReceiveMoneyAttachment;
+
+
+                    // LIST
+                    var sqlReceiveMoneyList = @"SELECT rml.""Id""
+                                        , rml.""ReceiveMoneyId""
+                                        , rml.""PriceIncludesTax""
+                                        , rml.""ReceiveFromAccountId""
+                                        , rml.""Description""
+                                        , rml.""TaxId""
+                                        , rml.""Amount""
+                                        , rml.""TransId"" 
+                                        FROM ""ReceiveMoneyList"" rml
+                                        INNER JOIN ""ReceiveMoney"" rm ON rml.""TransId"" = rm.""Id"" 
+                                        WHERE rm.""TenantId"" = @TenantId AND rm.""Id"" = @Id ";
+                    List<ReceiveMoneyFetchList> resultReceiveMoneyList;
+                    resultReceiveMoneyList = (await cn.QueryAsync<ReceiveMoneyFetchList>(sqlReceiveMoneyList, parameters).ConfigureAwait(false)).ToList();
+                    result.ReceiveMoneyList = resultReceiveMoneyList;
 
                 }
 
@@ -114,4 +134,5 @@ public class ReceiveMoneyFetchList : BaseDto
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
     public Int64 Amount { get; set; } = 0;
+    public int TransId { get; set; }
 }
