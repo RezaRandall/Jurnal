@@ -41,7 +41,7 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
 
             List<SendMoneyFetchAttachment> returnfile = await PostAttachmentAsync(request.AttachmentFile, transIdResult, cancellationToken);
             List<SendMoneyFetchTag> TagListResult = await PostTagAsync(request.TagList, transIdResult, cancellationToken);
-            List<SendMoneyFetchList> ReceiveMoneyListResult = await PostSendMoneyListAsync(request.ReceiveMoneyList, transIdResult, cancellationToken);
+            List<SendMoneyFetchList> SendMoneyListResult = await PostSendMoneyListAsync(request.SendMoneyList, transIdResult, cancellationToken);
 
             var row = new SendMoneyFetchDto()
             {
@@ -178,7 +178,7 @@ public class SendMoneyInsertDto : IRequest<RowResponse<SendMoneyFetchDto>>
     public int DiscountPercent { get; set; } = 0;
     public List<SendMoneyAttachmentFiles> AttachmentFile { get; set; }
     public List<SendMoneyInsertTag> TagList { get; set; }
-    public List<SendMoneyInsertList> ReceiveMoneyList { get; set; }
+    public List<SendMoneyInsertList> SendMoneyList { get; set; }
 }
 
 public class SendMoneyAttachmentFiles

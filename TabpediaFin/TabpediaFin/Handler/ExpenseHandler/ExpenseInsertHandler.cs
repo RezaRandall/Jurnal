@@ -1,6 +1,7 @@
 ﻿using TabpediaFin.Domain;
 using TabpediaFin.Domain.Expense;
 using TabpediaFin.Handler.ExpenseAccountHandler;
+using TabpediaFin.Handler.SendMoneyHandler;
 
 namespace TabpediaFin.Handler.ExpenseHandler;
 
@@ -19,25 +20,24 @@ public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowRespons
     {
         var result = new RowResponse<ExpenseFetchDto>();
         int transIdResult;
-        DateTime TransDate = TimeZoneInfo.ConvertTimeToUtc(request.TransDate);
+        DateTime TransDate = TimeZoneInfo.ConvertTimeToUtc(request.TransactionDate);
 
         var expense = new Expense()
         {
-            TransNum = request.TransNum,
-            TransDate = TransDate,
-            ContactId = request.ContactId,
+            PayFromAccountId = request.PayFromAccountId,
+            PayLater = request.PayLater,
+            RecipientContactId = request.RecipientContactId,
+            TransactionDate = TransDate,
             PaymentMethodId = request.PaymentMethodId,
+            TransactionNo = request.TransactionNo,
+            BillingAddress = request.BillingAddress,
+            DueDate = request.DueDate,
             PaymentTermId = request.PaymentTermId,
-            Amount = request.Amount,
-            DiscountTypeId = request.DiscountTypeId,
+            Memo = request.Memo,
+            Status = request.Status,
             DiscountPercent = request.DiscountPercent,
             DiscountAmount = request.DiscountAmount,
-            Notes = request.Notes,
-            Description = request.Description,
-            TaxId = request.TaxId,
-            AccountCashAndBankId = request.AccountCashAndBankId,
-            PayLater = request.PayLater,
-            PriceIncludesTax = request.PriceIncludesTax
+            TotalAmount = request.TotalAmount
         };
 
         try
@@ -48,26 +48,25 @@ public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowRespons
 
             List<ExpenseFetchAttachment> returnfile = await PostAttachmentAsync(request.AttachmentFile, transIdResult, cancellationToken);
             List<ExpenseFetchTag> TagListResult = await PostTagAsync(request.TagList, transIdResult, cancellationToken);
-            //List<ExpenseAccount> expenseAccount = await PostExpenseAccount(request.ExpenseAccountList, transIdResult, cancellationToken);
+            List<ExpenseFetchList> ExpenseListResult = await PostExpenseListAsync(request.ExpenseInsertList, transIdResult, cancellationToken);
 
             var row = new ExpenseFetchDto()
             {
                 Id = expense.Id,
-                TransNum = expense.TransNum,
-                TransDate = expense.TransDate,
-                ContactId = expense.ContactId,
+                PayFromAccountId = expense.PayFromAccountId,
+                PayLater = expense.PayLater,
+                RecipientContactId = expense.RecipientContactId,
+                TransactionDate = expense.TransactionDate,
                 PaymentMethodId = expense.PaymentMethodId,
+                TransactionNo = expense.TransactionNo,
+                BillingAddress = expense.BillingAddress,
+                DueDate = expense.DueDate,
                 PaymentTermId = expense.PaymentTermId,
-                Amount = expense.Amount,
-                DiscountTypeId = expense.DiscountTypeId,
+                Memo = expense.Memo,
+                Status = expense.Status,
                 DiscountPercent = expense.DiscountPercent,
                 DiscountAmount = expense.DiscountAmount,
-                Notes = expense.Notes,
-                Description = expense.Description,
-                TaxId = expense.TaxId,
-                AccountCashAndBankId = expense.AccountCashAndBankId,
-                PayLater = expense.PayLater,
-                PriceIncludesTax = expense.PriceIncludesTax
+                TotalAmount = expense.TotalAmount
             };
 
             result.IsOk = true;
@@ -144,6 +143,40 @@ public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowRespons
         return ExpenseFetchTag;
     }
 
+    public async Task<List<ExpenseFetchList>> PostExpenseListAsync(List<ExpenseInsertList> filedata, int TransId, CancellationToken cancellationToken)
+    {
+        List<ExpenseList> ExpenseList = new List<ExpenseList>();
+        List<ExpenseFetchList> ExpenseFetchList = new List<ExpenseFetchList>();
+
+        if (filedata.Count > 0)
+        {
+            foreach (ExpenseInsertList item in filedata)
+            {
+                ExpenseList.Add(new ExpenseList
+                {
+                    PriceIncludesTax = item.PriceIncludesTax,
+                    ExpenseAccountId = item.ExpenseAccountId,
+                    Description = item.Description,
+                    TaxId = item.TaxId,
+                    Amount = item.Amount,
+                    TransId = TransId
+                });
+                ExpenseFetchList.Add(new ExpenseFetchList
+                {
+                    PriceIncludesTax = item.PriceIncludesTax,
+                    ExpenseAccountId = item.ExpenseAccountId,
+                    Description = item.Description,
+                    TaxId = item.TaxId,
+                    Amount = item.Amount,
+                    TransId = TransId
+                });
+            }
+            await _context.ExpenseList.AddRangeAsync(ExpenseList, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+        return ExpenseFetchList;
+    }
+
     //public async Task<List<ExpenseAccountFetchDto>> PostExpenseAccount(List<ExpenseAccountInsertDto> fileData, int transId, CancellationToken cancellationToken)
     //{
     //    List<ExpenseAccount> expenseAccount = new List<ExpenseAccount>();
@@ -166,24 +199,23 @@ public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowRespons
 
 public class ExpenseInsertDto : IRequest<RowResponse<ExpenseFetchDto>>
 {
-    public string TransNum { get; set; } = string.Empty;
-    public DateTime TransDate { get; set; }
-    public int ContactId { get; set; } = 0;
-    public int PaymentMethodId { get; set; } = 0;
-    public int PaymentTermId { get; set; } = 0;
-    public int Amount { get; set; } = 0;
-    public int DiscountTypeId { get; set; } = 0;
-    public int DiscountPercent { get; set; } = 0;
-    public int DiscountAmount { get; set; } = 0;
-    public string Notes { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public int TaxId { get; set; } = 0;
-    public int AccountCashAndBankId { get; set; } = 0;
+    public int PayFromAccountId { get; set; } = 0;
     public Boolean PayLater { get; set; } = false;
-    public Boolean PriceIncludesTax { get; set; } = false;
+    public int RecipientContactId { get; set; } = 0;
+    public DateTime TransactionDate { get; set; }
+    public int PaymentMethodId { get; set; } = 0;
+    public string TransactionNo { get; set; } = string.Empty;
+    public string BillingAddress { get; set; } = string.Empty;
+    public DateTime DueDate { get; set; }
+    public int PaymentTermId { get; set; } = 0;
+    public string Memo { get; set; } = string.Empty;
+    public int Status { get; set; } = 0;
+    public int DiscountPercent { get; set; } = 0;
+    public Int64 DiscountAmount { get; set; } = 0;
+    public Int64 TotalAmount { get; set; } = 0;
     public List<ExpenseAttachmentFiles> AttachmentFile { get; set; }
     public List<ExpenseInsertTag> TagList { get; set; }
-    //public List<ExpenseAccount> ExpenseAccountList { get; set; }
+    public List<ExpenseInsertList> ExpenseInsertList { get; set; }
 }
 
 public class ExpenseAttachmentFiles
@@ -192,7 +224,6 @@ public class ExpenseAttachmentFiles
     public string FileUrl { get; set; } = string.Empty;
     public string FileSize { get; set; } = string.Empty;
     public string Extension { get; set; } = string.Empty;
-    public int TransId { get; set; }
 }
 
 public class ExpenseInsertTag
@@ -200,10 +231,11 @@ public class ExpenseInsertTag
     public int TagId { get; set; } = 0;
 }
 
-//public class ExpenseAccount
-//{
-//    public string Name { get; set; } = string.Empty;
-//    public string ExpenseAccountNumber { get; set; } = string.Empty;
-//    public int ExpenseCategoryId { get; set; } = 0;
-//    public int TaxId { get; set; } = 0;
-//}
+public class ExpenseInsertList
+{
+    public bool PriceIncludesTax { get; set; } = false;
+    public int ExpenseAccountId { get; set; } = 0;
+    public string Description { get; set; } = string.Empty;
+    public int TaxId { get; set; } = 0;
+    public Int64 Amount { get; set; } = 0;
+}

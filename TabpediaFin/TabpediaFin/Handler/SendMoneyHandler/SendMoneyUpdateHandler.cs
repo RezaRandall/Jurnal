@@ -1,7 +1,4 @@
-﻿using TabpediaFin.Domain;
-using TabpediaFin.Domain.ReceiveMoney;
-using TabpediaFin.Domain.SendMoney;
-using TabpediaFin.Handler.ReceiveMoneyHandler;
+﻿using TabpediaFin.Domain.SendMoney;
 
 namespace TabpediaFin.Handler.SendMoneyHandler;
 
@@ -206,5 +203,4 @@ public class SendMoneyUpdateList
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
     public Int64 Amount { get; set; } = 0;
-    public int TransId { get; set; }
 }
