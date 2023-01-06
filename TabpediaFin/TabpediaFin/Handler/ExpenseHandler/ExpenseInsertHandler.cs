@@ -21,65 +21,139 @@ public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowRespons
         var result = new RowResponse<ExpenseFetchDto>();
         int transIdResult;
         DateTime TransDate = TimeZoneInfo.ConvertTimeToUtc(request.TransactionDate);
+        var lastMonth = TimeZoneInfo.ConvertTimeToUtc(DateTime.Today.AddMonths(1));
 
-        var expense = new Expense()
+        var paylater = request.PayLater;
+        if (paylater == false) 
         {
-            PayFromAccountId = request.PayFromAccountId,
-            PayLater = request.PayLater,
-            RecipientContactId = request.RecipientContactId,
-            TransactionDate = TransDate,
-            PaymentMethodId = request.PaymentMethodId,
-            TransactionNo = request.TransactionNo,
-            BillingAddress = request.BillingAddress,
-            DueDate = request.DueDate,
-            PaymentTermId = request.PaymentTermId,
-            Memo = request.Memo,
-            Status = request.Status,
-            DiscountPercent = request.DiscountPercent,
-            DiscountAmount = request.DiscountAmount,
-            TotalAmount = request.TotalAmount
-        };
-
-        try
-        {
-            await _context.Expense.AddAsync(expense, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
-            transIdResult = expense.Id;
-
-            List<ExpenseFetchAttachment> returnfile = await PostAttachmentAsync(request.AttachmentFile, transIdResult, cancellationToken);
-            List<ExpenseFetchTag> TagListResult = await PostTagAsync(request.TagList, transIdResult, cancellationToken);
-            List<ExpenseFetchList> ExpenseListResult = await PostExpenseListAsync(request.ExpenseInsertList, transIdResult, cancellationToken);
-
-            var row = new ExpenseFetchDto()
+            var expense = new Expense()
             {
-                Id = expense.Id,
-                PayFromAccountId = expense.PayFromAccountId,
-                PayLater = expense.PayLater,
-                RecipientContactId = expense.RecipientContactId,
-                TransactionDate = expense.TransactionDate,
-                PaymentMethodId = expense.PaymentMethodId,
-                TransactionNo = expense.TransactionNo,
-                BillingAddress = expense.BillingAddress,
-                DueDate = expense.DueDate,
-                PaymentTermId = expense.PaymentTermId,
-                Memo = expense.Memo,
-                Status = expense.Status,
-                DiscountPercent = expense.DiscountPercent,
-                DiscountAmount = expense.DiscountAmount,
-                TotalAmount = expense.TotalAmount
+                PayFromAccountId = request.PayFromAccountId,
+                PayLater = request.PayLater,
+                RecipientContactId = request.RecipientContactId,
+                TransactionDate = TransDate,
+                PaymentMethodId = request.PaymentMethodId,
+                TransactionNo = request.TransactionNo,
+                BillingAddress = request.BillingAddress,
+                //DueDate = lastMonth,
+                //PaymentTermId = request.PaymentTermId,
+                Memo = request.Memo,
+                Status = request.Status,
+                DiscountPercent = request.DiscountPercent,
+                DiscountAmount = request.DiscountAmount,
+                DiscountForAccountId = request.DiscountForAccountId,
+                TotalAmount = request.TotalAmount
             };
 
-            result.IsOk = true;
-            result.ErrorMessage = string.Empty;
-            result.Row = row;
+            try
+            {
+                await _context.Expense.AddAsync(expense, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+                transIdResult = expense.Id;
+
+                List<ExpenseFetchAttachment> returnfile = await PostAttachmentAsync(request.AttachmentFile, transIdResult, cancellationToken);
+                List<ExpenseFetchTag> TagListResult = await PostTagAsync(request.TagList, transIdResult, cancellationToken);
+                List<ExpenseFetchList> ExpenseListResult = await PostExpenseListAsync(request.ExpenseInsertList, transIdResult, cancellationToken);
+
+                var row = new ExpenseFetchDto()
+                {
+                    Id = expense.Id,
+                    PayFromAccountId = expense.PayFromAccountId,
+                    PayLater = expense.PayLater,
+                    RecipientContactId = expense.RecipientContactId,
+                    TransactionDate = expense.TransactionDate,
+                    PaymentMethodId = expense.PaymentMethodId,
+                    TransactionNo = expense.TransactionNo,
+                    BillingAddress = expense.BillingAddress,
+                    //DueDate = expense.DueDate,
+                    //PaymentTermId = expense.PaymentTermId,
+                    Memo = expense.Memo,
+                    Status = expense.Status,
+                    DiscountPercent = expense.DiscountPercent,
+                    DiscountAmount = expense.DiscountAmount,
+                    DiscountForAccountId = expense.DiscountForAccountId,
+                    TotalAmount = expense.TotalAmount
+                };
+
+                result.IsOk = true;
+                result.ErrorMessage = string.Empty;
+                result.Row = row;
+            }
+            catch (Exception ex)
+            {
+                result.IsOk = false;
+                result.ErrorMessage = ex.Message;
+            }
+
+            return result;
         }
-        catch (Exception ex)
+        else
         {
-            result.IsOk = false;
-            result.ErrorMessage = ex.Message;
+            var expense = new Expense()
+            {
+                PayFromAccountId = request.PayFromAccountId,
+                PayLater = request.PayLater,
+                RecipientContactId = request.RecipientContactId,
+                TransactionDate = TransDate,
+                PaymentMethodId = request.PaymentMethodId,
+                TransactionNo = request.TransactionNo,
+                BillingAddress = request.BillingAddress,
+                DueDate = lastMonth,
+                PaymentTermId = request.PaymentTermId,
+                Memo = request.Memo,
+                Status = request.Status,
+                DiscountPercent = request.DiscountPercent,
+                DiscountAmount = request.DiscountAmount,
+                DiscountForAccountId = request.DiscountForAccountId,
+                TotalAmount = request.TotalAmount
+            };
+
+            try
+            {
+                await _context.Expense.AddAsync(expense, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+                transIdResult = expense.Id;
+
+                List<ExpenseFetchAttachment> returnfile = await PostAttachmentAsync(request.AttachmentFile, transIdResult, cancellationToken);
+                List<ExpenseFetchTag> TagListResult = await PostTagAsync(request.TagList, transIdResult, cancellationToken);
+                List<ExpenseFetchList> ExpenseListResult = await PostExpenseListAsync(request.ExpenseInsertList, transIdResult, cancellationToken);
+
+                var row = new ExpenseFetchDto()
+                {
+                    Id = expense.Id,
+                    PayFromAccountId = expense.PayFromAccountId,
+                    PayLater = expense.PayLater,
+                    RecipientContactId = expense.RecipientContactId,
+                    TransactionDate = expense.TransactionDate,
+                    PaymentMethodId = expense.PaymentMethodId,
+                    TransactionNo = expense.TransactionNo,
+                    BillingAddress = expense.BillingAddress,
+                    DueDate = expense.DueDate,
+                    PaymentTermId = expense.PaymentTermId,
+                    Memo = expense.Memo,
+                    Status = expense.Status,
+                    DiscountPercent = expense.DiscountPercent,
+                    DiscountAmount = expense.DiscountAmount,
+                    DiscountForAccountId = expense.DiscountForAccountId,
+                    TotalAmount = expense.TotalAmount
+                };
+
+                result.IsOk = true;
+                result.ErrorMessage = string.Empty;
+                result.Row = row;
+            }
+            catch (Exception ex)
+            {
+                result.IsOk = false;
+                result.ErrorMessage = ex.Message;
+            }
+
+            return result;
         }
 
-        return result;
+
+
+
     }
 
     public async Task<List<ExpenseFetchAttachment>> PostAttachmentAsync(List<ExpenseAttachmentFiles> filedata, int TransId, CancellationToken cancellationToken)
@@ -177,23 +251,6 @@ public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowRespons
         return ExpenseFetchList;
     }
 
-    //public async Task<List<ExpenseAccountFetchDto>> PostExpenseAccount(List<ExpenseAccountInsertDto> fileData, int transId, CancellationToken cancellationToken)
-    //{
-    //    List<ExpenseAccount> expenseAccount = new List<ExpenseAccount>();
-    //    List<ExpenseAccountFetchDto> expenseAccountFetchDtos = new List<ExpenseAccountFetchDto>();
-
-    //    if (fileData.Count > 0)
-    //    {
-    //        foreach (ExpenseAccountInsertDto i in fileData)
-    //        {
-    //            ExpenseAccount.Add(new ExpenseAccount
-    //            {
-
-    //            });
-    //        }
-    //    }
-    //}
-
 }
 
 
@@ -212,6 +269,7 @@ public class ExpenseInsertDto : IRequest<RowResponse<ExpenseFetchDto>>
     public int Status { get; set; } = 0;
     public int DiscountPercent { get; set; } = 0;
     public Int64 DiscountAmount { get; set; } = 0;
+    public int DiscountForAccountId { get; set; } = 0;
     public Int64 TotalAmount { get; set; } = 0;
     public List<ExpenseAttachmentFiles> AttachmentFile { get; set; }
     public List<ExpenseInsertTag> TagList { get; set; }

@@ -11,68 +11,77 @@ public class SendMoneyListHandler : IFetchPagedListHandler<SendMoneyListDto>
         _currentUser = currentUser;
     }
 
-    public async Task<PagedListResponse<SendMoneyListDto>> Handle(FetchPagedListRequestDto<SendMoneyListDto> req, CancellationToken cancellationToken)
+    public async Task<PagedListResponse<SendMoneyListDto>> Handle(FetchPagedListRequestDto<SendMoneyListDto> request, CancellationToken cancellationToken)
     {
-        if (req.PageNum == 0) { req.PageNum = 1; }
-        if (req.PageSize == 0) { req.PageSize = 10; }
+        if (request.PageNum == 0) { request.PageNum = 0; }
+        if (request.PageSize == 0) { request.PageSize = 10; }
 
-        var result = new PagedListResponse<SendMoneyListDto>();
+        var response = new PagedListResponse<SendMoneyListDto>();
 
         try
         {
-            string sqlWhere = " WHERE (1=1) ";
-            var parameters = new DynamicParameters();
-
-            if (!string.IsNullOrWhiteSpace(req.Search))
+            using (var conn = _dbManager.CreateConnection())
             {
-                sqlWhere += SqlHelper.GenerateWhere<SendMoneyListDto>();
-                parameters.Add("Search", $"%{req.Search.Trim().ToLowerInvariant()}%");
-            }
+                string sqlsort = "";
+                string sqlsearch = "";
+                string expensefilter = "";
 
-            //var orderby = string.Empty;
-            if (string.IsNullOrWhiteSpace(req.SortBy))
-            {
-                req.SortBy = SqlHelper.GenerateOrderBy(req.SortBy, req.SortDesc, "CreatedUtc");
-            }
+                if (request.SortBy != null && request.SortBy != "")
+                {
+                    sqlsort = @" order by """ + request.SortBy + "\" ASC";
 
-            using (var cn = _dbManager.CreateConnection())
-            {
-                cn.Open();
+                    if (request.SortDesc == true)
+                    {
+                        sqlsort = @" order by """ + request.SortBy + "\" ASC";
+                    }
+                }
 
-                var list = await cn.FetchListPagedAsync<SendMoneyListDto>(pageNumber: req.PageNum
-                   , rowsPerPage: req.PageSize
-                   , search: req.Search
-                   , sortby: req.SortBy
-                   , sortdesc: req.SortDesc
-                   , currentUser: _currentUser
-                    );
-                int recordCount = await cn.RecordCountAsync<SendMoneyListDto>(sqlWhere, parameters);
-                result.IsOk = true;
-                result.ErrorMessage = string.Empty;
-                result.List = list.List;
-                result.RecordCount = recordCount;
+                if (request.Search != null && request.Search != "")
+                {
+                    sqlsearch = @"AND LOWER(""TransactionNo"") LIKE @Search OR LOWER(""Memo"") LIKE @Search ";
+                }
+
+                var sql = @"SELECT  *
+                          FROM ""SendMoney"" WHERE ""TenantId"" = @TenantId " + expensefilter + " " + sqlsearch + " " + sqlsort + " LIMIT @PageSize OFFSET @PageNum";
+
+                var parameters = new DynamicParameters();
+                parameters.Add("TenantId", _currentUser.TenantId);
+                parameters.Add("PageSize", request.PageSize);
+                parameters.Add("PageNum", request.PageNum);
+                parameters.Add("Search", $"%{request.Search.Trim().ToLowerInvariant()}%");
+
+                List<SendMoneyListDto> result;
+                result = (await conn.QueryAsync<SendMoneyListDto>(sql, parameters).ConfigureAwait(false)).ToList();
+
+                response.RecordCount = result.Count;
+
+                response.IsOk = true;
+                response.List = result;
+                response.ErrorMessage = string.Empty;
             }
         }
         catch (Exception ex)
         {
-            result.IsOk = false;
-            result.ErrorMessage = ex.Message;
+            response.IsOk = false;
+            response.ErrorMessage = ex.Message;
         }
-        return result;
+        return response;
     }
+
 }
 
 [Table("SendMoney")]
 public class SendMoneyListDto : BaseDto
 {
     public int PayFromAccountId { get; set; } = 0;
-    public int ReceiverId { get; set; } = 0;
+    public int RecipientContactId { get; set; } = 0;
     public DateTime TransactionDate { get; set; }
     [Searchable]
     public string TransactionNo { get; set; } = string.Empty;
     [Searchable]
     public string Memo { get; set; } = string.Empty;
-    public int TotalAmount { get; set; } = 0;
-    public int DiscountAmount { get; set; } = 0;
+    public Int64 TotalAmount { get; set; } = 0;
+    public Int64 DiscountAmount { get; set; } = 0;
     public int DiscountPercent { get; set; } = 0;
+    public int DiscountForAccountId { get; set; } = 0;
 }

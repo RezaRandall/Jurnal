@@ -2,7 +2,7 @@
 
 namespace TabpediaFin.Migrations;
 
-[Migration(202301051653)]
+[Migration(202301061653)]
 public class Table_Expense : Migration
 {
     public override void Down()
@@ -26,8 +26,9 @@ public class Table_Expense : Migration
             .WithColumn("PaymentTermId").AsInt32().Nullable()
             .WithColumn("Memo").AsString(250).Nullable()
             .WithColumn("Status").AsInt32().NotNullable().WithDefaultValue(0) // 0-Open;1-Closed;jika status open dan due date terlewati maka akan menjadi expired
-            .WithColumn("DiscountPercent").AsInt32().NotNullable().WithDefaultValue(0) //0-presentase; 1-nominal
+            .WithColumn("DiscountPercent").AsInt32().NotNullable().WithDefaultValue(0)
             .WithColumn("DiscountAmount").AsDecimal(18, 2).NotNullable().WithDefaultValue(0)
+            .WithColumn("DiscountForAccountId").AsInt32().Nullable()
             .WithColumn("TotalAmount").AsDecimal(18, 2).NotNullable().WithDefaultValue(0)
             .WithColumn("CreatedUid").AsInt32().NotNullable()
             .WithColumn("CreatedUtc").AsDateTime().NotNullable()

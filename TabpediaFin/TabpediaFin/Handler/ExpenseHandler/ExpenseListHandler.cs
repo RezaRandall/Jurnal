@@ -38,7 +38,7 @@ public class ExpenseListHandler : IFetchPagedListHandler<ExpenseListDto>
 
                 if (request.Search != null && request.Search != "")
                 {
-                    sqlsearch = @"AND LOWER(""TransNum"") LIKE @Search OR LOWER(""Notes"") LIKE @Search OR LOWER(""Description"") LIKE @Search";
+                    sqlsearch = @"AND LOWER(""TransactionNo"") LIKE @Search OR LOWER(""Memo"") LIKE @Search OR LOWER(""BillingAddress"") LIKE @Search";
                 }
 
                 var sql = @"SELECT  *
@@ -88,5 +88,6 @@ public class ExpenseListDto : BaseDto
     public int Status { get; set; } = 0;
     public int DiscountType { get; set; } = 0;
     public int DiscountAmount { get; set; } = 0;
+    public int DiscountForAccountId { get; set; } = 0;
     public Int64 TotalAmount { get; set; } = 0;
 }

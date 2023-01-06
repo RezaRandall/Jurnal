@@ -31,6 +31,21 @@ public class ExpenseFetchHandler : IFetchByIdHandler<ExpenseFetchDto>
 
                 if (result != null)
                 {
+                    // ATTACHMENT
+                    var sqlExpenseAttachment = @"SELECT ea.""Id""
+                                        , ea.""FileName""
+                                        , ea.""FileUrl""
+                                        , ea.""Extension""
+                                        , ea.""FileSize""
+                                        , ea.""TransId"" 
+                                        FROM ""ExpenseAttachment"" ea
+                                        INNER JOIN ""Expense"" e ON ea.""TransId"" = e.""Id"" 
+                                        WHERE e.""TenantId"" = @TenantId AND e.""Id"" = @Id ";
+                    List<ExpenseFetchAttachment> resultExpenseAttachment;
+                    resultExpenseAttachment = (await cn.QueryAsync<ExpenseFetchAttachment>(sqlExpenseAttachment, parameters).ConfigureAwait(false)).ToList();
+                    result.ExpenseAttachmentList = resultExpenseAttachment;
+
+                    // EXPENSE TAG
                     var sqlExpensetag = @"SELECT et.""Id""
                                                 ,et.""TagId""
                                                 ,et.""TransId""
@@ -46,18 +61,17 @@ public class ExpenseFetchHandler : IFetchByIdHandler<ExpenseFetchDto>
                     resultExpenseTag = (await cn.QueryAsync<ExpenseFetchTag>(sqlExpensetag, parameters).ConfigureAwait(false)).ToList();
                     result.ExpenseTagList = resultExpenseTag;
 
-                    var sqlExpenseAttachment = @"SELECT ea.""Id""
-                                        , ea.""FileName""
-                                        , ea.""FileUrl""
-                                        , ea.""Extension""
-                                        , ea.""FileSize""
-                                        , ea.""TransId"" 
-                                        FROM ""ExpenseAttachment"" ea
-                                        INNER JOIN ""Expense"" e ON ea.""TransId"" = e.""Id"" 
-                                        WHERE e.""TenantId"" = @TenantId AND e.""Id"" = @Id ";
-                    List<ExpenseFetchAttachment> resultExpenseAttachment;
-                    resultExpenseAttachment = (await cn.QueryAsync<ExpenseFetchAttachment>(sqlExpenseAttachment, parameters).ConfigureAwait(false)).ToList();
-                    result.ExpenseAttachmentList = resultExpenseAttachment;
+                    // EXPENSE LIST
+                    var sqlExpenseList = @"SELECT el.""Id"", el.""PriceIncludesTax"", el.""ExpenseAccountId""
+                                        , el.""Description"", el.""TaxId"", el.""Amount"", el.""TransId""
+                                        FROM ""ExpenseList"" el 
+                                        INNER JOIN ""Expense"" e on el.""TransId"" = e.""Id""  
+                                        WHERE e.""TenantId"" = @TenantId and e.""Id"" = @Id ";
+
+                    List<ExpenseFetchList> resultExpenseList;
+                    resultExpenseList = (await cn.QueryAsync<ExpenseFetchList>(sqlExpenseList, parameters).ConfigureAwait(false)).ToList();
+                    result.ExpenseFetchList = resultExpenseList;
+
 
                 }
 
@@ -90,15 +104,16 @@ public class ExpenseFetchDto : BaseDto
     public int PaymentMethodId { get; set; } = 0;
     public string TransactionNo { get; set; } = string.Empty;
     public string BillingAddress { get; set; } = string.Empty;
-    public DateTime DueDate { get; set; }
+    public DateTime? DueDate { get; set; }
     public int PaymentTermId { get; set; } = 0;
     public string Memo { get; set; } = string.Empty;
     public int Status { get; set; } = 0;
     public int DiscountPercent { get; set; } = 0;
     public Int64 DiscountAmount { get; set; } = 0;
+    public int DiscountForAccountId { get; set; } = 0;
     public Int64 TotalAmount { get; set; } = 0;
-    public List<ExpenseFetchTag> ExpenseTagList { get; set; }
     public List<ExpenseFetchAttachment> ExpenseAttachmentList { get; set; }
+    public List<ExpenseFetchTag> ExpenseTagList { get; set; }
     public List<ExpenseFetchList> ExpenseFetchList { get; set; }
 }
 
