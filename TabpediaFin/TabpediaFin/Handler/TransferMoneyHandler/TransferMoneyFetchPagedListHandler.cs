@@ -11,66 +11,64 @@ public class TransferMoneyListHandler : IFetchPagedListHandler<TransferMoneyList
         _currentUser = currentUser;
     }
 
-    public async Task<PagedListResponse<TransferMoneyListDto>> Handle(FetchPagedListRequestDto<TransferMoneyListDto> req, CancellationToken cancellationToken)
+    public async Task<PagedListResponse<TransferMoneyListDto>> Handle(FetchPagedListRequestDto<TransferMoneyListDto> request, CancellationToken cancellationToken)
     {
-        if (req.PageNum == 0) { req.PageNum = 1; }
-        if (req.PageSize == 0) { req.PageSize = 10; }
+        if (request.PageNum == 0) { request.PageNum = 0; }
+        if (request.PageSize == 0) { request.PageSize = 10; }
 
-        var result = new PagedListResponse<TransferMoneyListDto>();
+        var response = new PagedListResponse<TransferMoneyListDto>();
 
         try
         {
-            string sqlWhere = " WHERE (1=1) ";
-            var parameters = new DynamicParameters();
-
-            if (!string.IsNullOrWhiteSpace(req.Search))
+            using (var conn = _dbManager.CreateConnection())
             {
-                sqlWhere += SqlHelper.GenerateWhere<TransferMoneyListDto>();
-                parameters.Add("Search", $"%{req.Search.Trim().ToLowerInvariant()}%");
-            }
+                string sqlsort = "";
+                string sqlsearch = "";
+                string expensefilter = "";
 
-            //var orderby = string.Empty;
-            if (string.IsNullOrWhiteSpace(req.SortBy))
-            {
-                //orderby = SqlHelper.GenerateOrderBy(req.SortBy, req.SortDesc);
-                req.SortBy = SqlHelper.GenerateOrderBy(req.SortBy, req.SortDesc, "CreatedUtc");
-            }
+                if (request.SortBy != null && request.SortBy != "")
+                {
+                    sqlsort = @" order by """ + request.SortBy + "\" ASC";
 
-            using (var cn = _dbManager.CreateConnection())
-            {
-                cn.Open();
+                    if (request.SortDesc == true)
+                    {
+                        sqlsort = @" order by """ + request.SortBy + "\" ASC";
+                    }
+                }
 
-                var list = await cn.FetchListPagedAsync<TransferMoneyListDto>(pageNumber: req.PageNum
-                , rowsPerPage: req.PageSize
-                , search: req.Search
-                , sortby: req.SortBy
-                , sortdesc: req.SortDesc
-                , currentUser: _currentUser
-                    );
-                int recordCount = await cn.RecordCountAsync<TransferMoneyListDto>(sqlWhere, parameters);
-                result.IsOk = true;
-                result.ErrorMessage = string.Empty;
-                result.List = list.List;
-                result.RecordCount = recordCount;
+                if (request.Search != null && request.Search != "")
+                {
+                    sqlsearch = @"AND LOWER(""TransactionNumber"") LIKE @Search OR LOWER(""Memo"") LIKE @Search ";
+                }
+
+                var sql = @"SELECT  *
+                          FROM ""TransferMoney"" WHERE ""TenantId"" = @TenantId " + expensefilter + " " + sqlsearch + " " + sqlsort + " LIMIT @PageSize OFFSET @PageNum";
+
+                var parameters = new DynamicParameters();
+                parameters.Add("TenantId", _currentUser.TenantId);
+                parameters.Add("PageSize", request.PageSize);
+                parameters.Add("PageNum", request.PageNum);
+                parameters.Add("Search", $"%{request.Search.Trim().ToLowerInvariant()}%");
+
+                List<TransferMoneyListDto> result;
+                result = (await conn.QueryAsync<TransferMoneyListDto>(sql, parameters).ConfigureAwait(false)).ToList();
+
+                response.RecordCount = result.Count;
+
+                response.IsOk = true;
+                response.List = result;
+                response.ErrorMessage = string.Empty;
             }
         }
         catch (Exception ex)
         {
-            result.IsOk = false;
-            result.ErrorMessage = ex.Message;
+            response.IsOk = false;
+            response.ErrorMessage = ex.Message;
         }
-        return result;
+        return response;
     }
 
-
 }
-
-
-
-
-
-
-
 
 [Table("TransferMoney")]
 public class TransferMoneyListDto : BaseDto

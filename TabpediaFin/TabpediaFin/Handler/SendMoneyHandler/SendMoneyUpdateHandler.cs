@@ -1,7 +1,4 @@
-﻿using TabpediaFin.Domain;
-using TabpediaFin.Domain.ReceiveMoney;
-using TabpediaFin.Domain.SendMoney;
-using TabpediaFin.Handler.ReceiveMoneyHandler;
+﻿using TabpediaFin.Domain.SendMoney;
 
 namespace TabpediaFin.Handler.SendMoneyHandler;
 
@@ -34,13 +31,14 @@ public class SendMoneyUpdateHandler : IRequestHandler<SendMoneyUpdateDto, RowRes
         {
             var sendMoney = await _context.SendMoney.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
             sendMoney.PayFromAccountId = request.PayFromAccountId;
-            sendMoney.ReceiverId = request.ReceiverId;
+            sendMoney.RecipientContactId = request.RecipientContactId;
             sendMoney.TransactionDate = request.TransactionDate;
             sendMoney.TransactionNo = request.TransactionNo;
             sendMoney.Memo = request.Memo;
             sendMoney.TotalAmount = request.TotalAmount;
             sendMoney.DiscountAmount = request.DiscountAmount;
             sendMoney.DiscountPercent = request.DiscountPercent;
+            sendMoney.DiscountForAccountId = request.DiscountForAccountId;
 
             sendMoneyId = request.Id;
             List<int> idUpdateSendMoneyTag = new List<int>();
@@ -139,13 +137,14 @@ public class SendMoneyUpdateHandler : IRequestHandler<SendMoneyUpdateDto, RowRes
             {
                 Id = request.Id,
                 PayFromAccountId = request.PayFromAccountId,
-                ReceiverId = request.ReceiverId,
+                RecipientContactId = request.RecipientContactId,
                 TransactionDate = request.TransactionDate,
                 TransactionNo = request.TransactionNo,
                 Memo = request.Memo,
                 TotalAmount = request.TotalAmount,
                 DiscountAmount = request.DiscountAmount,
                 DiscountPercent = request.DiscountPercent,
+                DiscountForAccountId = request.DiscountForAccountId,
                 SendMoneyTagList = sendMoneyFetchTag,
                 SendMoneyAttachmentList = sendMoneyFetchAttachment,
                 SendMoneyList = sendMoneyFetchList
@@ -171,13 +170,14 @@ public class SendMoneyUpdateDto : IRequest<RowResponse<SendMoneyFetchDto>>
 {
     public int Id { get; set; }
     public int PayFromAccountId { get; set; } = 0;
-    public int ReceiverId { get; set; } = 0;
+    public int RecipientContactId { get; set; } = 0;
     public DateTime TransactionDate { get; set; }
     public string TransactionNo { get; set; } = string.Empty;
     public string Memo { get; set; } = string.Empty;
-    public int TotalAmount { get; set; } = 0;
-    public int DiscountAmount { get; set; } = 0;
+    public Int64 TotalAmount { get; set; } = 0;
+    public Int64 DiscountAmount { get; set; } = 0;
     public int DiscountPercent { get; set; } = 0;
+    public int DiscountForAccountId { get; set; } = 0;
     public List<SendMoneyAttachmentUpdate> SendMoneyAttachmentFile { get; set; }
     public List<SendMoneyUpdateTag> SendMoneyTagList { get; set; }
     public List<SendMoneyUpdateList> SendMoneyList { get; set; }
@@ -206,5 +206,4 @@ public class SendMoneyUpdateList
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
     public Int64 Amount { get; set; } = 0;
-    public int TransId { get; set; }
 }

@@ -11,56 +11,63 @@ public class ReceiveMoneyListHandler : IFetchPagedListHandler<ReceiveMoneyListDt
         _currentUser = currentUser;
     }
 
-    public async Task<PagedListResponse<ReceiveMoneyListDto>> Handle(FetchPagedListRequestDto<ReceiveMoneyListDto> req, CancellationToken cancellationToken)
+    public async Task<PagedListResponse<ReceiveMoneyListDto>> Handle(FetchPagedListRequestDto<ReceiveMoneyListDto> request, CancellationToken cancellationToken)
     {
-        if (req.PageNum == 0) { req.PageNum = 1; }
-        if (req.PageSize == 0) { req.PageSize = 10; }
+        if (request.PageNum == 0) { request.PageNum = 0; }
+        if (request.PageSize == 0) { request.PageSize = 10; }
 
-        var result = new PagedListResponse<ReceiveMoneyListDto>();
+        var response = new PagedListResponse<ReceiveMoneyListDto>();
 
         try
         {
-            string sqlWhere = " WHERE (1=1) ";
-            var parameters = new DynamicParameters();
-
-            if (!string.IsNullOrWhiteSpace(req.Search))
+            using (var conn = _dbManager.CreateConnection())
             {
-                sqlWhere += SqlHelper.GenerateWhere<ReceiveMoneyListDto>();
-                parameters.Add("Search", $"%{req.Search.Trim().ToLowerInvariant()}%");
-            }
+                string sqlsort = "";
+                string sqlsearch = "";
+                string expensefilter = "";
 
-            //var orderby = string.Empty;
-            if (string.IsNullOrWhiteSpace(req.SortBy))
-            {
-                //orderby = SqlHelper.GenerateOrderBy(req.SortBy, req.SortDesc);
-                req.SortBy = SqlHelper.GenerateOrderBy(req.SortBy, req.SortDesc, "CreatedUtc");
-            }
+                if (request.SortBy != null && request.SortBy != "")
+                {
+                    sqlsort = @" order by """ + request.SortBy + "\" ASC";
 
-            using (var cn = _dbManager.CreateConnection())
-            {
-                cn.Open();
+                    if (request.SortDesc == true)
+                    {
+                        sqlsort = @" order by """ + request.SortBy + "\" ASC";
+                    }
+                }
 
-                var list = await cn.FetchListPagedAsync<ReceiveMoneyListDto>(pageNumber: req.PageNum
-                   , rowsPerPage: req.PageSize
-                   , search: req.Search
-                   , sortby: req.SortBy
-                   , sortdesc: req.SortDesc
-                   , currentUser: _currentUser
-                    );
-                int recordCount = await cn.RecordCountAsync<ReceiveMoneyListDto>(sqlWhere, parameters);
-                result.IsOk = true;
-                result.ErrorMessage = string.Empty;
-                result.List = list.List;
-                result.RecordCount = recordCount;
+                if (request.Search != null && request.Search != "")
+                {
+                    sqlsearch = @"AND LOWER(""TransactionNo"") LIKE @Search OR LOWER(""Memo"") LIKE @Search ";
+                }
+
+                var sql = @"SELECT  *
+                          FROM ""ReceiveMoney"" WHERE ""TenantId"" = @TenantId " + expensefilter + " " + sqlsearch + " " + sqlsort + " LIMIT @PageSize OFFSET @PageNum";
+
+                var parameters = new DynamicParameters();
+                parameters.Add("TenantId", _currentUser.TenantId);
+                parameters.Add("PageSize", request.PageSize);
+                parameters.Add("PageNum", request.PageNum);
+                parameters.Add("Search", $"%{request.Search.Trim().ToLowerInvariant()}%");
+
+                List<ReceiveMoneyListDto> result;
+                result = (await conn.QueryAsync<ReceiveMoneyListDto>(sql, parameters).ConfigureAwait(false)).ToList();
+
+                response.RecordCount = result.Count;
+
+                response.IsOk = true;
+                response.List = result;
+                response.ErrorMessage = string.Empty;
             }
         }
         catch (Exception ex)
         {
-            result.IsOk = false;
-            result.ErrorMessage = ex.Message;
+            response.IsOk = false;
+            response.ErrorMessage = ex.Message;
         }
-        return result;
+        return response;
     }
+
 }
 
 
