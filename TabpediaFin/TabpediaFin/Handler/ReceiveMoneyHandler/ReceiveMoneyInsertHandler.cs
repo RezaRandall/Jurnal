@@ -16,6 +16,7 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
     {
         var result = new RowResponse<ReceiveMoneyFetchDto>();
         int transIdResult;
+        Int64 receiveAmount;
         DateTime TransDate = TimeZoneInfo.ConvertTimeToUtc(request.TransactionDate);
 
         var receiveMoney = new ReceiveMoney()
@@ -31,7 +32,17 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
         try
         {
             await _context.ReceiveMoney.AddAsync(receiveMoney, cancellationToken);
+
+            receiveAmount = receiveMoney.TotalAmount;
+
+            var account = await _context.Account.FirstAsync(x => x.Id == request.DepositToAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var accountBalance = account.Balance;
+
+            var sumTotalBalanceAccount = receiveAmount + accountBalance;
             await _context.SaveChangesAsync(cancellationToken);
+
+
+
             transIdResult = receiveMoney.Id;
 
             var accountCahAndBank = await _context.AccountCashAndBank.FirstAsync(x => x.Id == request.DepositToAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);

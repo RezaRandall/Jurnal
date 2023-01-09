@@ -45,10 +45,10 @@ public class TransferMoneyInsertHandler : IRequestHandler<TransferMoneyInsertDto
             }
             else 
             {
+            // Perhitungan 
             var balanceValueTransfer = balanceTransfer - transferAmount;
             accountCashAndBankPostTransfer.Balance = balanceValueTransfer;
             await _context.SaveChangesAsync(cancellationToken);
-
 
             var accountCashAndBankGetDepo = await _context.AccountCashAndBank.FirstAsync(x => x.Id == request.DepositToAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
             var totalBalanceDepo = accountCashAndBankGetDepo.Balance;
