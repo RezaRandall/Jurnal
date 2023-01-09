@@ -15,6 +15,7 @@ global using TabpediaFin.Dto.Base;
 global using TabpediaFin.Dto.Common.Request;
 global using TabpediaFin.Dto.Common.Response;
 global using TabpediaFin.Handler.Interfaces;
+global using TabpediaFin.Handler.CoAHandler;
 global using TabpediaFin.Handler.ContactAddressHandler;
 global using TabpediaFin.Handler.ContactAddressTypeHandler;
 global using TabpediaFin.Handler.ContactGroupHandler;

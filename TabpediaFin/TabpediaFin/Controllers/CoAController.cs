@@ -20,8 +20,8 @@ namespace TabpediaFin.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GenerateAccountFirst()
         {
-            FetchPagedListRequestDto<SalesOfferListDto> request = new FetchPagedListRequestDto<SalesOfferListDto>();
-            return Result(await _mediator.Send(request));
+            GenerateAccountInsertDto command = new GenerateAccountInsertDto();
+            return Result(await _mediator.Send(command));
         }
     }
 }
