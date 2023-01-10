@@ -39,6 +39,7 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
             var accountBalance = account.Balance;
 
             var sumTotalBalanceAccount = receiveAmount + accountBalance;
+            account.Balance = sumTotalBalanceAccount;
             await _context.SaveChangesAsync(cancellationToken);
 
 
