@@ -36,7 +36,7 @@ public class TransferMoneyInsertHandler : IRequestHandler<TransferMoneyInsertDto
 
             transferAmount = transferMoney.Amount;
 
-            var accountCashAndBankPostTransfer = await _context.AccountCashAndBank.FirstAsync(x => x.Id == request.TransferFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var accountCashAndBankPostTransfer = await _context.Account.FirstAsync(x => x.Id == request.TransferFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
             var balanceTransfer = accountCashAndBankPostTransfer.Balance ;
             if (balanceTransfer < transferAmount)
             {
@@ -50,7 +50,7 @@ public class TransferMoneyInsertHandler : IRequestHandler<TransferMoneyInsertDto
             accountCashAndBankPostTransfer.Balance = balanceValueTransfer;
             await _context.SaveChangesAsync(cancellationToken);
 
-            var accountCashAndBankGetDepo = await _context.AccountCashAndBank.FirstAsync(x => x.Id == request.DepositToAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var accountCashAndBankGetDepo = await _context.Account.FirstAsync(x => x.Id == request.DepositToAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
             var totalBalanceDepo = accountCashAndBankGetDepo.Balance;
             var balanceValDepo = totalBalanceDepo + transferAmount;
             accountCashAndBankGetDepo.Balance = balanceValDepo;
@@ -165,7 +165,6 @@ public class TransferMoneyAttahmentFiles
     public string FileUrl { get; set; } = string.Empty;
     public string FileSize { get; set; } = string.Empty;
     public string Extension { get; set; } = string.Empty;
-    public int TransId { get; set; }
 }
 
 public class TransferMoneyInsertTag

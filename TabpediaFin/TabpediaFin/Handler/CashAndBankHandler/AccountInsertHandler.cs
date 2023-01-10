@@ -1,46 +1,48 @@
 ﻿namespace TabpediaFin.Handler.CashAndBank;
 
-public class AccountCashAndBankInsertHandler : IRequestHandler<AccountCashAndBankInsertDto, RowResponse<AccountCashAndBankFetchDto>>
+public class AccountInsertHandler : IRequestHandler<AccountInsertDto, RowResponse<AccountFetchDto>>
 {
     private readonly FinContext _context;
 
-    public AccountCashAndBankInsertHandler(FinContext db)
+    public AccountInsertHandler(FinContext db)
     {
         _context = db;
     }
 
-    public async Task<RowResponse<AccountCashAndBankFetchDto>> Handle(AccountCashAndBankInsertDto request, CancellationToken cancellationToken)
+    public async Task<RowResponse<AccountFetchDto>> Handle(AccountInsertDto request, CancellationToken cancellationToken)
     {
-        var result = new RowResponse<AccountCashAndBankFetchDto>();
+        var result = new RowResponse<AccountFetchDto>();
 
-        var accountCashAndBank = new AccountCashAndBank()
+        var accountCashAndBank = new Account()
         {
             Name = request.Name,
             AccountNumber = request.AccountNumber,
-            CashAndBankCategoryId = request.CashAndBankCategoryId,
-            DetailAccountId = request.DetailAccountId,
-            TaxId = request.TaxId,
+            CategoryId = request.CategoryId,
+            AccountParentId = request.AccountParentId,
             BankId = request.BankId,
+            TaxId = request.TaxId,
             Description = request.Description,
             Balance = request.Balance,
+            IsLocked = request.IsLocked
         };
 
         try
         {
-            await _context.AccountCashAndBank.AddAsync(accountCashAndBank, cancellationToken);
+            await _context.Account.AddAsync(accountCashAndBank, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
 
-            var row = new AccountCashAndBankFetchDto()
+            var row = new AccountFetchDto()
             {
                 Id = accountCashAndBank.Id,
                 Name = accountCashAndBank.Name,
                 AccountNumber = accountCashAndBank.AccountNumber,
-                CashAndBankCategoryId = accountCashAndBank.CashAndBankCategoryId,
-                DetailAccountId = accountCashAndBank.DetailAccountId,
-                TaxId = accountCashAndBank.TaxId,
+                CategoryId = accountCashAndBank.CategoryId,
+                AccountParentId = accountCashAndBank.AccountParentId,
                 BankId = accountCashAndBank.BankId,
+                TaxId = accountCashAndBank.TaxId,
                 Description = accountCashAndBank.Description,
                 Balance = accountCashAndBank.Balance,
+                IsLocked = accountCashAndBank.IsLocked
             };
 
             result.IsOk = true;
@@ -57,14 +59,16 @@ public class AccountCashAndBankInsertHandler : IRequestHandler<AccountCashAndBan
     }
 }
 
-public class AccountCashAndBankInsertDto : IRequest<RowResponse<AccountCashAndBankFetchDto>>
+public class AccountInsertDto : IRequest<RowResponse<AccountFetchDto>>
 {
     public string Name { get; set; } = string.Empty;
     public string AccountNumber { get; set; } = string.Empty;
-    public int CashAndBankCategoryId { get; set; } = 0;
-    public int DetailAccountId { get; set; } = 0;
-    public int TaxId { get; set; } = 0;
+    public int CategoryId { get; set; } = 0;
+    public int AccountParentId { get; set; } = 0;
     public int BankId { get; set; } = 0;
+    public int TaxId { get; set; } = 0;
     public string Description { get; set; } = string.Empty;
-    public Int64 Balance { get; set; } = 0;
+    public double Balance { get; set; } = 0;
+    public Boolean IsLocked { get; set; } = false;
 }
+

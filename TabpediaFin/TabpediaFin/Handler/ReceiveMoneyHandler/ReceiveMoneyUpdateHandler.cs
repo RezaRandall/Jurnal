@@ -103,9 +103,8 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
                     receiveMoneyUpdateList.Add(new ReceiveMoneyList
                     {
                         Id = i.Id,
-                        ReceiveMoneyId = i.ReceiveMoneyId,
                         PriceIncludesTax = i.PriceIncludesTax,
-                        ReceiveFromAccountId = i.ReceiveFromAccountId,
+                        AccountId = i.AccountId,
                         Description = i.Description,
                         TaxId = i.TaxId,
                         Amount = i.Amount,
@@ -115,9 +114,8 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
                     receiveMoneyFetchList.Add(new ReceiveMoneyFetchList
                     {
                         Id = i.Id,
-                        ReceiveMoneyId = i.ReceiveMoneyId,
+                        AccountId = i.AccountId,
                         PriceIncludesTax = i.PriceIncludesTax,
-                        ReceiveFromAccountId = i.ReceiveFromAccountId,
                         Description = i.Description,
                         TaxId = i.TaxId,
                         Amount = i.Amount,
@@ -196,9 +194,8 @@ public class ReceiveMoneyUpdateTag
 public class ReceiveMoneyUpdateList
 {
     public int Id { get; set; }
-    public int ReceiveMoneyId { get; set; } = 0;
+    public int AccountId { get; set; } = 0;
     public bool PriceIncludesTax { get; set; } = false;
-    public int ReceiveFromAccountId { get; set; } = 0;
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
     public Int64 Amount { get; set; } = 0;

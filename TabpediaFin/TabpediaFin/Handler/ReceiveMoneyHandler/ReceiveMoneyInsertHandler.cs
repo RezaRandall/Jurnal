@@ -45,7 +45,7 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
 
             transIdResult = receiveMoney.Id;
 
-            var accountCahAndBank = await _context.AccountCashAndBank.FirstAsync(x => x.Id == request.DepositToAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var accountCahAndBank = await _context.Account.FirstAsync(x => x.Id == request.DepositToAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
             var balanceAccount = accountCahAndBank.Balance;
 
             List<ReceiveMoneyFetchAttachment> returnfile = await PostAttachmentAsync(request.AttachmentFile, transIdResult, cancellationToken);
@@ -149,9 +149,8 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
             {
                 ReceiveMoneyList.Add(new ReceiveMoneyList
                 {
-                    ReceiveMoneyId = item.ReceiveMoneyId,
                     PriceIncludesTax = item.PriceIncludesTax,
-                    ReceiveFromAccountId = item.ReceiveFromAccountId,
+                    AccountId = item.AccountId,
                     Description = item.Description,
                     TaxId = item.TaxId,
                     Amount = item.Amount,
@@ -159,9 +158,8 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
                 });
                 ReceiveMoneyFetchList.Add(new ReceiveMoneyFetchList
                 {
-                    ReceiveMoneyId = item.ReceiveMoneyId,
                     PriceIncludesTax = item.PriceIncludesTax,
-                    ReceiveFromAccountId = item.ReceiveFromAccountId,
+                    AccountId = item.AccountId,
                     Description = item.Description,
                     TaxId = item.TaxId,
                     Amount = item.Amount,
@@ -207,9 +205,8 @@ public class ReceiveMoneyInsertTag
 
 public class ReceiveMoneyInsertList
 {
-    public int ReceiveMoneyId { get; set; } = 0;
     public bool PriceIncludesTax { get; set; } = false;
-    public int ReceiveFromAccountId { get; set; } = 0;
+    public int AccountId { get; set; } = 0;
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
     public Int64 Amount { get; set; } = 0;
