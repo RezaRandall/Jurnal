@@ -19,6 +19,20 @@
 
             try
             {
+                using (var cn = _dbManager.CreateConnection())
+                {
+                    var sqlcount = @$"Select count(1) from ""Account"" where ""TenantId"" = @TenantId";
+                    var parameters = new DynamicParameters();
+                    parameters.Add("TenantId", _currentUser.TenantId);
+                    
+                    var totalRecord = await cn.ExecuteScalarAsync<int>(sqlcount, parameters);
+                    
+                    if(totalRecord > 0)
+                    {
+                        result.IsOk = false;
+                        result.ErrorMessage = "Account has already been generated";
+                    }
+                }
                 List<Account> listofAccount = new List<Account>();
                 listofAccount.AddRange(new List<Account>
                 {

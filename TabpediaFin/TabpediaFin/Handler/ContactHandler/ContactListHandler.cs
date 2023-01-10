@@ -53,7 +53,7 @@
 
                     if (request.Search != null && request.Search != "")
                     {
-                        sqlsearch = @"AND LOWER(i.""Name"") LIKE @Search  AND LOWER(i.""Address"") LIKE @Search  AND LOWER(i.""CityName"") LIKE @Search  AND LOWER(i.""PostalCode"") LIKE @Search  AND LOWER(i.""Email"") LIKE @Search  AND LOWER(i.""Phone"") LIKE @Search  AND LOWER(i.""Fax"") LIKE @Search  AND LOWER(i.""Website"") LIKE @Search  AND LOWER(i.""Npwp"") LIKE @Search";
+                        sqlsearch = @"AND (LOWER(i.""Name"") LIKE @Search  OR LOWER(i.""Address"") LIKE @Search  OR LOWER(i.""CityName"") LIKE @Search  OR LOWER(i.""PostalCode"") LIKE @Search  OR LOWER(i.""Email"") LIKE @Search  OR LOWER(i.""Phone"") LIKE @Search  OR LOWER(i.""Fax"") LIKE @Search  OR LOWER(i.""Website"") LIKE @Search  OR LOWER(i.""Npwp"") LIKE @Search)";
                     }
 
                     var sql = @"SELECT c.""Name"" as groupName, i.""Id"", i.""TenantId"",i.""Name"", i.""Address"", i.""CityName"",i.""PostalCode"",i.""Email"",i.""Phone"",i.""Fax"",i.""Website"",i.""Npwp"",i.""GroupId"",i.""Notes"", i.""IsCustomer"", i.""IsVendor"", i.""IsEmployee"", i.""IsOther""  FROM ""Contact"" i LEFT JOIN ""ContactGroup"" c on i.""GroupId"" = c.""Id"" WHERE i.""TenantId"" = @TenantId " + contactfilter + " " + sqlsearch + " " + sqlsort + " LIMIT @PageSize OFFSET @PageNum";

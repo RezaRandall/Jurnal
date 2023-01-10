@@ -1,29 +1,26 @@
 ﻿namespace TabpediaFin.Handler.CoAHandler
 {
-    public class AccountListHandler : IQueryPagedListAccountDto<AccountListDto>
+    public class AccountChildListHandler : IQueryPagedChildListAccountDto<AccountChildListDto>
     {
         private readonly DbManager _dbManager;
         private readonly ICurrentUser _currentUser;
 
-        public AccountListHandler(DbManager dbManager, ICurrentUser currentUser)
+        public AccountChildListHandler(DbManager dbManager, ICurrentUser currentUser)
         {
             _dbManager = dbManager;
             _currentUser = currentUser;
         }
-        public async Task<PagedListResponse<AccountListDto>> Handle(QueryPagedListAccountDto<AccountListDto> request, CancellationToken cancellationToken)
+        public async Task<PagedListResponse<AccountChildListDto>> Handle(QueryPagedChildListAccountDto<AccountChildListDto> request, CancellationToken cancellationToken)
         {
-            var response = new PagedListResponse<AccountListDto>();
+            var response = new PagedListResponse<AccountChildListDto>();
             try
             {
                 using (var cn = _dbManager.CreateConnection())
                 {
                     string sqlsort = "";
                     string sqlsearch = "";
-                    string sqlfiltercategory = "";
-                    if (request.category != null && request.category != 0)
-                    {
-                        sqlfiltercategory = @"AND i.""CategoryId"" = " + request.category + "";
-                    }
+                    string sqlfilterchild = @"AND i.""AccountParentId"" = " + request.parentAccountId + "";
+                    
                     if (request.SortBy != null && request.SortBy != "")
                     {
                         sqlsort = @" order by """ + request.SortBy + "\" ASC";
@@ -39,14 +36,14 @@
                         sqlsearch = @"AND (LOWER(i.""Name"") LIKE @Search  OR LOWER(i.""AccountNumber"") LIKE @Search  OR LOWER(i.""CategoryId"") LIKE @Search  OR LOWER(i.""AccountParentId"") LIKE @Search  OR LOWER(i.""TaxId"") LIKE @Search  OR LOWER(i.""Description"") LIKE @Search)";
                     }
 
-                    var sql = @"SELECT ac.""Name"" as CategoryAccount, t.""Name"" as TaxName, i.""Name"", i.""AccountNumber"", i.""CategoryId"", i.""AccountParentId"",i.""TaxId"", i.""Description"", i.""Balance"", i.""IsLocked"", i.""BankId""  FROM ""Account"" i LEFT JOIN ""Tax"" t ON i.""TaxId"" = t.""Id"" LEFT JOIN ""AccountCategory"" ac ON i.""CategoryId"" = ac.""Id""  WHERE i.""TenantId"" = @TenantId " + sqlfiltercategory + sqlsearch + " " + sqlsort + "";
+                    var sql = @"SELECT ac.""Name"" as CategoryAccount, t.""Name"" as TaxName, i.""Name"", i.""AccountNumber"", i.""CategoryId"", i.""AccountParentId"", i.""TaxId"", i.""Description"", i.""Balance"", i.""IsLocked"", i.""BankId""  FROM ""Account"" i LEFT JOIN ""Tax"" t ON i.""TaxId"" = t.""Id"" LEFT JOIN ""AccountCategory"" ac ON i.""CategoryId"" = ac.""Id""  WHERE i.""TenantId"" = @TenantId " + sqlfilterchild + sqlsearch + " " + sqlsort + "";
 
                     var parameters = new DynamicParameters();
                     parameters.Add("TenantId", _currentUser.TenantId);
                     parameters.Add("Search", $"%{request.Search.Trim().ToLowerInvariant()}%");
 
-                    List<AccountListDto> result;
-                    result = (await cn.QueryAsync<AccountListDto>(sql, parameters).ConfigureAwait(false)).ToList();
+                    List<AccountChildListDto> result;
+                    result = (await cn.QueryAsync<AccountChildListDto>(sql, parameters).ConfigureAwait(false)).ToList();
 
                     response.RecordCount = result.Count;
 
@@ -66,7 +63,7 @@
         }
     }
     [Table("Account")]
-    public class AccountListDto : BaseDto
+    public class AccountChildListDto : BaseDto
     {
         public string Name { get; set; } = string.Empty;
         public string AccountNumber { get; set; } = string.Empty;
@@ -80,16 +77,17 @@
         public bool IsLocked { get; set; } = false;
         public int BankId { get; set; } = 0;
     }
-    public class QueryPagedListAccountDto<T> : IRequest<PagedListResponse<T>>
+    public class QueryPagedChildListAccountDto<T> : IRequest<PagedListResponse<T>>
     {
         public string Search { get; set; } = string.Empty;
 
         public string SortBy { get; set; } = string.Empty;
 
         public bool SortDesc { get; set; }
-        public int category { get; set; } = 0;
+        public int parentAccountId { get; set; } = 0;
     }
-    public interface IQueryPagedListAccountDto<T> : IRequestHandler<QueryPagedListAccountDto<T>, PagedListResponse<T>>
+
+    public interface IQueryPagedChildListAccountDto<T> : IRequestHandler<QueryPagedChildListAccountDto<T>, PagedListResponse<T>>
     {
     }
 }

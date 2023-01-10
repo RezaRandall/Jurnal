@@ -16,6 +16,20 @@ namespace TabpediaFin.Controllers
             _mediator = mediator;
         }
 
+        [HttpPost("list")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetList([FromBody] QueryPagedListAccountDto<AccountListDto> request)
+        {
+            return Result(await _mediator.Send(request));
+        }
+
+        [HttpPost("getchildaccountlist")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetListChild([FromBody] QueryPagedChildListAccountDto<AccountListDto> request)
+        {
+            return Result(await _mediator.Send(request));
+        }
+
         [HttpPost("generateaccountfirst")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GenerateAccountFirst()
@@ -23,5 +37,7 @@ namespace TabpediaFin.Controllers
             GenerateAccountInsertDto command = new GenerateAccountInsertDto();
             return Result(await _mediator.Send(command));
         }
+
+        
     }
 }
