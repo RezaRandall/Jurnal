@@ -1,6 +1,4 @@
-﻿using NPOI.HPSF;
-using TabpediaFin.Handler.ContactHandler;
-using TabpediaFin.Handler.ItemItemCategoryHandler;
+﻿using TabpediaFin.Handler.ItemItemCategoryHandler;
 using TabpediaFin.Handler.ItemUnitMeasureHandler;
 
 namespace TabpediaFin.Handler.Item;
