@@ -1,5 +1,6 @@
 ﻿using TabpediaFin.Domain;
 using TabpediaFin.Domain.ReceiveMoney;
+using TabpediaFin.Domain.TransferMoney;
 using TabpediaFin.Handler.ReceiveMoneyHandler;
 
 namespace TabpediaFin.Handler.ReceiveMoneyHandler;
@@ -32,13 +33,86 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
         try
         {
             var receiveMoney = await _context.ReceiveMoney.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-            receiveMoney.DepositToAccountId = request.DepositToAccountId;
-            receiveMoney.PayerId = request.PayerId;
-            receiveMoney.TransactionDate = request.TransactionDate;
-            receiveMoney.TransactionNo = request.TransactionNo;
-            receiveMoney.Memo = request.Memo;
-            receiveMoney.TotalAmount = request.TotalAmount;
 
+            var balanceAccountTrans = await _context.Account.FirstAsync(x => x.Id == request.DepositToAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var balanceAccountDepo = await _context.Account.FirstAsync(x => x.Id == request.ReceiveMoneyListUpdate[0].AccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+
+            var balanceTrans = balanceAccountTrans.Balance;
+            var balanceDepo = balanceAccountDepo.Balance;
+
+            var reqTotalAmount = request.TotalAmount;
+            var reqReceiveMoney = receiveMoney.TotalAmount;
+
+            if (request.TotalAmount > receiveMoney.TotalAmount)
+            {
+                var sum = reqTotalAmount - reqReceiveMoney;
+                var sumcal = sum + balanceTrans;
+                balanceAccountTrans.Balance = sumcal;
+                balanceAccountDepo.Balance = sumcal;
+            }
+            if (request.TotalAmount < receiveMoney.TotalAmount && request.TotalAmount != 0)
+            {
+                var sum = reqTotalAmount + reqReceiveMoney;
+                var sumcal = sum - balanceTrans;
+                balanceAccountTrans.Balance = sumcal;
+                balanceAccountDepo.Balance = sumcal;
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            if (request.TotalAmount > receiveMoney.TotalAmount )
+            {
+                var backBalanceTrans = request.TotalAmount - receiveMoney.TotalAmount;
+                balanceAccountTrans.Balance = balanceTrans + backBalanceTrans;
+                balanceAccountDepo.Balance = balanceDepo + backBalanceTrans;
+                receiveMoney.DepositToAccountId = request.DepositToAccountId;
+                receiveMoney.PayerId = request.PayerId;
+                receiveMoney.TransactionDate = request.TransactionDate;
+                receiveMoney.TransactionNo = request.TransactionNo;
+                receiveMoney.Memo = request.Memo;
+                receiveMoney.TotalAmount = request.TotalAmount;
+            }
+            if (request.TotalAmount < receiveMoney.TotalAmount && request.TotalAmount != 0)
+            {
+                var backBalanceTrans = receiveMoney.TotalAmount - request.TotalAmount;
+                balanceAccountTrans.Balance = balanceTrans - backBalanceTrans;
+                balanceAccountDepo.Balance = balanceDepo - backBalanceTrans;
+                receiveMoney.DepositToAccountId = request.DepositToAccountId;
+                receiveMoney.PayerId = request.PayerId;
+                receiveMoney.TransactionDate = request.TransactionDate;
+                receiveMoney.TransactionNo = request.TransactionNo;
+                receiveMoney.Memo = request.Memo;
+                receiveMoney.TotalAmount = request.TotalAmount;
+            }
+            //if (request.TotalAmount == 0)
+            //{
+            //    var valSum = balanceTrans + balanceDepo;
+            //    balanceAccountTrans.Balance = valSum;
+            //    balanceAccountDepo.Balance = balanceDepo - balanceDepo;
+            //    receiveMoney.DepositToAccountId = request.DepositToAccountId;
+            //    receiveMoney.PayerId = request.PayerId;
+            //    receiveMoney.TransactionDate = request.TransactionDate;
+            //    receiveMoney.TransactionNo = request.TransactionNo;
+            //    receiveMoney.Memo = request.Memo;
+            //    receiveMoney.TotalAmount = request.TotalAmount;
+            //}
+            if (request.TotalAmount == balanceDepo)
+            {
+                balanceAccountTrans.Balance = balanceTrans;
+                balanceAccountDepo.Balance = balanceDepo;
+                receiveMoney.DepositToAccountId = request.DepositToAccountId;
+                receiveMoney.PayerId = request.PayerId;
+                receiveMoney.TransactionDate = request.TransactionDate;
+                receiveMoney.TransactionNo = request.TransactionNo;
+                receiveMoney.Memo = request.Memo;
+                receiveMoney.TotalAmount = request.TotalAmount;
+            }
+            if (request.TotalAmount == 0 || balanceAccountDepo.Balance == 0)
+            {
+                result.IsOk = false;
+                result.ErrorMessage = "Transaction account lines must not be blank / is invalid, Failed!";
+                return result;
+            }
 
             receiveMoneyId = request.Id;
             List<int> idUpdateReceiveMoneyTag = new List<int>();
