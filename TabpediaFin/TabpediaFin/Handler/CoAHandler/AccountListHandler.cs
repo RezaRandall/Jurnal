@@ -55,35 +55,6 @@
                         if(item.AccountParentId != 0)
                         {
                             int myIndex = result.FindIndex(p => p.Id == item.AccountParentId);
-                            //resultchild.Add(new AccountList
-                            //{
-                            //    Name = item.Name,
-                            //    AccountNumber = item.AccountNumber,
-                            //    CategoryId = item.CategoryId,
-                            //    CategoryAccount = item.CategoryAccount,
-                            //    AccountParentId = item.AccountParentId,
-                            //    TaxId = item.TaxId,
-                            //    TaxName = item.TaxName,
-                            //    Description = item.Description,
-                            //    Balance = item.Balance,
-                            //    IsLocked = item.IsLocked,
-                            //    BankId = item.BankId,
-                            //});
-                            //resultfix[myIndex].ChildAccountList = resultchild;
-                            //resultchild.Add(new AccountList
-                            //{
-                            //    Name = item.Name,
-                            //    AccountNumber = item.AccountNumber,
-                            //    CategoryId = item.CategoryId,
-                            //    CategoryAccount = item.CategoryAccount,
-                            //    AccountParentId = item.AccountParentId,
-                            //    TaxId = item.TaxId,
-                            //    TaxName = item.TaxName,
-                            //    Description = item.Description,
-                            //    Balance = item.Balance,
-                            //    IsLocked = item.IsLocked,
-                            //    BankId = item.BankId,
-                            //});
                             resultfix[myIndex].ChildAccountList.Add(new AccountList
                             {
                                 Name = item.Name,
@@ -97,11 +68,13 @@
                                 Balance = item.Balance,
                                 IsLocked = item.IsLocked,
                                 BankId = item.BankId,
+                                Id = item.Id,
                             });
                         }
                         else
                         {
                             resultfix.Add(new AccountListDto {
+                                Id = item.Id,
                                 Name = item.Name,
                                 AccountNumber = item.AccountNumber,
                                 CategoryId = item.CategoryId,
