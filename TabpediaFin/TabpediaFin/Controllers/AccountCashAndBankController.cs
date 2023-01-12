@@ -16,7 +16,7 @@ public class AccountCashAndBankController : ApiControllerBase
 
     [HttpPost("list")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<AccountCashAndBankListDto> request)
+    public async Task<IActionResult> GetList([FromBody] Handler.CashAndBank.QueryPagedListAccountDto<AccountListsDto> request)
     {
         return Result(await _mediator.Send(request));
     }
@@ -25,19 +25,19 @@ public class AccountCashAndBankController : ApiControllerBase
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Get(int id)
     {
-        return Result(await _mediator.Send(new FetchByIdRequestDto<AccountCashAndBankFetchDto>(id)));
+        return Result(await _mediator.Send(new FetchByIdRequestDto<AccountFetchDto>(id)));
     }
 
     [HttpPost]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> Insert([FromBody] AccountCashAndBankInsertDto command)
+    public async Task<IActionResult> Insert([FromBody] AccountInsertDto command)
     {
         return Result(await _mediator.Send(command));
     }
 
     [HttpPut]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> Update([FromBody] AccountCashAndBankUpdateDto command)
+    public async Task<IActionResult> Update([FromBody] AccountUpdateDto command)
     {
         return Result(await _mediator.Send(command));
     }
@@ -46,7 +46,7 @@ public class AccountCashAndBankController : ApiControllerBase
     [HttpDelete("{id}")]
     public async Task Delete(int id)
     {
-        await _mediator.Send(new DeleteByIdRequestDto<AccountCashAndBankFetchDto>(id));
+        await _mediator.Send(new DeleteByIdRequestDto<AccountFetchDto>(id));
     }
 
 }

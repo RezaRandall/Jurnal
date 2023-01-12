@@ -31,11 +31,17 @@ public class TransferMoneyUpdateHandler : IRequestHandler<TransferMoneyUpdateDto
             var transferMoney = await _context.TransferMoney.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
 
 
-            var balanceAccountCashAndBankTrans = await _context.AccountCashAndBank.FirstAsync(x => x.Id == transferMoney.TransferFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-            var balanceAccountCashAndBankDepo = await _context.AccountCashAndBank.FirstAsync(x => x.Id == transferMoney.DepositToAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var balanceAccountCashAndBankTrans = await _context.Account.FirstAsync(x => x.Id == transferMoney.TransferFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var balanceAccountCashAndBankDepo = await _context.Account.FirstAsync(x => x.Id == transferMoney.DepositToAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
 
             var balanceTrans = balanceAccountCashAndBankTrans.Balance;
             var balanceDepo = balanceAccountCashAndBankDepo.Balance;
+
+            var getbackBalance = balanceTrans + balanceDepo;
+            balanceAccountCashAndBankTrans.Balance = getbackBalance;
+
+
+            await _context.SaveChangesAsync(cancellationToken);
 
             if (request.Amount > transferMoney.Amount && request.Amount < balanceTrans)
             {
@@ -49,7 +55,7 @@ public class TransferMoneyUpdateHandler : IRequestHandler<TransferMoneyUpdateDto
                 transferMoney.TransactionNumber = request.TransactionNumber;
                 transferMoney.TransactionDate = request.TransactionDate;
             }
-            if (request.Amount < transferMoney.Amount)
+            if (request.Amount < transferMoney.Amount && request.Amount != 0)
             {
                 var backBalanceTrans = transferMoney.Amount - request.Amount;
                 balanceAccountCashAndBankTrans.Balance = balanceTrans + backBalanceTrans;
@@ -73,7 +79,7 @@ public class TransferMoneyUpdateHandler : IRequestHandler<TransferMoneyUpdateDto
                 transferMoney.TransactionNumber = request.TransactionNumber;
                 transferMoney.TransactionDate = request.TransactionDate;
             }
-            if (request.Amount == transferMoney.Amount)
+            if (request.Amount == balanceDepo)
             {
                 balanceAccountCashAndBankTrans.Balance = balanceTrans;
                 balanceAccountCashAndBankDepo.Balance = balanceDepo;

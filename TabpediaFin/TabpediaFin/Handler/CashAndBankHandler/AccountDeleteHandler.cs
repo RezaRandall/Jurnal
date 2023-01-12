@@ -1,35 +1,35 @@
 ﻿using TabpediaFin.Handler.CashAndBank;
 
-public class AccountCashAndBankDeleteHandler : IDeleteByIdHandler<AccountCashAndBankFetchDto>
+public class AccountDeleteHandler : IDeleteByIdHandler<AccountFetchDto>
 {
     private readonly FinContext _context;
     private readonly IPaymentMethodCacheRemover _cacheRemover;
 
-    public AccountCashAndBankDeleteHandler(FinContext db, ICurrentUser currentUser, IPaymentMethodCacheRemover cacheRemover)
+    public AccountDeleteHandler(FinContext db, ICurrentUser currentUser, IPaymentMethodCacheRemover cacheRemover)
     {
         _context = db;
         _cacheRemover = cacheRemover;
     }
 
-    public async Task<RowResponse<AccountCashAndBankFetchDto>> Handle(DeleteByIdRequestDto<AccountCashAndBankFetchDto> request, CancellationToken cancellationToken)
+    public async Task<RowResponse<AccountFetchDto>> Handle(DeleteByIdRequestDto<AccountFetchDto> request, CancellationToken cancellationToken)
     {
-        var result = new RowResponse<AccountCashAndBankFetchDto>();
+        var result = new RowResponse<AccountFetchDto>();
         try
         {
-            var accountCashAndBank = await _context.AccountCashAndBank.FirstAsync(x => x.Id == request.Id, cancellationToken);
+            var accountCashAndBank = await _context.Account.FirstAsync(x => x.Id == request.Id, cancellationToken);
             if (accountCashAndBank == null || accountCashAndBank.Id == 0)
             {
                 throw new HttpException(HttpStatusCode.NotFound, "Data not found");
             }
 
-            _context.AccountCashAndBank.Remove(accountCashAndBank);
+            _context.Account.Remove(accountCashAndBank);
 
             await _context.SaveChangesAsync(cancellationToken);
             _cacheRemover.RemoveCache();
 
             result.IsOk = true;
             result.ErrorMessage = String.Empty;
-            result.Row = new AccountCashAndBankFetchDto();
+            result.Row = new AccountFetchDto();
         }
         catch (Exception ex)
         {

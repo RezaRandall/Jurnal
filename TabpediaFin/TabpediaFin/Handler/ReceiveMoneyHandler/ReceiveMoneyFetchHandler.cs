@@ -64,9 +64,8 @@ public class ReceiveMoneyFetchHandler : IFetchByIdHandler<ReceiveMoneyFetchDto>
 
                     // LIST
                     var sqlReceiveMoneyList = @"SELECT rml.""Id""
-                                        , rml.""ReceiveMoneyId""
                                         , rml.""PriceIncludesTax""
-                                        , rml.""ReceiveFromAccountId""
+                                        , rml.""AccountId""
                                         , rml.""Description""
                                         , rml.""TaxId""
                                         , rml.""Amount""
@@ -128,9 +127,8 @@ public class ReceiveMoneyFetchTag : BaseDto
 
 public class ReceiveMoneyFetchList : BaseDto
 {
-    public int ReceiveMoneyId { get; set; } = 0;
     public bool PriceIncludesTax { get; set; } = false;
-    public int ReceiveFromAccountId { get; set; } = 0;
+    public int AccountId { get; set; } = 0;
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
     public Int64 Amount { get; set; } = 0;

@@ -27,6 +27,11 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
             TransactionNo = request.TransactionNo,
             Memo = request.Memo,
             TotalAmount = request.TotalAmount,
+            
+        };
+        var receiveMoneyList = new ReceiveMoneyList()
+        {
+            AccountId = request.ListOfReceiveMoney[0].AccountId
         };
 
         try
@@ -37,16 +42,21 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
 
             var account = await _context.Account.FirstAsync(x => x.Id == request.DepositToAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
             var accountBalance = account.Balance;
-
             var sumTotalBalanceAccount = receiveAmount + accountBalance;
-            await _context.SaveChangesAsync(cancellationToken);
+            account.Balance = sumTotalBalanceAccount;
+
+            var receiveFromAccountId = await _context.Account.FirstAsync(x => x.Id == request.ListOfReceiveMoney[0].AccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var receiveBalance = receiveFromAccountId.Balance;
+            receiveFromAccountId.Balance = receiveBalance + sumTotalBalanceAccount;
+
+           await _context.SaveChangesAsync(cancellationToken);
 
 
 
             transIdResult = receiveMoney.Id;
 
-            var accountCahAndBank = await _context.AccountCashAndBank.FirstAsync(x => x.Id == request.DepositToAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-            var balanceAccount = accountCahAndBank.Balance;
+            //var accountCahAndBank = await _context.Account.FirstAsync(x => x.Id == request.DepositToAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+            //var balanceAccount = accountCahAndBank.Balance;
 
             List<ReceiveMoneyFetchAttachment> returnfile = await PostAttachmentAsync(request.AttachmentFile, transIdResult, cancellationToken);
             List<ReceiveMoneyFetchTag> TagListResult = await PostTagAsync(request.TagList, transIdResult, cancellationToken);
@@ -149,9 +159,8 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
             {
                 ReceiveMoneyList.Add(new ReceiveMoneyList
                 {
-                    ReceiveMoneyId = item.ReceiveMoneyId,
                     PriceIncludesTax = item.PriceIncludesTax,
-                    ReceiveFromAccountId = item.ReceiveFromAccountId,
+                    AccountId = item.AccountId,
                     Description = item.Description,
                     TaxId = item.TaxId,
                     Amount = item.Amount,
@@ -159,9 +168,8 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
                 });
                 ReceiveMoneyFetchList.Add(new ReceiveMoneyFetchList
                 {
-                    ReceiveMoneyId = item.ReceiveMoneyId,
                     PriceIncludesTax = item.PriceIncludesTax,
-                    ReceiveFromAccountId = item.ReceiveFromAccountId,
+                    AccountId = item.AccountId,
                     Description = item.Description,
                     TaxId = item.TaxId,
                     Amount = item.Amount,
@@ -174,6 +182,7 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
         }
 
         return ReceiveMoneyFetchList;
+        
     }
 
 
@@ -207,9 +216,8 @@ public class ReceiveMoneyInsertTag
 
 public class ReceiveMoneyInsertList
 {
-    public int ReceiveMoneyId { get; set; } = 0;
     public bool PriceIncludesTax { get; set; } = false;
-    public int ReceiveFromAccountId { get; set; } = 0;
+    public int AccountId { get; set; } = 0;
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
     public Int64 Amount { get; set; } = 0;
