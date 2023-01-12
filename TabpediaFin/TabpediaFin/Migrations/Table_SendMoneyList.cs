@@ -2,7 +2,7 @@
 
 namespace TabpediaFin.Migrations;
 
-    [Migration(202301021633)]
+    [Migration(202301121025)]
 public class Table_SendMoneyList : Migration
 {
     public override void Down()
@@ -16,7 +16,7 @@ public class Table_SendMoneyList : Migration
         .WithColumn("Id").AsInt32().NotNullable().Identity().PrimaryKey()
         .WithColumn("TenantId").AsInt32().NotNullable()
         .WithColumn("PriceIncludesTax").AsBoolean().NotNullable().WithDefaultValue(false)
-        .WithColumn("PaymentForAccountCashAndBanktId").AsInt32().NotNullable()
+        .WithColumn("AccountId").AsInt32().NotNullable()
         .WithColumn("Description").AsString(250).Nullable()
         .WithColumn("TaxId").AsInt32().Nullable()
         .WithColumn("Amount").AsDecimal(18, 2).NotNullable().WithDefaultValue(0)

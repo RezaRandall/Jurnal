@@ -1,4 +1,5 @@
-﻿using TabpediaFin.Domain;
+﻿using NPOI.SS.Formula.Functions;
+using TabpediaFin.Domain;
 using TabpediaFin.Domain.ReceiveMoney;
 using TabpediaFin.Domain.SendMoney;
 
@@ -19,6 +20,7 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
     {
         var result = new RowResponse<SendMoneyFetchDto>();
         int transIdResult;
+        Int64 RequestAmountTotal;        
         DateTime TransDate = TimeZoneInfo.ConvertTimeToUtc(request.TransactionDate);
 
         var sendMoney = new SendMoney()
@@ -29,6 +31,7 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
             TransactionNo = request.TransactionNo,
             Memo = request.Memo,
             TotalAmount = request.TotalAmount,
+            WitholdingAmount = request.WitholdingAmount,
             DiscountAmount = request.DiscountAmount,
             DiscountPercent = request.DiscountPercent,
             DiscountForAccountId = request.DiscountForAccountId,
@@ -37,6 +40,33 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
         try
         {
             await _context.SendMoney.AddAsync(sendMoney, cancellationToken);
+            RequestAmountTotal = sendMoney.TotalAmount;
+
+            // BALANCE REDUCTION FROM PAYEER ACCOUNT
+            var saldoPayeer = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var senderBalance = saldoPayeer.Balance;
+            var sumReductionAmt = senderBalance - RequestAmountTotal;
+            saldoPayeer.Balance = sumReductionAmt;
+
+            // WHEN INCLUDE WITHOLDING
+            if (request.DiscountAmount != 0 || request.DiscountPercent != 0 && request.DiscountForAccountId != 0)
+            {
+                var discountInput = await _context.Account.FirstAsync(x => x.Id == request.DiscountForAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                var balanceAmount = discountInput.Balance;
+                var witholding = request.WitholdingAmount;
+                var countWitholding = balanceAmount + witholding;
+                discountInput.Balance = countWitholding;
+            }
+
+            // BALANCE REDUCTION FROM RECIPIENT ACCOUNT
+            foreach (SendMoneyInsertList i in request.SendMoneyList)
+            {
+                var paymentForAccountId = await _context.Account.FirstAsync(x => x.Id == i.AccountId && x.TenantId == _currentUser.TenantId, cancellationToken) ;
+                var balanceAccountReceiver = paymentForAccountId.Balance;
+                var sumBalance = balanceAccountReceiver - i.Amount;
+                paymentForAccountId.Balance = sumBalance;
+            }
+
             await _context.SaveChangesAsync(cancellationToken);
             transIdResult = sendMoney.Id;
 
@@ -52,6 +82,7 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
                 TransactionNo = sendMoney.TransactionNo,
                 Memo = sendMoney.Memo,
                 TotalAmount = sendMoney.TotalAmount,
+                WitholdingAmount = sendMoney.WitholdingAmount,
                 DiscountAmount = sendMoney.DiscountAmount,
                 DiscountPercent = sendMoney.DiscountPercent,
                 DiscountForAccountId = request.DiscountForAccountId,
@@ -141,7 +172,7 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
                 SendMoneyList.Add(new SendMoneyList
                 {
                     PriceIncludesTax = item.PriceIncludesTax,
-                    PaymentForAccountCashAndBanktId = item.PaymentForAccountCashAndBanktId,
+                    AccountId = item.AccountId,
                     Description = item.Description,
                     TaxId = item.TaxId,
                     Amount = item.Amount,
@@ -150,7 +181,7 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
                 SendMoneyFetchList.Add(new SendMoneyFetchList
                 {
                     PriceIncludesTax = item.PriceIncludesTax,
-                    PaymentForAccountCashAndBanktId = item.PaymentForAccountCashAndBanktId,
+                    AccountId = item.AccountId,
                     Description = item.Description,
                     TaxId = item.TaxId,
                     Amount = item.Amount,
@@ -176,6 +207,7 @@ public class SendMoneyInsertDto : IRequest<RowResponse<SendMoneyFetchDto>>
     public string TransactionNo { get; set; } = string.Empty;
     public string Memo { get; set; } = string.Empty;
     public Int64 TotalAmount { get; set; } = 0;
+    public Int64 WitholdingAmount { get; set; } = 0;
     public Int64 DiscountAmount { get; set; } = 0;
     public int DiscountPercent { get; set; } = 0;
     public int DiscountForAccountId { get; set; } = 0;
@@ -200,7 +232,7 @@ public class SendMoneyInsertTag
 public class SendMoneyInsertList
 {
     public bool PriceIncludesTax { get; set; } = false;
-    public int PaymentForAccountCashAndBanktId { get; set; } = 0;
+    public int AccountId { get; set; } = 0;
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
     public Int64 Amount { get; set; } = 0;

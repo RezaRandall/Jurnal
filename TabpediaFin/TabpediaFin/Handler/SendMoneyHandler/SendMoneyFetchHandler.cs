@@ -65,7 +65,7 @@ public class SendMoneyFetchHandler : IFetchByIdHandler<SendMoneyFetchDto>
                     //  LIST AMOUNT
                     var sqlSendMoneyList = @"SELECT sml.""Id""
                                         , sml.""PriceIncludesTax""
-                                        , sml.""PaymentForAccountCashAndBanktId""
+                                        , sml.""AccountId""
                                         , sml.""Description""
                                         , sml.""TaxId""
                                         , sml.""Amount"" 
@@ -102,6 +102,7 @@ public class SendMoneyFetchDto : BaseDto
     public string TransactionNo { get; set; } = string.Empty;
     public string Memo { get; set; } = string.Empty;
     public Int64 TotalAmount { get; set; } = 0;
+    public Int64 WitholdingAmount { get; set; } = 0;
     public Int64 DiscountAmount { get; set; } = 0;
     public int DiscountPercent { get; set; } = 0;
     public int DiscountForAccountId { get; set; } = 0;
@@ -128,7 +129,7 @@ public class SendMoneyFetchTag : BaseDto
 public class SendMoneyFetchList : BaseDto
 {
     public bool PriceIncludesTax { get; set; } = false;
-    public int PaymentForAccountCashAndBanktId { get; set; } = 0;
+    public int AccountId { get; set; } = 0;
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
     public Int64 Amount { get; set; } = 0;
