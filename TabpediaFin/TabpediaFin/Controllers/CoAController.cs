@@ -25,7 +25,14 @@ namespace TabpediaFin.Controllers
 
         [HttpPost("getchildaccountlist")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetListChild([FromBody] QueryPagedChildListAccountDto<AccountListDto> request)
+        public async Task<IActionResult> GetListChild([FromBody] QueryPagedChildListAccountDto<AccountChildListDto> request)
+        {
+            return Result(await _mediator.Send(request));
+        }
+
+        [HttpPost("getaccountpurchasesales")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetAccountPurchaseSales([FromBody] AccountPurchaseSalesList request)
         {
             return Result(await _mediator.Send(request));
         }

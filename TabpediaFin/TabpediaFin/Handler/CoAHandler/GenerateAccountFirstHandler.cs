@@ -31,6 +31,7 @@
                     {
                         result.IsOk = false;
                         result.ErrorMessage = "Account has already been generated";
+                        return result;
                     }
                 }
                 List<Account> listofAccount = new List<Account>();
