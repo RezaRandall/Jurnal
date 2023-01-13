@@ -37,22 +37,23 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
         try
         {
             await _context.ReceiveMoney.AddAsync(receiveMoney, cancellationToken);
-
             receiveAmount = receiveMoney.TotalAmount;
 
+            // CALCULATE SUM RECEIVER ACCOUNT SELECTED
             var account = await _context.Account.FirstAsync(x => x.Id == request.DepositToAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
             var accountBalance = account.Balance;
             var sumTotalBalanceAccount = receiveAmount + accountBalance;
             account.Balance = sumTotalBalanceAccount;
 
-            var receiveFromAccountId = await _context.Account.FirstAsync(x => x.Id == request.ListOfReceiveMoney[0].AccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-            var receiveBalance = receiveFromAccountId.Balance;
-            receiveFromAccountId.Balance = receiveBalance + sumTotalBalanceAccount;
+            // CALCULATE RECEIVE MONEY LIST IN EVERY ACCOUNT SELECTED
+            foreach (ReceiveMoneyInsertList i in request.ListOfReceiveMoney)
+            {
+                var receiveFromAccountId = await _context.Account.FirstAsync(x => x.Id == i.AccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                var receiveBalance = receiveFromAccountId.Balance;
+                receiveFromAccountId.Balance = receiveBalance + sumTotalBalanceAccount;
+            }
 
-           await _context.SaveChangesAsync(cancellationToken);
-
-
-
+            await _context.SaveChangesAsync(cancellationToken);
             transIdResult = receiveMoney.Id;
 
             List<ReceiveMoneyFetchAttachment> returnfile = await PostAttachmentAsync(request.AttachmentFile, transIdResult, cancellationToken);
