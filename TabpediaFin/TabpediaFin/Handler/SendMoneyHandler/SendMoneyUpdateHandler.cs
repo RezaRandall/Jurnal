@@ -36,6 +36,7 @@ public class SendMoneyUpdateHandler : IRequestHandler<SendMoneyUpdateDto, RowRes
             sendMoney.TransactionNo = request.TransactionNo;
             sendMoney.Memo = request.Memo;
             sendMoney.TotalAmount = request.TotalAmount;
+            sendMoney.WitholdingAmount = request.WitholdingAmount;
             sendMoney.DiscountAmount = request.DiscountAmount;
             sendMoney.DiscountPercent = request.DiscountPercent;
             sendMoney.DiscountForAccountId = request.DiscountForAccountId;
@@ -104,7 +105,7 @@ public class SendMoneyUpdateHandler : IRequestHandler<SendMoneyUpdateDto, RowRes
                     {
                         Id = i.Id,
                         PriceIncludesTax = i.PriceIncludesTax,
-                        PaymentForAccountCashAndBanktId = i.PaymentForAccountCashAndBanktId,
+                        AccountId = i.AccountId,
                         Description = i.Description,
                         TaxId = i.TaxId,
                         Amount = i.Amount,
@@ -115,7 +116,7 @@ public class SendMoneyUpdateHandler : IRequestHandler<SendMoneyUpdateDto, RowRes
                     {
                         Id = i.Id,
                         PriceIncludesTax = i.PriceIncludesTax,
-                        PaymentForAccountCashAndBanktId = i.PaymentForAccountCashAndBanktId,
+                        AccountId = i.AccountId,
                         Description = i.Description,
                         TaxId = i.TaxId,
                         Amount = i.Amount,
@@ -142,6 +143,7 @@ public class SendMoneyUpdateHandler : IRequestHandler<SendMoneyUpdateDto, RowRes
                 TransactionNo = request.TransactionNo,
                 Memo = request.Memo,
                 TotalAmount = request.TotalAmount,
+                WitholdingAmount = request.WitholdingAmount,
                 DiscountAmount = request.DiscountAmount,
                 DiscountPercent = request.DiscountPercent,
                 DiscountForAccountId = request.DiscountForAccountId,
@@ -175,6 +177,7 @@ public class SendMoneyUpdateDto : IRequest<RowResponse<SendMoneyFetchDto>>
     public string TransactionNo { get; set; } = string.Empty;
     public string Memo { get; set; } = string.Empty;
     public Int64 TotalAmount { get; set; } = 0;
+    public Int64 WitholdingAmount { get; set; } = 0;
     public Int64 DiscountAmount { get; set; } = 0;
     public int DiscountPercent { get; set; } = 0;
     public int DiscountForAccountId { get; set; } = 0;
@@ -202,7 +205,7 @@ public class SendMoneyUpdateList
 {
     public int Id { get; set; }
     public bool PriceIncludesTax { get; set; } = false;
-    public int PaymentForAccountCashAndBanktId { get; set; } = 0;
+    public int AccountId { get; set; } = 0;
     public string Description { get; set; } = string.Empty;
     public int TaxId { get; set; } = 0;
     public Int64 Amount { get; set; } = 0;

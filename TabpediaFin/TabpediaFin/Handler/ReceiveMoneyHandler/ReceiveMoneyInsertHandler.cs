@@ -55,9 +55,6 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
 
             transIdResult = receiveMoney.Id;
 
-            //var accountCahAndBank = await _context.Account.FirstAsync(x => x.Id == request.DepositToAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-            //var balanceAccount = accountCahAndBank.Balance;
-
             List<ReceiveMoneyFetchAttachment> returnfile = await PostAttachmentAsync(request.AttachmentFile, transIdResult, cancellationToken);
             List<ReceiveMoneyFetchTag> TagListResult = await PostTagAsync(request.TagList, transIdResult, cancellationToken);
             List<ReceiveMoneyFetchList> ReceiveMoneyListResult = await PostReceiveMoneyListAsync(request.ListOfReceiveMoney, transIdResult, cancellationToken);
