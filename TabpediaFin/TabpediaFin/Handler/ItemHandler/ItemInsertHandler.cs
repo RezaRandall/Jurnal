@@ -36,7 +36,10 @@ public class ItemInsertHandler : IRequestHandler<ItemInsertDto, RowResponse<Item
             StockMin = req.StockMin,
             IsArchived = req.IsArchived,
             ImageFileName = req.ImageFileName,
-            Notes = req.Notes
+            Notes = req.Notes,
+            PurchaseAccount = req.PurchaseAccount,
+            SalesAccount = req.SalesAccount,
+
         };
         List<ItemItemCategory> itemItemCategory = new List<ItemItemCategory>();
         List<ItemUnitMeasure> itemUnitMeasure = new List<ItemUnitMeasure>();
@@ -190,6 +193,8 @@ public class ItemInsertDto : IRequest<RowResponse<ItemDto>>
     public bool IsArchived { get; set; } = true;
     public string ImageFileName { get; set; } = string.Empty;
     public string Notes { get; set; } = string.Empty;
+    public int PurchaseAccount { get; set; } = 0;
+    public int SalesAccount { get; set; } = 0;
     public List<ItemItemCategoryInsertDto> ItemItemCategoryList { get; set; }
     public List<ItemUnitMeasureInsertDto> ItemUnitMeasureList { get; set; }
     public List<ItemAttahmentFiles> ItemAttachmentFile { get; set; }

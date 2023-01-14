@@ -46,6 +46,9 @@ public class ItemUpdateHandler : IRequestHandler<ItemUpdateDto, RowResponse<Item
             item.IsArchived = request.IsArchived;
             item.ImageFileName = request.ImageFileName;
             item.Notes = request.Notes;
+            item.PurchaseAccount = request.PurchaseAccount;
+            item.SalesAccount = request.SalesAccount;
+
 
             itemIdResult = request.Id;
             List<int> idUpdateItemItemCategory = new List<int>();
@@ -196,6 +199,8 @@ public class ItemUpdateDto : IRequest<RowResponse<ItemDto>>
     public bool IsArchived { get; set; } = true;
     public string ImageFileName { get; set; } = string.Empty;
     public string Notes { get; set; } = string.Empty;
+    public int PurchaseAccount { get; set; } = 0;
+    public int SalesAccount { get; set; } = 0;
     public List<ItemItemCategoryUpdate> ItemItemCategoryList { get; set; }
     public List<ItemUnitMeasureUpdate> ItemUnitMeasureList { get; set; }
     public List<ItemAttahmentUpdate> AttachmentFile { get; set; }

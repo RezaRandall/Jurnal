@@ -17,5 +17,7 @@
         public bool IsArchived { get; set; } = true;
         public string ImageFileName { get; set; } = string.Empty;
         public string Notes { get; set; } = string.Empty;
+        public int PurchaseAccount { get; set; } = 0;
+        public int SalesAccount { get; set; } = 0;
     }
 }

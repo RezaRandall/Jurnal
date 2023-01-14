@@ -30,6 +30,8 @@ public class Table_Item : Migration
             .WithColumn("IsArchived").AsBoolean().NotNullable().WithDefaultValue(false)
             .WithColumn("ImageFileName").AsString(250).Nullable()
             .WithColumn("Notes").AsString(250).Nullable()
+            .WithColumn("PurchaseAccount").AsInt32().NotNullable().WithDefaultValue(0)
+            .WithColumn("SalesAccount").AsInt32().NotNullable().WithDefaultValue(0)
             .WithColumn("CreatedUid").AsInt32().NotNullable()
             .WithColumn("CreatedUtc").AsDateTime().NotNullable()
             .WithColumn("UpdatedUid").AsInt32().Nullable()

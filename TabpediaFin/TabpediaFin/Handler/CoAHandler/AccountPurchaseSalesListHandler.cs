@@ -46,6 +46,7 @@
 
     public class AccountPurchaseSalesList : IRequest<PagedListResponse<AccountPurchaseSalesListDto>>
     {
+        public string type { get; set; } = string.Empty;
     }
 
     [Table("Account")]
