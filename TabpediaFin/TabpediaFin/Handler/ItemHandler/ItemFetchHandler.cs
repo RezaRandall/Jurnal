@@ -113,6 +113,10 @@ public class ItemDto : BaseDto
     public bool IsArchived { get; set; } = true;
     public string ImageFileName { get; set; } = string.Empty;
     public string Notes { get; set; } = string.Empty;
+    public int PurchaseAccount { get; set; } = 0;
+    public int PurchaseTax { get; set; } = 0;
+    public int SalesAccount { get; set; } = 0;
+    public int SalesTax { get; set; } = 0;
     public List<ItemItemCategoryFetchDto> ItemItemCategoryList { get; set; }
     public List<ItemUnitMeasureFetchDto> ItemUnitMeasureList { get; set; }
     public List<ItemFetchAttachment> ItemAttachmentList { get; set; }

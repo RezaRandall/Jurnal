@@ -36,7 +36,13 @@ public class ItemInsertHandler : IRequestHandler<ItemInsertDto, RowResponse<Item
             StockMin = req.StockMin,
             IsArchived = req.IsArchived,
             ImageFileName = req.ImageFileName,
-            Notes = req.Notes
+            Notes = req.Notes,
+            PurchaseAccount = req.PurchaseAccount,
+            SalesAccount = req.SalesAccount,
+            PurchaseTax = req.PurchaseTax,
+            SalesTax = req.SalesTax,
+
+
         };
         List<ItemItemCategory> itemItemCategory = new List<ItemItemCategory>();
         List<ItemUnitMeasure> itemUnitMeasure = new List<ItemUnitMeasure>();
@@ -120,8 +126,13 @@ public class ItemInsertHandler : IRequestHandler<ItemInsertDto, RowResponse<Item
                 IsArchived = item.IsArchived,
                 ImageFileName = item.ImageFileName,
                 Notes = item.Notes,
+                PurchaseAccount = item.PurchaseAccount,
+                SalesAccount = item.SalesAccount,
+                PurchaseTax = item.PurchaseTax,
+                SalesTax = item.SalesTax,
                 ItemItemCategoryList = itemItemCategoryFetchDto,
                 ItemUnitMeasureList = itemUnitMeasureFetchDto,
+
             };
             result.IsOk = true;
             result.ErrorMessage = string.Empty;
@@ -190,6 +201,10 @@ public class ItemInsertDto : IRequest<RowResponse<ItemDto>>
     public bool IsArchived { get; set; } = true;
     public string ImageFileName { get; set; } = string.Empty;
     public string Notes { get; set; } = string.Empty;
+    public int PurchaseAccount { get; set; } = 0;
+    public int PurchaseTax { get; set; } = 0;
+    public int SalesAccount { get; set; } = 0;
+    public int SalesTax { get; set; } = 0;
     public List<ItemItemCategoryInsertDto> ItemItemCategoryList { get; set; }
     public List<ItemUnitMeasureInsertDto> ItemUnitMeasureList { get; set; }
     public List<ItemAttahmentFiles> ItemAttachmentFile { get; set; }

@@ -30,11 +30,14 @@ namespace TabpediaFin.Controllers
             return Result(await _mediator.Send(request));
         }
 
-        [HttpPost("getaccountpurchasesales")]
+
+        [HttpGet("getaccountpurchasesales/{accounttype}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetAccountPurchaseSales([FromBody] AccountPurchaseSalesList request)
+        public async Task<IActionResult> GetAccountPurchaseSales(string accounttype)
         {
-            return Result(await _mediator.Send(request));
+            AccountPurchaseSalesList command = new AccountPurchaseSalesList();
+            command.type = accounttype;
+            return Result(await _mediator.Send(command));
         }
 
         [HttpPost("generateaccountfirst")]
@@ -45,6 +48,10 @@ namespace TabpediaFin.Controllers
             return Result(await _mediator.Send(command));
         }
 
-        
+        public enum accounttype{
+            all = 0,
+            purchase = 1,
+            sales = 2
+        }
     }
 }

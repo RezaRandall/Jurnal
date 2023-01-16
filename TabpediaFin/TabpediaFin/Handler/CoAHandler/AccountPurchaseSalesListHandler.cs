@@ -46,21 +46,21 @@
 
     public class AccountPurchaseSalesList : IRequest<PagedListResponse<AccountPurchaseSalesListDto>>
     {
+        public string type { get; set; } = string.Empty;
     }
 
-    [Table("Account")]
-    public class AccountPurchaseSalesListDto : BaseDto
+    public class AccountPurchaseSalesListDto
+    { 
+        public List<AccountData> PurchaseAccountList { get; set; }
+        public List<AccountData> SalesAccountList { get; set; }
+    }
+    public class AccountData : BaseDto
     {
         public string Name { get; set; } = string.Empty;
         public string AccountNumber { get; set; } = string.Empty;
-        public int CategoryId { get; set; } = 0;
-        public string CategoryAccount { get; set; } = string.Empty;
-        public int AccountParentId { get; set; } = 0;
         public int TaxId { get; set; } = 0;
         public string TaxName { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public double Balance { get; set; } = 0;
-        public bool IsLocked { get; set; } = false;
-        public int BankId { get; set; } = 0;
     }
+
 }
