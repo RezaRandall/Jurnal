@@ -18,6 +18,8 @@
         public string ImageFileName { get; set; } = string.Empty;
         public string Notes { get; set; } = string.Empty;
         public int PurchaseAccount { get; set; } = 0;
+        public int PurchaseTax { get; set; } = 0;
         public int SalesAccount { get; set; } = 0;
+        public int SalesTax { get; set; } = 0;
     }
 }
