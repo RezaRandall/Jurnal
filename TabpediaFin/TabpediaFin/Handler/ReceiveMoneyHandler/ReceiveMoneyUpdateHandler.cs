@@ -37,88 +37,142 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
             var penerima = await _context.Account.FirstAsync(x => x.Id == request.DepositToAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
             var saldoPenerima = penerima.Balance;
 
-            var reqTotalAmount = request.TotalAmount;
+            var totalDiterima = request.TotalAmount;
             var reqReceiveMoney = dataPenerimaUang.TotalAmount;
+            double hasilHitunga = 0;
+            double hasilHitungb = 0;
+
 
             foreach (ReceiveMoneyUpdateList i in request.ReceiveMoneyListUpdate)
             {
+                var amtRequest = i.Amount;
+
                 var pengirim = await _context.Account.FirstAsync(x => x.Id == i.AccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
                 var balanceDepo = pengirim.Balance;
 
-                // perhitungan kalkulasi saldo pada akun penerima 
+
                 if (request.TotalAmount > dataPenerimaUang.TotalAmount)
                 {
-                    var sum = reqTotalAmount - reqReceiveMoney;
-                    var sumcal = sum + saldoPenerima;
-                    penerima.Balance = sumcal;
-                    pengirim.Balance = balanceDepo + sumcal;
+                    if (balanceDepo == 0)
+                    {
+                        var hasilBalanceAccount = reqReceiveMoney;
+
+                        hasilHitunga = hasilBalanceAccount - amtRequest;
+
+                        pengirim.Balance = hasilHitunga;
+
+                        var hasilPengurangan = saldoPenerima - i.Amount;
+
+                        penerima.Balance += hasilPengurangan;
+                    }
+                    else 
+                    {
+                        var hasilBalanceAccount = balanceDepo - reqReceiveMoney;
+
+                        hasilHitunga = hasilBalanceAccount + amtRequest;
+
+                        pengirim.Balance = hasilHitunga;
+
+                        var hasilPengurangan = i.Amount - saldoPenerima;
+
+                        penerima.Balance += hasilPengurangan;
+                    }
+
                 }
+
+                var receiveMoneyListData = await _context.ReceiveMoneyList.FirstAsync(x => x.Id == i.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
+                var balance = receiveMoneyListData.Amount;
+
                 if (request.TotalAmount < dataPenerimaUang.TotalAmount && request.TotalAmount != 0)
                 {
-                    var sum = reqTotalAmount + reqReceiveMoney;
-                    var sumcal = sum - saldoPenerima;
-                    penerima.Balance = sumcal;
-                    pengirim.Balance = balanceDepo - sumcal;
+                    if (balanceDepo == 0)
+                    {
+                        var hasilBalanceAccount = reqReceiveMoney;
+
+                        hasilHitunga = hasilBalanceAccount - amtRequest;
+
+                        pengirim.Balance = hasilHitunga;
+
+                        var hasilPengurangan = saldoPenerima - i.Amount;
+
+                        penerima.Balance += hasilPengurangan;
+                    }
+                    else 
+                    {
+                        var hasilBalanceAccount = balanceDepo - balance;
+
+                        hasilHitunga = hasilBalanceAccount + amtRequest;
+
+                        pengirim.Balance = hasilHitunga;
+
+                        var hasilPengurangan = saldoPenerima -i.Amount;
+
+                        penerima.Balance -= amtRequest;
+                    }
+
                 }
+
+                //if (request.TotalAmount > dataPenerimaUang.TotalAmount)
+                //{
+                //    var backBalanceTrans = request.TotalAmount - dataPenerimaUang.TotalAmount;
+                //    penerima.Balance = saldoPenerima + backBalanceTrans;
+                //    pengirim.Balance = balanceDepo + backBalanceTrans;
+                //    dataPenerimaUang.DepositToAccountId = request.DepositToAccountId;
+                //    dataPenerimaUang.PayerId = request.PayerId;
+                //    dataPenerimaUang.TransactionDate = request.TransactionDate;
+                //    dataPenerimaUang.TransactionNo = request.TransactionNo;
+                //    dataPenerimaUang.Memo = request.Memo;
+                //    dataPenerimaUang.TotalAmount = request.TotalAmount;
+                //}
+                //if (request.TotalAmount < dataPenerimaUang.TotalAmount && request.TotalAmount != 0)
+                //{
+                //    var backBalanceTrans = dataPenerimaUang.TotalAmount - request.TotalAmount;
+                //    penerima.Balance = saldoPenerima - backBalanceTrans;
+                //    pengirim.Balance = balanceDepo - backBalanceTrans;
+                //    dataPenerimaUang.DepositToAccountId = request.DepositToAccountId;
+                //    dataPenerimaUang.PayerId = request.PayerId;
+                //    dataPenerimaUang.TransactionDate = request.TransactionDate;
+                //    dataPenerimaUang.TransactionNo = request.TransactionNo;
+                //    dataPenerimaUang.Memo = request.Memo;
+                //    dataPenerimaUang.TotalAmount = request.TotalAmount;
+                //}
+                ////if (request.TotalAmount == 0)
+                ////{
+                ////    var valSum = saldoPenerima + balanceDepo;
+                ////    penerima.Balance = valSum;
+                ////    pengirim.Balance = balanceDepo - balanceDepo;
+                ////    dataPenerimaUang.DepositToAccountId = request.DepositToAccountId;
+                ////    dataPenerimaUang.PayerId = request.PayerId;
+                ////    dataPenerimaUang.TransactionDate = request.TransactionDate;
+                ////    dataPenerimaUang.TransactionNo = request.TransactionNo;
+                ////    dataPenerimaUang.Memo = request.Memo;
+                ////    dataPenerimaUang.TotalAmount = request.TotalAmount;
+                ////}
+                //if (request.TotalAmount == balanceDepo)
+                //{
+                //    penerima.Balance = saldoPenerima;
+                //    pengirim.Balance = balanceDepo;
+                //    dataPenerimaUang.DepositToAccountId = request.DepositToAccountId;
+                //    dataPenerimaUang.PayerId = request.PayerId;
+                //    dataPenerimaUang.TransactionDate = request.TransactionDate;
+                //    dataPenerimaUang.TransactionNo = request.TransactionNo;
+                //    dataPenerimaUang.Memo = request.Memo;
+                //    dataPenerimaUang.TotalAmount = request.TotalAmount;
+                //}
+                //if (request.TotalAmount == 0 || pengirim.Balance == 0)
+                //{
+                //    result.IsOk = false;
+                //    result.ErrorMessage = "Transaction account lines must not be blank / is invalid, Failed!";
+                //    return result;
+                //}
             }
 
 
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            //if (request.TotalAmount > dataPenerimaUang.TotalAmount )
-            //{
-            //    var backBalanceTrans = request.TotalAmount - dataPenerimaUang.TotalAmount;
-            //    penerima.Balance = saldoPenerima + backBalanceTrans;
-            //    pengirim.Balance = balanceDepo + backBalanceTrans;
-            //    dataPenerimaUang.DepositToAccountId = request.DepositToAccountId;
-            //    dataPenerimaUang.PayerId = request.PayerId;
-            //    dataPenerimaUang.TransactionDate = request.TransactionDate;
-            //    dataPenerimaUang.TransactionNo = request.TransactionNo;
-            //    dataPenerimaUang.Memo = request.Memo;
-            //    dataPenerimaUang.TotalAmount = request.TotalAmount;
-            //}
-            //if (request.TotalAmount < dataPenerimaUang.TotalAmount && request.TotalAmount != 0)
-            //{
-            //    var backBalanceTrans = dataPenerimaUang.TotalAmount - request.TotalAmount;
-            //    penerima.Balance = saldoPenerima - backBalanceTrans;
-            //    pengirim.Balance = balanceDepo - backBalanceTrans;
-            //    dataPenerimaUang.DepositToAccountId = request.DepositToAccountId;
-            //    dataPenerimaUang.PayerId = request.PayerId;
-            //    dataPenerimaUang.TransactionDate = request.TransactionDate;
-            //    dataPenerimaUang.TransactionNo = request.TransactionNo;
-            //    dataPenerimaUang.Memo = request.Memo;
-            //    dataPenerimaUang.TotalAmount = request.TotalAmount;
-            //}
-            ////if (request.TotalAmount == 0)
-            ////{
-            ////    var valSum = saldoPenerima + balanceDepo;
-            ////    penerima.Balance = valSum;
-            ////    pengirim.Balance = balanceDepo - balanceDepo;
-            ////    dataPenerimaUang.DepositToAccountId = request.DepositToAccountId;
-            ////    dataPenerimaUang.PayerId = request.PayerId;
-            ////    dataPenerimaUang.TransactionDate = request.TransactionDate;
-            ////    dataPenerimaUang.TransactionNo = request.TransactionNo;
-            ////    dataPenerimaUang.Memo = request.Memo;
-            ////    dataPenerimaUang.TotalAmount = request.TotalAmount;
-            ////}
-            //if (request.TotalAmount == balanceDepo)
-            //{
-            //    penerima.Balance = saldoPenerima;
-            //    pengirim.Balance = balanceDepo;
-            //    dataPenerimaUang.DepositToAccountId = request.DepositToAccountId;
-            //    dataPenerimaUang.PayerId = request.PayerId;
-            //    dataPenerimaUang.TransactionDate = request.TransactionDate;
-            //    dataPenerimaUang.TransactionNo = request.TransactionNo;
-            //    dataPenerimaUang.Memo = request.Memo;
-            //    dataPenerimaUang.TotalAmount = request.TotalAmount;
-            //}
-            //if (request.TotalAmount == 0 || pengirim.Balance == 0)
-            //{
-            //    result.IsOk = false;
-            //    result.ErrorMessage = "Transaction account lines must not be blank / is invalid, Failed!";
-            //    return result;
-            //}
+
+            
 
             receiveMoneyId = request.Id;
             List<int> idUpdateReceiveMoneyTag = new List<int>();
