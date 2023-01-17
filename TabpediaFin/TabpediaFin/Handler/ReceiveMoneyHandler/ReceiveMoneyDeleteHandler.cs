@@ -22,6 +22,13 @@ public class ReceiveMoneyDeleteHandler : IDeleteByIdHandler<ReceiveMoneyFetchDto
             {
                 throw new HttpException(HttpStatusCode.NotFound, "Data not found");
             }
+            var reqReceiveMoney = receiveMoney.TotalAmount;
+
+            var account = await _context.ReceiveMoneyList.FirstAsync(x => x.TransId == request.Id, cancellationToken);
+
+            var backBalanceTrans = account.Amount - reqReceiveMoney;
+            account.Amount = backBalanceTrans;
+
             _context.ReceiveMoney.Remove(receiveMoney);
             await _context.SaveChangesAsync(cancellationToken);
 
@@ -48,6 +55,14 @@ public class ReceiveMoneyDeleteHandler : IDeleteByIdHandler<ReceiveMoneyFetchDto
                 _context.ReceiveMoneyTag.RemoveRange(ReceiveMoneyTagList);
                 await _context.SaveChangesAsync(cancellationToken);
 
+            }
+
+            // LIST 
+            List<ReceiveMoneyList> ReceiveMoneyList = _context.ReceiveMoneyList.Where<ReceiveMoneyList>(x => x.TransId == request.Id).ToList();
+            if (ReceiveMoneyList.Count > 0)
+            {
+                _context.ReceiveMoneyList.RemoveRange(ReceiveMoneyList);
+                await _context.SaveChangesAsync(cancellationToken);
             }
 
             result.IsOk = true;
