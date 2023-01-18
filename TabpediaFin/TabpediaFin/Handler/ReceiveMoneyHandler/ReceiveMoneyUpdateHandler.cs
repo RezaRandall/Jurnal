@@ -38,8 +38,8 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
 
             var totalDiterima = request.TotalAmount;
             var reqReceiveMoney = dataPenerimaUang.TotalAmount;
-            double hasilHitunga = 0;
-            double hasilHitungb = 0;
+            double hasilHitung = 0;
+            //double hasilHitungb = 0;
 
             receiveMoneyId = request.Id;
             var id = 0;
@@ -84,16 +84,16 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
                     if (balanceDepo == 0)
                     {
                         var hasilBalanceAccount = reqReceiveMoney;
-                        hasilHitunga = hasilBalanceAccount - amtRequest;
-                        pengirim.Balance = hasilHitunga;
+                        hasilHitung = hasilBalanceAccount - amtRequest;
+                        pengirim.Balance = hasilHitung;
                         var hasilPengurangan = saldoPenerima - i.Amount;
                         penerima.Balance += hasilPengurangan;
                     }
                     else 
                     {
                         var hasilBalanceAccount = balanceDepo - balance;
-                        hasilHitunga = hasilBalanceAccount + amtRequest;
-                        pengirim.Balance = hasilHitunga;
+                        hasilHitung = hasilBalanceAccount + amtRequest;
+                        pengirim.Balance = hasilHitung;
                         var hasilPengurangan = i.Amount - saldoPenerima;
                         penerima.Balance += hasilPengurangan;
                     }
@@ -114,9 +114,9 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
                     else 
                     {
                         var hasilBalanceAccount = balanceDepo - balance;
-                        hasilHitunga = hasilBalanceAccount + amtRequest;
-                        pengirim.Balance = hasilHitunga;
-                        var hasilPengurangan = saldoPenerima -i.Amount;
+                        hasilHitung = hasilBalanceAccount + amtRequest;
+                        pengirim.Balance = hasilHitung;
+                        var hasilPengurangan = saldoPenerima - i.Amount;
                         penerima.Balance -= amtRequest;
                     }
                 }
@@ -124,8 +124,8 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
                 if (request.TotalAmount == dataPenerimaUang.TotalAmount)
                 {
                     var hasilBalanceAccount = balanceDepo - balance;
-                    hasilHitunga = hasilBalanceAccount + amtRequest;
-                    pengirim.Balance = hasilHitunga;
+                    hasilHitung = hasilBalanceAccount + amtRequest;
+                    pengirim.Balance = hasilHitung;
                     var hasilPengurangan =  i.Amount - saldoPenerima;
                     penerima.Balance += hasilPengurangan;
                 }
@@ -187,7 +187,7 @@ public class ReceiveMoneyUpdateHandler : IRequestHandler<ReceiveMoneyUpdateDto, 
             await _context.SaveChangesAsync(cancellationToken);
 
 
-            // CHANGE LIST OF RECEIVE MONEY LISTS
+            // CHANGE LIST OF RECEIVE MONEY ITEMS
             List<int> idUpdateReceiveMoneyTag = new List<int>();
             List<int> idUpdateReceiveMoneyAttachment = new List<int>();
             List<int> idUpdateReceiveMoneyList = new List<int>();

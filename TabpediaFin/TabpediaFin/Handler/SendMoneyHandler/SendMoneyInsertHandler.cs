@@ -43,18 +43,15 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
             RequestAmountTotal = sendMoney.TotalAmount;
 
             // BALANCE REDUCTION FROM PAYEER ACCOUNT
-            var saldoPayeer = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-            var senderBalance = saldoPayeer.Balance;
-            var sumReductionAmt = senderBalance - RequestAmountTotal;
-            saldoPayeer.Balance = sumReductionAmt;
+            var accountPayeer = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var reductionAmt = accountPayeer.Balance - RequestAmountTotal;
+            accountPayeer.Balance = reductionAmt;
 
             // WHEN INCLUDE WITHOLDING
             if (request.DiscountAmount != 0 || request.DiscountPercent != 0 && request.DiscountForAccountId != 0)
             {
                 var discountInput = await _context.Account.FirstAsync(x => x.Id == request.DiscountForAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-                var balanceAmount = discountInput.Balance;
-                var witholding = request.WitholdingAmount;
-                var countWitholding = balanceAmount + witholding;
+                var countWitholding = discountInput.Balance + request.WitholdingAmount;
                 discountInput.Balance = countWitholding;
             }
 

@@ -1,4 +1,5 @@
-﻿using TabpediaFin.Domain.SendMoney;
+﻿using TabpediaFin.Domain.ReceiveMoney;
+using TabpediaFin.Domain.SendMoney;
 
 namespace TabpediaFin.Handler.SendMoneyHandler;
 
@@ -29,19 +30,137 @@ public class SendMoneyUpdateHandler : IRequestHandler<SendMoneyUpdateDto, RowRes
 
         try
         {
-            var sendMoney = await _context.SendMoney.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-            sendMoney.PayFromAccountId = request.PayFromAccountId;
-            sendMoney.RecipientContactId = request.RecipientContactId;
-            sendMoney.TransactionDate = request.TransactionDate;
-            sendMoney.TransactionNo = request.TransactionNo;
-            sendMoney.Memo = request.Memo;
-            sendMoney.TotalAmount = request.TotalAmount;
-            sendMoney.WitholdingAmount = request.WitholdingAmount;
-            sendMoney.DiscountAmount = request.DiscountAmount;
-            sendMoney.DiscountPercent = request.DiscountPercent;
-            sendMoney.DiscountForAccountId = request.DiscountForAccountId;
+            var getSendMoneyData = await _context.SendMoney.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
 
+            var account = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var saldoDikirim = request.TotalAmount;
+
+            var reqSendMoney = getSendMoneyData.TotalAmount;
+            double hasilHitung = 0;
             sendMoneyId = request.Id;
+            var id = 0;
+
+            // PERHITUNGAN ACCOUNT
+            foreach (SendMoneyUpdateList i in request.SendMoneyList)
+            {
+                var amtSend = i.Amount;
+
+                var getDataByAccount = await _context.Account.FirstAsync(x => x.Id == i.AccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                var amountAccount = getDataByAccount.Balance;
+                Int64 balance = 0;
+                //CREATE NEW DATA IN SEND MONEY LIST WHEN DON'T HAVE AN ID
+                if (i.Id == 0 || i.Id == null)
+                {
+                    DateTime TransDate = TimeZoneInfo.ConvertTimeToUtc(request.TransactionDate);
+                    var sendMoney = new SendMoneyList()
+                    {
+                        Id = i.Id,
+                        PriceIncludesTax = i.PriceIncludesTax,
+                        AccountId = i.AccountId,
+                        Description = i.Description,
+                        TaxId = i.TaxId,
+                        Amount = i.Amount,
+                        CreatedUid = _currentUser.UserId,
+                        TransId = sendMoneyId
+
+                    };
+                    await _context.SendMoneyList.AddAsync(sendMoney, cancellationToken);
+                    await _context.SaveChangesAsync(cancellationToken);
+                    hasilHitung = sendMoney.Amount;
+                }
+                else
+                {
+                    var sendMoneyListData = await _context.SendMoneyList.AsNoTracking().FirstOrDefaultAsync(x => x.Id == i.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
+                    hasilHitung = sendMoneyListData.Amount;
+                    id = sendMoneyListData.AccountId;
+                }
+
+                if (request.TotalAmount > getSendMoneyData.TotalAmount)
+                {
+                    if (amountAccount == 0)
+                    {
+                        var hasilBalanceAccount = reqSendMoney;
+                        hasilHitung = hasilBalanceAccount - amtSend;
+                        getDataByAccount.Balance = hasilHitung;
+                        var hasilPengurangan = saldoDikirim - i.Amount;
+                        account.Balance += hasilPengurangan;
+                    }
+                    else
+                    {
+                        var hasilBalanceAccount = amountAccount - balance;
+                        hasilHitung = hasilBalanceAccount + amtSend;
+                        getDataByAccount.Balance = hasilHitung;
+                        var hasilPengurangan = i.Amount - saldoDikirim;
+                        account.Balance += hasilPengurangan;
+                    }
+                }
+
+                if (request.TotalAmount < getSendMoneyData.TotalAmount && request.TotalAmount != 0)
+                {
+                    if (amountAccount == 0)
+                    {
+                        var getBalanceAccount = await _context.Account.FirstAsync(x => x.Id == id && x.TenantId == _currentUser.TenantId, cancellationToken);
+                        Double balances = getBalanceAccount.Balance;
+                        var hasilBalanceAccount = balance - balances;
+
+                        getBalanceAccount.Balance = hasilBalanceAccount;
+                        getDataByAccount.Balance = amtSend;
+                        account.Balance -= amtSend;
+                    }
+                    else
+                    {
+                        var hasilBalanceAccount = amountAccount - balance;
+                        hasilHitung = hasilBalanceAccount + amtSend;
+                        getDataByAccount.Balance = hasilHitung;
+                        var hasilPengurangan = saldoDikirim - i.Amount;
+                        account.Balance -= amtSend;
+                    }
+                }
+                if (request.TotalAmount == getSendMoneyData.TotalAmount)
+                {
+                    var hasilBalanceAccount = amountAccount - balance;
+                    hasilHitung = hasilBalanceAccount + amtSend;
+                    getDataByAccount.Balance = hasilHitung;
+                    var hasilPengurangan = i.Amount - saldoDikirim;
+                    account.Balance += hasilPengurangan;
+                }
+
+
+            }
+            await _context.SaveChangesAsync(cancellationToken);
+
+            // JURNAL CALCULATION
+            if (request.TotalAmount > getSendMoneyData.TotalAmount)
+            {
+                var backBalanceTrans = request.TotalAmount - getSendMoneyData.TotalAmount;
+                getSendMoneyData.TotalAmount = reqSendMoney + backBalanceTrans;
+            }
+            if (request.TotalAmount < getSendMoneyData.TotalAmount && request.TotalAmount != 0)
+            {
+                var backBalanceTrans = getSendMoneyData.TotalAmount - request.TotalAmount;
+                getSendMoneyData.TotalAmount = reqSendMoney - backBalanceTrans;
+            }
+            if (request.TotalAmount == 0)
+            {
+                result.IsOk = false;
+                result.ErrorMessage = "Transaction account lines must not be blank / is invalid, Failed!";
+                return result;
+            }
+
+            getSendMoneyData.PayFromAccountId = request.PayFromAccountId;
+            getSendMoneyData.RecipientContactId = request.RecipientContactId;
+            getSendMoneyData.TransactionDate = request.TransactionDate;
+            getSendMoneyData.TransactionNo = request.TransactionNo;
+            getSendMoneyData.Memo = request.Memo;
+            getSendMoneyData.TotalAmount = request.TotalAmount;
+            getSendMoneyData.WitholdingAmount = request.WitholdingAmount;
+            getSendMoneyData.DiscountAmount = request.DiscountAmount;
+            getSendMoneyData.DiscountPercent = request.DiscountPercent;
+            getSendMoneyData.DiscountForAccountId = request.DiscountForAccountId;
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            //sendMoneyId = request.Id;
             List<int> idUpdateSendMoneyTag = new List<int>();
             List<int> idUpdateSendMoneyAttachment = new List<int>();
             List<int> idUpdateSendMoneyList = new List<int>();

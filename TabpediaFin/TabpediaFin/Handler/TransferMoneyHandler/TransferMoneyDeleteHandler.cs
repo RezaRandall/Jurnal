@@ -1,4 +1,5 @@
-﻿using TabpediaFin.Domain.TransferMoney;
+﻿using TabpediaFin.Domain.ReceiveMoney;
+using TabpediaFin.Domain.TransferMoney;
 
 namespace TabpediaFin.Handler.TransferMoneyHandler;
 
@@ -22,8 +23,15 @@ public class TransferMoneyDeleteHandler : IDeleteByIdHandler<TransferMoneyFetchD
             {
                 throw new HttpException(HttpStatusCode.NotFound, "Data not found");
             }
-            _context.TransferMoney.Remove(transferMoney);
-            await _context.SaveChangesAsync(cancellationToken);
+            var account = await _context.Account.FirstAsync(x => x.Id == transferMoney.TransferFromAccountId, cancellationToken);
+            var sumAccount = account.Balance + transferMoney.Amount;
+            account.Balance = sumAccount;
+
+            var accounts = await _context.Account.FirstAsync(x => x.Id == transferMoney.DepositToAccountId, cancellationToken);
+            var sumAccounts = accounts.Balance - transferMoney.Amount;
+            accounts.Balance = sumAccounts;
+
+            //await _context.SaveChangesAsync(cancellationToken);
 
             // TRANSFER MONEY ATTACHMENT DELETE DATA
             List<TransferMoneyAttachment> TransferMoneyAttachmentList = _context.TransferMoneyAttachment.Where<TransferMoneyAttachment>(x => x.TransId == request.Id).ToList();
@@ -37,8 +45,7 @@ public class TransferMoneyDeleteHandler : IDeleteByIdHandler<TransferMoneyFetchD
                         file.Delete();
                     }
                 }
-                _context.TransferMoneyAttachment.RemoveRange(TransferMoneyAttachmentList);
-                await _context.SaveChangesAsync(cancellationToken);
+                //await _context.SaveChangesAsync(cancellationToken);
             }
 
             // TAG
@@ -46,9 +53,11 @@ public class TransferMoneyDeleteHandler : IDeleteByIdHandler<TransferMoneyFetchD
             if (TransferMoneyTagList.Count > 0)
             {
                 _context.TransferMoneyTag.RemoveRange(TransferMoneyTagList);
-                await _context.SaveChangesAsync(cancellationToken);
-
+                //await _context.SaveChangesAsync(cancellationToken);
             }
+            _context.TransferMoney.Remove(transferMoney);
+            _context.TransferMoneyAttachment.RemoveRange(TransferMoneyAttachmentList);
+            await _context.SaveChangesAsync(cancellationToken);
 
             result.IsOk = true;
             result.ErrorMessage = string.Empty;
