@@ -58,10 +58,20 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
             // BALANCE REDUCTION FROM RECIPIENT ACCOUNT
             foreach (SendMoneyInsertList i in request.SendMoneyList)
             {
+                
                 var paymentForAccountId = await _context.Account.FirstAsync(x => x.Id == i.AccountId && x.TenantId == _currentUser.TenantId, cancellationToken) ;
-                var balanceAccountReceiver = paymentForAccountId.Balance;
-                var sumBalance = balanceAccountReceiver - i.Amount;
-                paymentForAccountId.Balance = sumBalance;
+                if (paymentForAccountId.Balance == 0 || paymentForAccountId == null)
+                {
+                    var sumBalance = paymentForAccountId.Balance + i.Amount;
+                    paymentForAccountId.Balance = sumBalance;
+                }
+                else 
+                {
+                    //var balanceAccountReceiver = paymentForAccountId.Balance;
+                    //var sumBalance = balanceAccountReceiver - i.Amount;
+                    var sumBalance = paymentForAccountId.Balance - i.Amount;
+                    paymentForAccountId.Balance = sumBalance;
+                }
             }
 
             await _context.SaveChangesAsync(cancellationToken);
