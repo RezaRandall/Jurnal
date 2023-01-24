@@ -22,8 +22,9 @@ public class ReceiveMoneyDeleteHandler : IDeleteByIdHandler<ReceiveMoneyFetchDto
             {
                 throw new HttpException(HttpStatusCode.NotFound, "Data not found");
             }
-            _context.ReceiveMoney.Remove(receiveMoney);
-            await _context.SaveChangesAsync(cancellationToken);
+            var account = await _context.Account.FirstAsync(x => x.Id == receiveMoney.DepositToAccountId, cancellationToken);
+            var perhitunganAccount = account.Balance - receiveMoney.TotalAmount;
+            account.Balance = perhitunganAccount;
 
             // RECEIVE MONEY ATTACHMENT DELETE DATA
             List<ReceiveMoneyAttachment> ReceiveMoneyAttachmentList = _context.ReceiveMoneyAttachment.Where<ReceiveMoneyAttachment>(x => x.TransId == request.Id).ToList();
@@ -37,18 +38,33 @@ public class ReceiveMoneyDeleteHandler : IDeleteByIdHandler<ReceiveMoneyFetchDto
                         file.Delete();
                     }
                 }
-                _context.ReceiveMoneyAttachment.RemoveRange(ReceiveMoneyAttachmentList);
-                await _context.SaveChangesAsync(cancellationToken);
+
+                //await _context.SaveChangesAsync(cancellationToken);
             }
 
             // TAG
             List<ReceiveMoneyTag> ReceiveMoneyTagList = _context.ReceiveMoneyTag.Where<ReceiveMoneyTag>(x => x.TransId == request.Id).ToList();
-            if (ReceiveMoneyTagList.Count > 0)
-            {
-                _context.ReceiveMoneyTag.RemoveRange(ReceiveMoneyTagList);
-                await _context.SaveChangesAsync(cancellationToken);
 
+            // LIST 
+            List<ReceiveMoneyList> receiveMoneyList = _context.ReceiveMoneyList.Where<ReceiveMoneyList>(x => x.TransId == request.Id).ToList();
+            if (receiveMoneyList.Count > 0)
+            {
+                foreach (ReceiveMoneyList i in receiveMoneyList)
+                {
+                    var accounts = await _context.Account.FirstAsync(x => x.Id == i.AccountId, cancellationToken);
+                    var calAccount = accounts.Balance - i.Amount;
+                    accounts.Balance = calAccount;
+                }
+                //await _context.SaveChangesAsync(cancellationToken);
             }
+                _context.ReceiveMoney.Remove(receiveMoney);
+                _context.ReceiveMoneyAttachment.RemoveRange(ReceiveMoneyAttachmentList);
+                if (ReceiveMoneyTagList.Count > 0)
+                {
+                    _context.ReceiveMoneyTag.RemoveRange(ReceiveMoneyTagList);
+                }
+                _context.ReceiveMoneyList.RemoveRange(receiveMoneyList);
+                await _context.SaveChangesAsync(cancellationToken);
 
             result.IsOk = true;
             result.ErrorMessage = string.Empty;
