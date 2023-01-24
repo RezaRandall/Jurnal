@@ -31,12 +31,11 @@ namespace TabpediaFin.Controllers
         }
 
 
-        [HttpGet("getaccountpurchasesales/{accounttype}")]
+        [HttpGet("getaccountpurchasesales")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetAccountPurchaseSales(string accounttype)
+        public async Task<IActionResult> GetAccountPurchaseSales()
         {
             AccountPurchaseSalesList command = new AccountPurchaseSalesList();
-            command.type = accounttype;
             return Result(await _mediator.Send(command));
         }
 

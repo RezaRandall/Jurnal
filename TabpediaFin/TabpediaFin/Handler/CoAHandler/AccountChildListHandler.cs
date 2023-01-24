@@ -36,7 +36,7 @@
                         sqlsearch = @"AND (LOWER(i.""Name"") LIKE @Search  OR LOWER(i.""AccountNumber"") LIKE @Search  OR LOWER(i.""CategoryId"") LIKE @Search  OR LOWER(i.""AccountParentId"") LIKE @Search  OR LOWER(i.""TaxId"") LIKE @Search  OR LOWER(i.""Description"") LIKE @Search)";
                     }
 
-                    var sql = @"SELECT ac.""Name"" as CategoryAccount, t.""Name"" as TaxName, i.""Name"", i.""AccountNumber"", i.""CategoryId"", i.""AccountParentId"", i.""TaxId"", i.""Description"", i.""Balance"", i.""IsLocked"", i.""BankId""  FROM ""Account"" i LEFT JOIN ""Tax"" t ON i.""TaxId"" = t.""Id"" LEFT JOIN ""AccountCategory"" ac ON i.""CategoryId"" = ac.""Id""  WHERE i.""TenantId"" = @TenantId " + sqlfilterchild + sqlsearch + " " + sqlsort + "";
+                    var sql = @"SELECT i.""Id"", ac.""Name"" as CategoryAccount, t.""Name"" as TaxName, i.""Name"", i.""AccountNumber"", i.""CategoryId"", i.""AccountParentId"", i.""TaxId"", i.""Description"", i.""Balance"", i.""IsLocked"", i.""BankId""  FROM ""Account"" i LEFT JOIN ""Tax"" t ON i.""TaxId"" = t.""Id"" LEFT JOIN ""AccountCategory"" ac ON i.""CategoryId"" = ac.""Id""  WHERE i.""TenantId"" = @TenantId " + sqlfilterchild + sqlsearch + " " + sqlsort + "";
 
                     var parameters = new DynamicParameters();
                     parameters.Add("TenantId", _currentUser.TenantId);

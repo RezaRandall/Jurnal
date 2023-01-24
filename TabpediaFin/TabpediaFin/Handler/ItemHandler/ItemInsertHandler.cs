@@ -41,7 +41,7 @@ public class ItemInsertHandler : IRequestHandler<ItemInsertDto, RowResponse<Item
             SalesAccount = req.SalesAccount,
             PurchaseTax = req.PurchaseTax,
             SalesTax = req.SalesTax,
-
+            StockAccount = req.StockAccount
 
         };
         List<ItemItemCategory> itemItemCategory = new List<ItemItemCategory>();
@@ -130,9 +130,9 @@ public class ItemInsertHandler : IRequestHandler<ItemInsertDto, RowResponse<Item
                 SalesAccount = item.SalesAccount,
                 PurchaseTax = item.PurchaseTax,
                 SalesTax = item.SalesTax,
+                StockAccount = item.StockAccount,
                 ItemItemCategoryList = itemItemCategoryFetchDto,
                 ItemUnitMeasureList = itemUnitMeasureFetchDto,
-
             };
             result.IsOk = true;
             result.ErrorMessage = string.Empty;
@@ -205,6 +205,7 @@ public class ItemInsertDto : IRequest<RowResponse<ItemDto>>
     public int PurchaseTax { get; set; } = 0;
     public int SalesAccount { get; set; } = 0;
     public int SalesTax { get; set; } = 0;
+    public int StockAccount { get; set; } = 0;
     public List<ItemItemCategoryInsertDto> ItemItemCategoryList { get; set; }
     public List<ItemUnitMeasureInsertDto> ItemUnitMeasureList { get; set; }
     public List<ItemAttahmentFiles> ItemAttachmentFile { get; set; }

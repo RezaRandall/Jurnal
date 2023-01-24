@@ -21,5 +21,6 @@
         public int PurchaseTax { get; set; } = 0;
         public int SalesAccount { get; set; } = 0;
         public int SalesTax { get; set; } = 0;
+        public int StockAccount { get; set; } = 0;
     }
 }

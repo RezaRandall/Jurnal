@@ -48,6 +48,9 @@ public class ItemUpdateHandler : IRequestHandler<ItemUpdateDto, RowResponse<Item
             item.Notes = request.Notes;
             item.PurchaseAccount = request.PurchaseAccount;
             item.SalesAccount = request.SalesAccount;
+            item.PurchaseTax = request.PurchaseTax;
+            item.SalesTax = request.SalesTax;
+            item.StockAccount = request.StockAccount;
 
 
             itemIdResult = request.Id;
@@ -200,7 +203,10 @@ public class ItemUpdateDto : IRequest<RowResponse<ItemDto>>
     public string ImageFileName { get; set; } = string.Empty;
     public string Notes { get; set; } = string.Empty;
     public int PurchaseAccount { get; set; } = 0;
+    public int PurchaseTax { get; set; } = 0;
     public int SalesAccount { get; set; } = 0;
+    public int SalesTax { get; set; } = 0;
+    public int StockAccount { get; set; } = 0;
     public List<ItemItemCategoryUpdate> ItemItemCategoryList { get; set; }
     public List<ItemUnitMeasureUpdate> ItemUnitMeasureList { get; set; }
     public List<ItemAttahmentUpdate> AttachmentFile { get; set; }
