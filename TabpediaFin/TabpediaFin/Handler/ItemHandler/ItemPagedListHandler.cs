@@ -1,6 +1,6 @@
 ﻿namespace TabpediaFin.Handler.Item;
 
-public class ItemPagedListHandler : IFetchPagedListHandler<ItemListDto>
+public class ItemPagedListHandler : IQueryPagedListItemHandler<ItemListDto>
 {
     private readonly DbManager _dbManager;
     private readonly ICurrentUser _currentUser;
@@ -11,7 +11,7 @@ public class ItemPagedListHandler : IFetchPagedListHandler<ItemListDto>
         _currentUser = currentUser;
     }
 
-    public async Task<PagedListResponse<ItemListDto>> Handle(FetchPagedListRequestDto<ItemListDto> req, CancellationToken cancellationToken)
+    public async Task<PagedListResponse<ItemListDto>> Handle(QueryPagedListItemDto<ItemListDto> req, CancellationToken cancellationToken)
     {
         if (req.PageNum == 0) { req.PageNum = 1; }
         if (req.PageSize == 0) { req.PageSize = 10; }
@@ -21,6 +21,10 @@ public class ItemPagedListHandler : IFetchPagedListHandler<ItemListDto>
         try
         {
             string sqlWhere = " WHERE (1=1) ";
+            if(req.isArchived == false)
+            {
+                sqlWhere += @"And ""IsArchived"" = false";
+            }
             var parameters = new DynamicParameters();
 
             if (!string.IsNullOrWhiteSpace(req.Search))
@@ -41,15 +45,17 @@ public class ItemPagedListHandler : IFetchPagedListHandler<ItemListDto>
 
                 var list = await cn.FetchListPagedAsync<ItemListDto>(pageNumber: req.PageNum
                 , rowsPerPage: req.PageSize
-                , search: req.Search
-                , sortby: req.SortBy
-                , sortdesc: req.SortDesc
-                , currentUser: _currentUser);
+                , conditions: sqlWhere
+                , orderby: orderby
+                , currentUser: _currentUser
+                , parameters: parameters);
+
+                int recordCount = await cn.RecordCountAsync<ItemListDto>(sqlWhere, parameters);
 
                 result.IsOk = true;
                 result.ErrorMessage = string.Empty;
-                result.List = list.List;
-                result.RecordCount = list.TotalRecord;
+                result.List = list?.AsList() ?? new List<ItemListDto>(); ;
+                result.RecordCount = recordCount;
             }
         }
         catch (Exception ex)
@@ -87,4 +93,20 @@ public class ItemListDto : BaseDto
     public string ImageFileName { get; set; } = string.Empty;
     [Searchable]
     public string Notes { get; set; } = string.Empty;
+}
+public class QueryPagedListItemDto<T> : IRequest<PagedListResponse<T>>
+{
+    public int PageSize { get; set; } = 10;
+
+    public int PageNum { get; set; } = 1;
+
+    public string Search { get; set; } = string.Empty;
+
+    public string SortBy { get; set; } = string.Empty;
+
+    public bool SortDesc { get; set; }
+    public bool isArchived { get; set; } = false;
+}
+public interface IQueryPagedListItemHandler<T> : IRequestHandler<QueryPagedListItemDto<T>, PagedListResponse<T>>
+{
 }

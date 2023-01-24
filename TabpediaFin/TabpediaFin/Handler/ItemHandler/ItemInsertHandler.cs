@@ -208,7 +208,7 @@ public class ItemInsertDto : IRequest<RowResponse<ItemDto>>
     public int StockAccount { get; set; } = 0;
     public List<ItemItemCategoryInsertDto> ItemItemCategoryList { get; set; }
     public List<ItemUnitMeasureInsertDto> ItemUnitMeasureList { get; set; }
-    public List<ItemAttahmentFiles> ItemAttachmentFile { get; set; }
+    public List<ItemAttahmentFiles>? ItemAttachmentFile { get; set; }
 }
 
 public class ItemAttahmentFiles

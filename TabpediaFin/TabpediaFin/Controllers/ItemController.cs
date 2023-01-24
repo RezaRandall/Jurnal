@@ -17,7 +17,7 @@ public class ItemController : ApiControllerBase
 
     [HttpPost("list")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> GetList([FromBody] FetchPagedListRequestDto<ItemListDto> request)
+    public async Task<IActionResult> GetList([FromBody] QueryPagedListItemDto<ItemListDto> request)
     {
         return Result(await _mediator.Send(request));
     }
