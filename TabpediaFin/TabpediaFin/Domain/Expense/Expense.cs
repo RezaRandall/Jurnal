@@ -17,4 +17,5 @@ public class Expense : BaseEntity
     public Int64 DiscountAmount { get; set; } = 0;
     public int DiscountForAccountId { get; set; } = 0;
     public Int64 TotalAmount { get; set; } = 0;
+    public Int64 WitholdingAmount { get; set; } = 0;
 }

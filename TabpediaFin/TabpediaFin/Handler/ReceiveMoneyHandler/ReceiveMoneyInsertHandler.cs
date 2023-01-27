@@ -29,10 +29,6 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
             TotalAmount = request.TotalAmount,
             
         };
-        var receiveMoneyList = new ReceiveMoneyList()
-        {
-            AccountId = request.ListOfReceiveMoney[0].AccountId
-        };
 
         try
         {
@@ -50,7 +46,7 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
             {
                 var receiveFromAccountId = await _context.Account.FirstAsync(x => x.Id == i.AccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
                 var receiveBalance = receiveFromAccountId.Balance;
-                receiveFromAccountId.Balance = receiveBalance + sumTotalBalanceAccount;
+                receiveFromAccountId.Balance = receiveBalance + i.Amount;
             }
 
             await _context.SaveChangesAsync(cancellationToken);
