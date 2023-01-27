@@ -3,10 +3,12 @@
 public class UnitMeasureDeleteHandler : IDeleteByIdHandler<UnitMeasureDto>
 {
     private readonly FinContext _context;
+    private readonly ICurrentUser _currentUser;
 
-    public UnitMeasureDeleteHandler(FinContext db)
+    public UnitMeasureDeleteHandler(FinContext db, ICurrentUser currentUser)
     {
         _context = db;
+        _currentUser = currentUser;
     }
 
 
@@ -15,7 +17,7 @@ public class UnitMeasureDeleteHandler : IDeleteByIdHandler<UnitMeasureDto>
         var result = new RowResponse<UnitMeasureDto>();
         try
         {
-            var unitMeasure = await _context.UnitMeasure.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var unitMeasure = await _context.UnitMeasure.FirstOrDefaultAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
             if (unitMeasure == null || unitMeasure.Id == 0)
             {
                 throw new HttpException(HttpStatusCode.NotFound, "Data not found");

@@ -6,11 +6,13 @@ public class PaymentTermDeleteHandler : IDeleteByIdHandler<PaymentTermDto>
 {
     private readonly FinContext _context;
     private readonly IPaymentMethodCacheRemover _cacheRemover;
+    private readonly ICurrentUser _currentUser;
 
-    public PaymentTermDeleteHandler(FinContext db, IPaymentMethodCacheRemover cacheRemover)
+    public PaymentTermDeleteHandler(FinContext db, IPaymentMethodCacheRemover cacheRemover, ICurrentUser currentUser)
     {
         _context = db;
         _cacheRemover = cacheRemover;
+        _currentUser = currentUser;
     }
 
     public async Task<RowResponse<PaymentTermDto>> Handle(DeleteByIdRequestDto<PaymentTermDto> request, CancellationToken cancellationToken)
@@ -18,7 +20,7 @@ public class PaymentTermDeleteHandler : IDeleteByIdHandler<PaymentTermDto>
         var result = new RowResponse<PaymentTermDto>();
         try
         {
-            var paymentTermsData = await _context.PaymentTerm.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var paymentTermsData = await _context.PaymentTerm.FirstOrDefaultAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
             if (paymentTermsData == null )
             {
                 throw new HttpException(HttpStatusCode.NotFound, "Data not found");

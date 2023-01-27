@@ -6,11 +6,13 @@ public class AccountCashAndBankCategoryDeleteHandler : IDeleteByIdHandler<Accoun
 {
     private readonly FinContext _context;
     private readonly IPaymentMethodCacheRemover _cacheRemover;
+    private readonly ICurrentUser _currentUser;
 
     public AccountCashAndBankCategoryDeleteHandler(FinContext db, ICurrentUser currentUser, IPaymentMethodCacheRemover cacheRemover)
     {
         _context = db;
         _cacheRemover = cacheRemover;
+        _currentUser = currentUser;
     }
 
     public async Task<RowResponse<AccountCashAndBankCategoryFetchDto>> Handle(DeleteByIdRequestDto<AccountCashAndBankCategoryFetchDto> request, CancellationToken cancellationToken)
@@ -18,7 +20,7 @@ public class AccountCashAndBankCategoryDeleteHandler : IDeleteByIdHandler<Accoun
         var result = new RowResponse<AccountCashAndBankCategoryFetchDto>();
         try
         {
-            var accountCashAndBankCategoy = await _context.AccountCashAndBankCategory.FirstAsync(x => x.Id == request.Id, cancellationToken);
+            var accountCashAndBankCategoy = await _context.AccountCashAndBankCategory.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
             if (accountCashAndBankCategoy == null || accountCashAndBankCategoy.Id == 0)
             {
                 throw new HttpException(HttpStatusCode.NotFound, "Data not found");
