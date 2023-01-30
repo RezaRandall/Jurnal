@@ -16,11 +16,33 @@ namespace TabpediaFin.Controllers
             _mediator = mediator;
         }
 
+        [HttpGet("accountcategory/{idaccount:int}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetListCategory(int idaccount)
+        {
+            return Result(await _mediator.Send(new ListByIdRequestDto<AccountCategoryDto>(idaccount)));
+        }
+        
+        [HttpGet("createdefaultnumber/{idcategory:int}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetNumberCategory(int idcategory)
+        {
+            return Result(await _mediator.Send(new FetchByIdRequestDto<GenerateNumberDto>(idcategory)));
+        }
+
+
         [HttpPost("list")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetList([FromBody] QueryPagedListAccountDto<AccountListDto> request)
         {
             return Result(await _mediator.Send(request));
+        }
+
+        [HttpGet("{id:int}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetCOAId(int id)
+        {
+            return Result(await _mediator.Send(new FetchByIdRequestDto<AccountCoAFetchDto>(id)));
         }
 
         [HttpPost("getchildaccountlist")]
@@ -29,7 +51,6 @@ namespace TabpediaFin.Controllers
         {
             return Result(await _mediator.Send(request));
         }
-
 
         [HttpGet("getaccountpurchasesales")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -47,10 +68,11 @@ namespace TabpediaFin.Controllers
             return Result(await _mediator.Send(command));
         }
 
-        public enum accounttype{
-            all = 0,
-            purchase = 1,
-            sales = 2
+        [HttpGet("getcoa/{id:int}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetCOAListId(int id)
+        {
+            return Result(await _mediator.Send(new FetchByIdRequestDto<AccountCoAFetchDto>(id)));
         }
     }
 }
