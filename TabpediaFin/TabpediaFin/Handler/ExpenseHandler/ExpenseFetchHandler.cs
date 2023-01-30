@@ -112,6 +112,7 @@ public class ExpenseFetchDto : BaseDto
     public Int64 DiscountAmount { get; set; } = 0;
     public int DiscountForAccountId { get; set; } = 0;
     public Int64 TotalAmount { get; set; } = 0;
+    public Int64 WitholdingAmount { get; set; } = 0;
     public List<ExpenseFetchAttachment> ExpenseAttachmentList { get; set; }
     public List<ExpenseFetchTag> ExpenseTagList { get; set; }
     public List<ExpenseFetchList> ExpenseFetchList { get; set; }

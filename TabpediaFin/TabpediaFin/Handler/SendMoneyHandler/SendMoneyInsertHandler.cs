@@ -42,13 +42,24 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
             await _context.SendMoney.AddAsync(sendMoney, cancellationToken);
             RequestAmountTotal = sendMoney.TotalAmount;
 
+            double jumlah = sendMoney.TotalAmount + sendMoney.WitholdingAmount;
+
             // BALANCE REDUCTION FROM PAYEER ACCOUNT
-            var accountPayeer = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-            var reductionAmt = accountPayeer.Balance - RequestAmountTotal;
-            accountPayeer.Balance = reductionAmt;
+            if (request.WitholdingAmount == 0)
+            {
+                var accountPayeer = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                var reductionAmt = accountPayeer.Balance - RequestAmountTotal;
+                accountPayeer.Balance = reductionAmt;
+            }
+            else 
+            {
+                var accountPayeer = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                var reduction = accountPayeer.Balance - jumlah;
+                accountPayeer.Balance = reduction;
+            }
 
             // WHEN INCLUDE WITHOLDING
-            if (request.DiscountAmount != 0 || request.DiscountPercent != 0 && request.DiscountForAccountId != 0)
+            if (request.DiscountAmount != 0 || request.DiscountPercent != 0 || request.DiscountForAccountId != 0)
             {
                 var discountInput = await _context.Account.FirstAsync(x => x.Id == request.DiscountForAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
                 var countWitholding = discountInput.Balance + request.WitholdingAmount;
@@ -58,20 +69,9 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
             // BALANCE REDUCTION FROM RECIPIENT ACCOUNT
             foreach (SendMoneyInsertList i in request.SendMoneyList)
             {
-                
                 var paymentForAccountId = await _context.Account.FirstAsync(x => x.Id == i.AccountId && x.TenantId == _currentUser.TenantId, cancellationToken) ;
-                if (paymentForAccountId.Balance == 0 || paymentForAccountId == null)
-                {
-                    var sumBalance = paymentForAccountId.Balance + i.Amount;
-                    paymentForAccountId.Balance = sumBalance;
-                }
-                else 
-                {
-                    //var balanceAccountReceiver = paymentForAccountId.Balance;
-                    //var sumBalance = balanceAccountReceiver - i.Amount;
                     var sumBalance = paymentForAccountId.Balance - i.Amount;
                     paymentForAccountId.Balance = sumBalance;
-                }
             }
 
             await _context.SaveChangesAsync(cancellationToken);

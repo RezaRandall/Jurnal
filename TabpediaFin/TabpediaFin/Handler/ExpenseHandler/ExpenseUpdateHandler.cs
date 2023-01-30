@@ -1,8 +1,4 @@
-﻿using TabpediaFin.Domain;
-using TabpediaFin.Domain.Expense;
-using TabpediaFin.Handler.Item;
-using TabpediaFin.Handler.ItemItemCategoryHandler;
-using TabpediaFin.Handler.ItemUnitMeasureHandler;
+﻿using TabpediaFin.Domain.Expense;
 
 namespace TabpediaFin.Handler.ExpenseHandler;
 
@@ -29,318 +25,279 @@ public class ExpenseUpdateHandler : IRequestHandler<ExpenseUpdateDto, RowRespons
         List<ExpenseFetchAttachment> expenseFetchAttachment = new List<ExpenseFetchAttachment>();
         List<ExpenseFetchList> expenseFetchList = new List<ExpenseFetchList>();
 
-        DateTime? newdate = null;
 
-        var paylater = request.PayLater;
-        if (paylater == false)
+        try
         {
-            try
+            var dataPengirimUang = await _context.Expense.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var reqSendMoney = dataPengirimUang.TotalAmount;
+            double witholdingAmt = dataPengirimUang.WitholdingAmount;
+            double discountAmt = witholdingAmt;
+            double jumlah = 0;
+            var witholdingId = dataPengirimUang.DiscountForAccountId;
+
+            // BAYAR DARI AKUN / cek data akun
+            var dataAkun = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+            var saldoPengirim = dataAkun.Balance;
+            expenseId = request.Id;
+
+
+            var expenseListData = await _context.ExpenseList.AsNoTracking().Where(x => x.TransId == expenseId && x.TenantId == _currentUser.TenantId).ToListAsync();
+            foreach (var itm in expenseListData)
             {
-                var expenses = await _context.Expense.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-                expenses.PayFromAccountId = request.PayFromAccountId;
-                expenses.PayLater = request.PayLater;
-                expenses.RecipientContactId = request.RecipientContactId;
-                expenses.TransactionDate = request.TransactionDate;
-                expenses.PaymentMethodId = request.PaymentMethodId;
-                expenses.TransactionNo = request.TransactionNo;
-                expenses.BillingAddress = request.BillingAddress;
-                expenses.DueDate = newdate;
-                expenses.PaymentTermId = 0;
-                expenses.Memo = request.Memo;
-                expenses.Status = request.Status;
-                expenses.DiscountPercent = request.DiscountPercent;
-                expenses.DiscountAmount = request.DiscountAmount;
-                expenses.DiscountForAccountId = request.DiscountForAccountId;
-                expenses.TotalAmount = request.TotalAmount;
-
-                expenseId = request.Id;
-                List<int> idUpdateExpenseTag = new List<int>();
-                List<int> idUpdateExpenseAttachment = new List<int>();
-                List<int> idUpdateExpenseList = new List<int>();
-
-                // ATTACHMENT
-                if (request.AttachmentFile.Count > 0)
+                //PENGEMBALIAN
+                if (discountAmt != 0)
                 {
-                    foreach (ExpenseAttachmentUpdate i in request.AttachmentFile)
-                    {
-                        idUpdateExpenseAttachment.Add(i.Id);
-                        expenseAttachment.Add(new ExpenseAttachment
-                        {
-                            Id = i.Id,
-                            FileName = i.FileName,
-                            FileUrl = i.FileUrl,
-                            Extension = i.Extension,
-                            FileSize = i.FileSize,
-                            CreatedUid = _currentUser.UserId,
-                            TransId = expenseId
-                        });
-                        expenseFetchAttachment.Add(new ExpenseFetchAttachment
-                        {
-                            Id = i.Id,
-                            FileName = i.FileName,
-                            FileUrl = i.FileUrl,
-                            Extension = i.Extension,
-                            FileSize = i.FileSize,
-                            TransId = expenseId
-                        });
-                    }
-                    _context.ExpenseAttachment.UpdateRange(expenseAttachment);
+                    var getSaldo = await _context.Account.FirstAsync(x => x.Id == witholdingId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                    var saldo = getSaldo.Balance;
+                    var value = saldo - witholdingAmt;
+
+                    discountAmt = value;
+                    jumlah = reqSendMoney + witholdingAmt;
+                    getSaldo.Balance = value;
+
                 }
-
-                // TAG
-                if (request.ExpenseTagList.Count > 0)
-                {
-                    foreach (ExpenseUpdateTag expTag in request.ExpenseTagList)
-                    {
-                        idUpdateExpenseTag.Add(expTag.Id);
-                        expenseTag.Add(new ExpenseTag
-                        {
-                            Id = expTag.Id,
-                            TagId = expTag.TagId,
-                            TransId = expenseId,
-                            CreatedUid = _currentUser.UserId
-                        });
-                        expenseFetchTag.Add(new ExpenseFetchTag
-                        {
-                            Id = expTag.Id,
-                            TagId = expTag.TagId,
-                            TransId = expenseId
-                        });
-                    }
-                    _context.ExpenseTag.UpdateRange(expenseTag);
-                }
-
-                // EXPENSE LIST
-                if (request.ExpenseUpdateList.Count > 0)
-                {
-                    foreach (ExpenseUpdateList expList in request.ExpenseUpdateList)
-                    {
-                        idUpdateExpenseList.Add(expList.Id);
-                        expenseUpdateList.Add(new ExpenseList
-                        {
-                            Id = expList.Id,
-                            PriceIncludesTax = expList.PriceIncludesTax,
-                            ExpenseAccountId = expList.ExpenseAccountId,
-                            Description = expList.Description,
-                            TaxId = expList.TaxId,
-                            Amount = expList.Amount,
-                            TransId = expenseId,
-                            CreatedUid = _currentUser.UserId
-                        });
-                        expenseFetchList.Add(new ExpenseFetchList
-                        {
-                            Id = expList.Id,
-                            PriceIncludesTax = expList.PriceIncludesTax,
-                            ExpenseAccountId = expList.ExpenseAccountId,
-                            Description = expList.Description,
-                            TaxId = expList.TaxId,
-                            Amount = expList.Amount,
-                            TransId = expenseId
-                        });
-                    }
-                    _context.ExpenseList.UpdateRange(expenseUpdateList);
-                }
-
-
-                List<ExpenseTag> expenseTagList = _context.ExpenseTag.Where<ExpenseTag>(x => x.TransId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateExpenseTag.Contains(x.Id)).ToList();
-                List<ExpenseAttachment> expenseAttachmentList = _context.ExpenseAttachment.Where<ExpenseAttachment>(x => x.TransId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateExpenseAttachment.Contains(x.Id)).ToList();
-                List<ExpenseList> expenseList = _context.ExpenseList.Where<ExpenseList>(x => x.TransId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateExpenseList.Contains(x.Id)).ToList();
-                _context.ExpenseTag.RemoveRange(expenseTagList);
-                _context.ExpenseAttachment.RemoveRange(expenseAttachmentList);
-                _context.ExpenseList.RemoveRange(expenseList);
-                await _context.SaveChangesAsync(cancellationToken);
-
-                var row = new ExpenseFetchDto()
-                {
-                    Id = request.Id,
-                    PayFromAccountId = request.PayFromAccountId,
-                    PayLater = request.PayLater,
-                    RecipientContactId = request.RecipientContactId,
-                    TransactionDate = request.TransactionDate,
-                    PaymentMethodId = request.PaymentMethodId,
-                    TransactionNo = request.TransactionNo,
-                    BillingAddress = request.BillingAddress,
-                    DueDate = newdate,
-                    PaymentTermId = 0,
-                    Memo = request.Memo,
-                    Status = request.Status,
-                    DiscountPercent = request.DiscountPercent,
-                    DiscountAmount = request.DiscountAmount,
-                    DiscountForAccountId = request.DiscountForAccountId,
-                    TotalAmount = request.TotalAmount,
-                    ExpenseTagList = expenseFetchTag,
-                    ExpenseAttachmentList = expenseFetchAttachment,
-                    ExpenseFetchList = expenseFetchList
-                };
-
-                result.IsOk = true;
-                result.ErrorMessage = string.Empty;
-                result.Row = row;
+                var getBalaces = await _context.Account.FirstAsync(x => x.Id == itm.ExpenseAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                var nilaiBalanceAccounts = getBalaces.Balance;
+                var hasil = nilaiBalanceAccounts - itm.Amount;
+                getBalaces.Balance = hasil;
             }
-            catch (Exception ex)
+            if (witholdingAmt != 0)
             {
-                result.IsOk = false;
-                result.ErrorMessage = ex.Message;
+                var getValue = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                var nilai = getValue.Balance + jumlah;
+                getValue.Balance = nilai;
             }
-            return result;
+            else
+            {
+                var getValue = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                var nilai = getValue.Balance + reqSendMoney;
+                getValue.Balance = nilai;
+            }
+
+            // COUNT IN EVERY ACCOUNTS
+            foreach (ExpenseUpdateList i in request.ExpenseList)
+            {
+                if (i.Id == 0)
+                {
+                    DateTime TransDate = TimeZoneInfo.ConvertTimeToUtc(request.TransactionDate);
+                    var expense = new ExpenseList()
+                    {
+                        Id = i.Id,
+                        PriceIncludesTax = i.PriceIncludesTax,
+                        ExpenseAccountId = i.ExpenseAccountId,
+                        Description = i.Description,
+                        TaxId = i.TaxId,
+                        Amount = i.Amount,
+                        CreatedUid = _currentUser.UserId,
+                        TransId = expenseId
+                    };
+                    await _context.ExpenseList.AddAsync(expense, cancellationToken);
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+
+                // ambil nilai balance dari akun berdasarkan send money list
+                var getBalace = await _context.Account.FirstAsync(x => x.Id == i.ExpenseAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                var nilaiBalanceAccount = getBalace.Balance;
+
+                double nilaiKembali = 0;
+
+                var hasil = nilaiBalanceAccount + i.Amount;
+                getBalace.Balance = hasil;
+
+                nilaiKembali = dataAkun.Balance - i.Amount;
+                dataAkun.Balance = nilaiKembali;
+
+            }
+
+        // JURNAL COUNT
+        if (request.TotalAmount == dataPengirimUang.TotalAmount)
+        {
+            if (request.WitholdingAmount != 0)
+            {
+                var discount = await _context.Account.FirstAsync(x => x.Id == request.DiscountForAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                discount.Balance += request.WitholdingAmount;
+            }
         }
-        else 
+        else if (request.TotalAmount < dataPengirimUang.TotalAmount)
         {
-            try
+            var backBalanceTransaction = dataPengirimUang.TotalAmount - request.TotalAmount;
+            dataPengirimUang.TotalAmount = reqSendMoney - backBalanceTransaction;
+
+            if (request.WitholdingAmount != 0)
             {
-                var expenses = await _context.Expense.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-                expenses.PayFromAccountId = request.PayFromAccountId;
-                expenses.PayLater = request.PayLater;
-                expenses.RecipientContactId = request.RecipientContactId;
-                expenses.TransactionDate = request.TransactionDate;
-                expenses.PaymentMethodId = request.PaymentMethodId;
-                expenses.TransactionNo = request.TransactionNo;
-                expenses.BillingAddress = request.BillingAddress;
-                expenses.DueDate = request.DueDate;
-                expenses.PaymentTermId = request.PaymentTermId;
-                expenses.Memo = request.Memo;
-                expenses.Status = request.Status;
-                expenses.DiscountPercent = request.DiscountPercent;
-                expenses.DiscountAmount = request.DiscountAmount;
-                expenses.DiscountForAccountId = request.DiscountForAccountId;
-                expenses.TotalAmount = request.TotalAmount;
-
-                expenseId = request.Id;
-                List<int> idUpdateExpenseTag = new List<int>();
-                List<int> idUpdateExpenseAttachment = new List<int>();
-                List<int> idUpdateExpenseList = new List<int>();
-
-
-                // ATTACHMENT
-                if (request.AttachmentFile.Count > 0)
-                {
-                    foreach (ExpenseAttachmentUpdate i in request.AttachmentFile)
-                    {
-                        idUpdateExpenseAttachment.Add(i.Id);
-                        expenseAttachment.Add(new ExpenseAttachment
-                        {
-                            Id = i.Id,
-                            FileName = i.FileName,
-                            FileUrl = i.FileUrl,
-                            Extension = i.Extension,
-                            FileSize = i.FileSize,
-                            CreatedUid = _currentUser.UserId,
-                            TransId = expenseId
-                        });
-                        expenseFetchAttachment.Add(new ExpenseFetchAttachment
-                        {
-                            Id = i.Id,
-                            FileName = i.FileName,
-                            FileUrl = i.FileUrl,
-                            Extension = i.Extension,
-                            FileSize = i.FileSize,
-                            TransId = expenseId
-                        });
-                    }
-                    _context.ExpenseAttachment.UpdateRange(expenseAttachment);
-                }
-
-                // TAG
-                if (request.ExpenseTagList.Count > 0)
-                {
-                    foreach (ExpenseUpdateTag expTag in request.ExpenseTagList)
-                    {
-                        idUpdateExpenseTag.Add(expTag.Id);
-                        expenseTag.Add(new ExpenseTag
-                        {
-                            Id = expTag.Id,
-                            TagId = expTag.TagId,
-                            TransId = expenseId,
-                            CreatedUid = _currentUser.UserId
-                        });
-                        expenseFetchTag.Add(new ExpenseFetchTag
-                        {
-                            Id = expTag.Id,
-                            TagId = expTag.TagId,
-                            TransId = expenseId
-                        });
-                    }
-                    _context.ExpenseTag.UpdateRange(expenseTag);
-                }
-
-                // EXPENSE LIST
-                if (request.ExpenseUpdateList.Count > 0)
-                {
-                    foreach (ExpenseUpdateList expList in request.ExpenseUpdateList)
-                    {
-                        idUpdateExpenseList.Add(expList.Id);
-                        expenseUpdateList.Add(new ExpenseList
-                        {
-                            Id = expList.Id,
-                            PriceIncludesTax = expList.PriceIncludesTax,
-                            ExpenseAccountId = expList.ExpenseAccountId,
-                            Description = expList.Description,
-                            TaxId = expList.TaxId,
-                            Amount = expList.Amount,
-                            TransId = expenseId,
-                            CreatedUid = _currentUser.UserId
-                        });
-                        expenseFetchList.Add(new ExpenseFetchList
-                        {
-                            Id = expList.Id,
-                            PriceIncludesTax = expList.PriceIncludesTax,
-                            ExpenseAccountId = expList.ExpenseAccountId,
-                            Description = expList.Description,
-                            TaxId = expList.TaxId,
-                            Amount = expList.Amount,
-                            TransId = expenseId
-                        });
-                    }
-                    _context.ExpenseList.UpdateRange(expenseUpdateList);
-                }
-
-                List<ExpenseTag> expenseTagList = _context.ExpenseTag.Where<ExpenseTag>(x => x.TransId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateExpenseTag.Contains(x.Id)).ToList();
-                List<ExpenseAttachment> expenseAttachmentList = _context.ExpenseAttachment.Where<ExpenseAttachment>(x => x.TransId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateExpenseAttachment.Contains(x.Id)).ToList();
-                List<ExpenseList> expenseList = _context.ExpenseList.Where<ExpenseList>(x => x.TransId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateExpenseList.Contains(x.Id)).ToList();
-                _context.ExpenseTag.RemoveRange(expenseTagList);
-                _context.ExpenseAttachment.RemoveRange(expenseAttachmentList);
-                _context.ExpenseList.RemoveRange(expenseList);
-                await _context.SaveChangesAsync(cancellationToken);
-
-                var row = new ExpenseFetchDto()
-                {
-                    Id = request.Id,
-                    PayFromAccountId = request.PayFromAccountId,
-                    PayLater = request.PayLater,
-                    RecipientContactId = request.RecipientContactId,
-                    TransactionDate = request.TransactionDate,
-                    PaymentMethodId = request.PaymentMethodId,
-                    TransactionNo = request.TransactionNo,
-                    BillingAddress = request.BillingAddress,
-                    DueDate = request.DueDate,
-                    PaymentTermId = request.PaymentTermId,
-                    Memo = request.Memo,
-                    Status = request.Status,
-                    DiscountPercent = request.DiscountPercent,
-                    DiscountAmount = request.DiscountAmount,
-                    DiscountForAccountId = request.DiscountForAccountId,
-                    TotalAmount = request.TotalAmount,
-                    ExpenseTagList = expenseFetchTag,
-                    ExpenseAttachmentList = expenseFetchAttachment,
-                    ExpenseFetchList = expenseFetchList
-                };
-
-                result.IsOk = true;
-                result.ErrorMessage = string.Empty;
-                result.Row = row;
+                var discount = await _context.Account.FirstAsync(x => x.Id == request.DiscountForAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                discount.Balance += backBalanceTransaction;
             }
-            catch (Exception ex)
+        }
+        else
+        {
+            var backBalanceTransaction = request.TotalAmount - dataPengirimUang.TotalAmount;
+            dataPengirimUang.TotalAmount = reqSendMoney + backBalanceTransaction;
+
+            if (request.WitholdingAmount != 0)
             {
-                result.IsOk = false;
-                result.ErrorMessage = ex.Message;
+                var discount = await _context.Account.FirstAsync(x => x.Id == request.DiscountForAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                discount.Balance += backBalanceTransaction;
             }
+        }
+        if (request.TotalAmount == 0) // || pengirim.Balance == 0
+        {
+            result.IsOk = false;
+            result.ErrorMessage = "Transaction account lines must not be blank / is invalid, Failed!";
             return result;
         }
 
 
+            dataPengirimUang.PayFromAccountId = request.PayFromAccountId;
+            dataPengirimUang.PayLater = request.PayLater;
+            dataPengirimUang.RecipientContactId = request.RecipientContactId;
+            dataPengirimUang.TransactionDate = request.TransactionDate;
+            dataPengirimUang.PaymentMethodId = request.PaymentMethodId;
+            dataPengirimUang.TransactionNo = request.TransactionNo;
+            dataPengirimUang.BillingAddress = request.BillingAddress;
+            dataPengirimUang.DueDate = request.DueDate;
+            dataPengirimUang.PaymentTermId = 0;
+            dataPengirimUang.Memo = request.Memo;
+            dataPengirimUang.Status = request.Status;
+            dataPengirimUang.DiscountPercent = request.DiscountPercent;
+            dataPengirimUang.DiscountAmount = request.DiscountAmount;
+            dataPengirimUang.DiscountForAccountId = request.DiscountForAccountId;
+            dataPengirimUang.WitholdingAmount = request.WitholdingAmount;
+
+            expenseId = request.Id;
+            List<int> idUpdateExpenseTag = new List<int>();
+            List<int> idUpdateExpenseAttachment = new List<int>();
+            List<int> idUpdateExpenseList = new List<int>();
+
+            // ATTACHMENT
+            if (request.AttachmentFile.Count > 0)
+            {
+                foreach (ExpenseAttachmentUpdate i in request.AttachmentFile)
+                {
+                    idUpdateExpenseAttachment.Add(i.Id);
+                    expenseAttachment.Add(new ExpenseAttachment
+                    {
+                        Id = i.Id,
+                        FileName = i.FileName,
+                        FileUrl = i.FileUrl,
+                        Extension = i.Extension,
+                        FileSize = i.FileSize,
+                        CreatedUid = _currentUser.UserId,
+                        TransId = expenseId
+                    });
+                    expenseFetchAttachment.Add(new ExpenseFetchAttachment
+                    {
+                        Id = i.Id,
+                        FileName = i.FileName,
+                        FileUrl = i.FileUrl,
+                        Extension = i.Extension,
+                        FileSize = i.FileSize,
+                        TransId = expenseId
+                    });
+                }
+                _context.ExpenseAttachment.UpdateRange(expenseAttachment);
+            }
+
+            // TAG
+            if (request.ExpenseTagList.Count > 0)
+            {
+                foreach (ExpenseUpdateTag expTag in request.ExpenseTagList)
+                {
+                    idUpdateExpenseTag.Add(expTag.Id);
+                    expenseTag.Add(new ExpenseTag
+                    {
+                        Id = expTag.Id,
+                        TagId = expTag.TagId,
+                        TransId = expenseId,
+                        CreatedUid = _currentUser.UserId
+                    });
+                    expenseFetchTag.Add(new ExpenseFetchTag
+                    {
+                        Id = expTag.Id,
+                        TagId = expTag.TagId,
+                        TransId = expenseId
+                    });
+                }
+                _context.ExpenseTag.UpdateRange(expenseTag);
+            }
+
+            // EXPENSE LIST
+            if (request.ExpenseList.Count > 0)
+            {
+                foreach (ExpenseUpdateList expList in request.ExpenseList)
+                {
+                    idUpdateExpenseList.Add(expList.Id);
+                    expenseUpdateList.Add(new ExpenseList
+                    {
+                        Id = expList.Id,
+                        PriceIncludesTax = expList.PriceIncludesTax,
+                        ExpenseAccountId = expList.ExpenseAccountId,
+                        Description = expList.Description,
+                        TaxId = expList.TaxId,
+                        Amount = expList.Amount,
+                        TransId = expenseId,
+                        CreatedUid = _currentUser.UserId
+                    });
+                    expenseFetchList.Add(new ExpenseFetchList
+                    {
+                        Id = expList.Id,
+                        PriceIncludesTax = expList.PriceIncludesTax,
+                        ExpenseAccountId = expList.ExpenseAccountId,
+                        Description = expList.Description,
+                        TaxId = expList.TaxId,
+                        Amount = expList.Amount,
+                        TransId = expenseId
+                    });
+                }
+                _context.ExpenseList.UpdateRange(expenseUpdateList);
+            }
+
+
+            List<ExpenseTag> expenseTagList = _context.ExpenseTag.Where<ExpenseTag>(x => x.TransId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateExpenseTag.Contains(x.Id)).ToList();
+            List<ExpenseAttachment> expenseAttachmentList = _context.ExpenseAttachment.Where<ExpenseAttachment>(x => x.TransId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateExpenseAttachment.Contains(x.Id)).ToList();
+            List<ExpenseList> expenseList = _context.ExpenseList.Where<ExpenseList>(x => x.TransId == request.Id && x.TenantId == _currentUser.TenantId && !idUpdateExpenseList.Contains(x.Id)).ToList();
+            _context.ExpenseTag.RemoveRange(expenseTagList);
+            _context.ExpenseAttachment.RemoveRange(expenseAttachmentList);
+            _context.ExpenseList.RemoveRange(expenseList);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            var row = new ExpenseFetchDto()
+            {
+                Id = request.Id,
+                PayFromAccountId = request.PayFromAccountId,
+                PayLater = request.PayLater,
+                RecipientContactId = request.RecipientContactId,
+                TransactionDate = request.TransactionDate,
+                PaymentMethodId = request.PaymentMethodId,
+                TransactionNo = request.TransactionNo,
+                BillingAddress = request.BillingAddress,
+                DueDate = request.DueDate,
+                PaymentTermId = 0,
+                Memo = request.Memo,
+                Status = request.Status,
+                DiscountPercent = request.DiscountPercent,
+                DiscountAmount = request.DiscountAmount,
+                DiscountForAccountId = request.DiscountForAccountId,
+                TotalAmount = request.TotalAmount,
+                WitholdingAmount = request.WitholdingAmount,
+                ExpenseTagList = expenseFetchTag,
+                ExpenseAttachmentList = expenseFetchAttachment,
+                ExpenseFetchList = expenseFetchList
+            };
+
+            result.IsOk = true;
+            result.ErrorMessage = string.Empty;
+            result.Row = row;
+        }
+        catch (Exception ex)
+        {
+            result.IsOk = false;
+            result.ErrorMessage = ex.Message;
+        }
+        return result;
     }
-
 }
+
 
 
 
@@ -362,9 +319,10 @@ public class ExpenseUpdateDto : IRequest<RowResponse<ExpenseFetchDto>>
     public Int64 DiscountAmount { get; set; } = 0;
     public int DiscountForAccountId { get; set; } = 0;
     public Int64 TotalAmount { get; set; } = 0;
+    public Int64 WitholdingAmount { get; set; } = 0;
     public List<ExpenseAttachmentUpdate> AttachmentFile { get; set; }
     public List<ExpenseUpdateTag> ExpenseTagList { get; set; }
-    public List<ExpenseUpdateList> ExpenseUpdateList { get; set; }
+    public List<ExpenseUpdateList> ExpenseList { get; set; }
 }
 
 public class ExpenseAttachmentUpdate

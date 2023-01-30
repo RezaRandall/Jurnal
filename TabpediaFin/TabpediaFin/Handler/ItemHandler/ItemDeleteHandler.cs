@@ -18,7 +18,7 @@ public class ItemDeleteHandler : IDeleteByIdHandler<ItemDto>
         var result = new RowResponse<ItemDto>();
         try
         {
-            var itemData = await _context.Item.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var itemData = await _context.Item.FirstOrDefaultAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
             if (itemData == null || itemData.Id == 0)
             {
                 throw new HttpException(HttpStatusCode.NotFound, "Data not found");
@@ -41,7 +41,7 @@ public class ItemDeleteHandler : IDeleteByIdHandler<ItemDto>
             }
 
             // ITEM ATTACHMENT
-            List<ItemAttachment> ItemAttachmentList = _context.ItemAttachment.Where<ItemAttachment>(x => x.ItemId == request.Id).ToList();
+            List<ItemAttachment> ItemAttachmentList = _context.ItemAttachment.Where<ItemAttachment>(x => x.ItemId == request.Id && x.TenantId == _currentUser.TenantId).ToList();
             if (ItemAttachmentList.Count > 0)
             {
                 foreach (ItemAttachment item in ItemAttachmentList)
