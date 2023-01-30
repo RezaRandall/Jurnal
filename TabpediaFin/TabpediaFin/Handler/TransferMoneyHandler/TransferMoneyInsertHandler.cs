@@ -62,6 +62,7 @@ public class TransferMoneyInsertHandler : IRequestHandler<TransferMoneyInsertDto
 
                 var row = new TransferMoneyFetchDto()
                 {
+                    Id = transferMoney.Id,
                     TransferFromAccountId = transferMoney.TransferFromAccountId,
                     DepositToAccountId = transferMoney.DepositToAccountId,
                     Amount = transferMoney.Amount,

@@ -2,7 +2,7 @@
 
 namespace TabpediaFin.Migrations;
 
-[Migration(202301270951)]
+[Migration(202301301319)]
 public class Table_Expense : Migration
 {
     public override void Down()
@@ -20,6 +20,7 @@ public class Table_Expense : Migration
             .WithColumn("PaymentMethodId").AsInt32().NotNullable()
             .WithColumn("DiscountForAccountId").AsInt32().Nullable()
             .WithColumn("TotalAmount").AsDecimal(18, 2).NotNullable().WithDefaultValue(0)
+            .WithColumn("BalanceDue").AsDecimal(18, 2).NotNullable().WithDefaultValue(0)
             .WithColumn("DiscountAmount").AsDecimal(18, 2).NotNullable().WithDefaultValue(0)
             .WithColumn("DiscountPercent").AsInt32().NotNullable().WithDefaultValue(0)
             .WithColumn("WitholdingAmount").AsDecimal(18, 2).Nullable().WithDefaultValue(0)

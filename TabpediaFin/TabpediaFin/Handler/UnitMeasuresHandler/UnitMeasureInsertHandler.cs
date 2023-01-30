@@ -34,10 +34,8 @@ public class UnitMeasureInsertHandler : IRequestHandler<UnitMeasureInsertDto, Ro
 
             var row = new UnitMeasureDto()
             {
-                Id = unitMeasure.Id
-                ,
-                Name = unitMeasure.Name
-                ,
+                Id = unitMeasure.Id,
+                Name = unitMeasure.Name,
                 Description = unitMeasure.Description
             };
 

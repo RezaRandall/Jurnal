@@ -58,6 +58,7 @@ public class ReceiveMoneyInsertHandler : IRequestHandler<ReceiveMoneyInsertDto, 
 
             var row = new ReceiveMoneyFetchDto()
             {
+                Id = receiveMoney.Id,
                 DepositToAccountId = receiveMoney.DepositToAccountId,
                 PayerId = receiveMoney.PayerId,
                 TransactionDate = receiveMoney.TransactionDate,

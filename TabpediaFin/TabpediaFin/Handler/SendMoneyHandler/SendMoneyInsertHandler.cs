@@ -83,6 +83,7 @@ public class SendMoneyInsertHandler : IRequestHandler<SendMoneyInsertDto, RowRes
 
             var row = new SendMoneyFetchDto()
             {
+                Id = sendMoney.Id,
                 PayFromAccountId = sendMoney.PayFromAccountId,
                 RecipientContactId = sendMoney.RecipientContactId,
                 TransactionDate = sendMoney.TransactionDate,

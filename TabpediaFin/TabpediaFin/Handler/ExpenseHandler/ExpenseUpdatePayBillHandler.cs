@@ -2,21 +2,22 @@
 
 namespace TabpediaFin.Handler.ExpenseHandler;
 
-public class ExpenseUpdateHandler : IRequestHandler<ExpenseUpdateDto, RowResponse<ExpenseFetchDto>>
+public class ExpenseUpdatePayBillHandler : IRequestHandler<ExpenseUpdatePayBillDto, RowResponse<ExpenseFetchDto>>
 {
     private readonly FinContext _context;
     private readonly ICurrentUser _currentUser;
 
-    public ExpenseUpdateHandler(FinContext db, ICurrentUser currentUser)
+    public ExpenseUpdatePayBillHandler(FinContext db, ICurrentUser currentUser)
     {
         _context = db;
         _currentUser = currentUser;
     }
 
-    public async Task<RowResponse<ExpenseFetchDto>> Handle(ExpenseUpdateDto request, CancellationToken cancellationToken)
+    public async Task<RowResponse<ExpenseFetchDto>> Handle(ExpenseUpdatePayBillDto request, CancellationToken cancellationToken)
     {
         var result = new RowResponse<ExpenseFetchDto>();
         int expenseId;
+
         List<ExpenseTag> expenseTag = new List<ExpenseTag>();
         List<ExpenseAttachment> expenseAttachment = new List<ExpenseAttachment>();
         List<ExpenseList> expenseUpdateList = new List<ExpenseList>();
@@ -25,146 +26,85 @@ public class ExpenseUpdateHandler : IRequestHandler<ExpenseUpdateDto, RowRespons
         List<ExpenseFetchAttachment> expenseFetchAttachment = new List<ExpenseFetchAttachment>();
         List<ExpenseFetchList> expenseFetchList = new List<ExpenseFetchList>();
 
-
         try
         {
-            var dataPengirimUang = await _context.Expense.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId, cancellationToken);
-            var reqSendMoney = dataPengirimUang.TotalAmount;
-            double witholdingAmt = dataPengirimUang.WitholdingAmount;
-            double discountAmt = witholdingAmt;
-            double jumlah = 0;
-            var witholdingId = dataPengirimUang.DiscountForAccountId;
-
-            // BAYAR DARI AKUN / cek data akun
-            var dataAkun = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-            var saldoPengirim = dataAkun.Balance;
+            var dataPengirimUang = await _context.Expense.FirstAsync(x => x.Id == request.Id && x.TenantId == _currentUser.TenantId && x.PayLater == true, cancellationToken);
+            var reqBalanceDue = dataPengirimUang.BalanceDue;
             expenseId = request.Id;
+            var payLater = dataPengirimUang.PayLater;
+            var paymentMethodId = dataPengirimUang.PaymentMethodId;
+            var billingAddress = dataPengirimUang.BillingAddress;
+            var dueDate = dataPengirimUang.DueDate;
+            var paymentTermId = dataPengirimUang.PaymentTermId;
+            Int64 payBill = 0;
+            Int64 totalAmount = dataPengirimUang.TotalAmount;
+            //var expenseListData = await _context.ExpenseList.AsNoTracking().Where(x => x.TransId == expenseId && x.TenantId == _currentUser.TenantId).ToListAsync();
+            //foreach (var itm in expenseListData)
+            //{
 
-
-            var expenseListData = await _context.ExpenseList.AsNoTracking().Where(x => x.TransId == expenseId && x.TenantId == _currentUser.TenantId).ToListAsync();
-            foreach (var itm in expenseListData)
+            //}
+            //var expenseListData = await _context.Expense.AsNoTracking().Where(x => x.Id == expenseId && x.TenantId == _currentUser.TenantId && x.PayLater == true).ToListAsync();
+            foreach (var itm in request.ExpenseList)
             {
-                //PENGEMBALIAN
-                if (discountAmt != 0)
-                {
-                    var getSaldo = await _context.Account.FirstAsync(x => x.Id == witholdingId && x.TenantId == _currentUser.TenantId, cancellationToken);
-                    var saldo = getSaldo.Balance;
-                    var value = saldo - witholdingAmt;
-
-                    discountAmt = value;
-                    jumlah = reqSendMoney + witholdingAmt;
-                    getSaldo.Balance = value;
-
-                }
-                var getBalaces = await _context.Account.FirstAsync(x => x.Id == itm.ExpenseAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-                var nilaiBalanceAccounts = getBalaces.Balance;
-                var hasil = nilaiBalanceAccounts - itm.Amount;
-                getBalaces.Balance = hasil;
+                payBill = reqBalanceDue - itm.Amount;
+                dataPengirimUang.BalanceDue = payBill;
             }
-            if (witholdingAmt != 0)
+
+            // JURNAL COUNT
+            if (request.TotalAmount == dataPengirimUang.TotalAmount)
             {
-                var getValue = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-                var nilai = getValue.Balance + jumlah;
-                getValue.Balance = nilai;
+                if (request.WitholdingAmount != 0)
+                {
+                    var discount = await _context.Account.FirstAsync(x => x.Id == request.DiscountForAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                    discount.Balance += request.WitholdingAmount;
+                }
+            }
+            else if (request.TotalAmount < dataPengirimUang.TotalAmount)
+            {
+                var backBalanceTransaction = dataPengirimUang.TotalAmount - request.TotalAmount;
+                dataPengirimUang.TotalAmount = reqBalanceDue - backBalanceTransaction;
+
+                if (request.WitholdingAmount != 0)
+                {
+                    var discount = await _context.Account.FirstAsync(x => x.Id == request.DiscountForAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                    discount.Balance += backBalanceTransaction;
+                }
             }
             else
             {
-                var getValue = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-                var nilai = getValue.Balance + reqSendMoney;
-                getValue.Balance = nilai;
-            }
+                var backBalanceTransaction = request.TotalAmount - dataPengirimUang.TotalAmount;
+                dataPengirimUang.TotalAmount = reqBalanceDue + backBalanceTransaction;
 
-            // COUNT IN EVERY ACCOUNTS
-            foreach (ExpenseUpdateList i in request.ExpenseList)
-            {
-                if (i.Id == 0)
+                if (request.WitholdingAmount != 0)
                 {
-                    DateTime TransDate = TimeZoneInfo.ConvertTimeToUtc(request.TransactionDate);
-                    var expense = new ExpenseList()
-                    {
-                        Id = i.Id,
-                        PriceIncludesTax = i.PriceIncludesTax,
-                        ExpenseAccountId = i.ExpenseAccountId,
-                        Description = i.Description,
-                        TaxId = i.TaxId,
-                        Amount = i.Amount,
-                        CreatedUid = _currentUser.UserId,
-                        TransId = expenseId
-                    };
-                    await _context.ExpenseList.AddAsync(expense, cancellationToken);
-                    await _context.SaveChangesAsync(cancellationToken);
+                    var discount = await _context.Account.FirstAsync(x => x.Id == request.DiscountForAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                    discount.Balance += backBalanceTransaction;
                 }
-
-                // ambil nilai balance dari akun berdasarkan send money list
-                var getBalace = await _context.Account.FirstAsync(x => x.Id == i.ExpenseAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-                var nilaiBalanceAccount = getBalace.Balance;
-
-                double nilaiKembali = 0;
-
-                var hasil = nilaiBalanceAccount + i.Amount;
-                getBalace.Balance = hasil;
-
-                nilaiKembali = dataAkun.Balance - i.Amount;
-                dataAkun.Balance = nilaiKembali;
-
             }
-
-        // JURNAL COUNT
-        if (request.TotalAmount == dataPengirimUang.TotalAmount)
-        {
-            if (request.WitholdingAmount != 0)
+            if (request.TotalAmount == 0) // || pengirim.Balance == 0
             {
-                var discount = await _context.Account.FirstAsync(x => x.Id == request.DiscountForAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-                discount.Balance += request.WitholdingAmount;
+                result.IsOk = false;
+                result.ErrorMessage = "Transaction account lines must not be blank / is invalid, Failed!";
+                return result;
             }
-        }
-        else if (request.TotalAmount < dataPengirimUang.TotalAmount)
-        {
-            var backBalanceTransaction = dataPengirimUang.TotalAmount - request.TotalAmount;
-            dataPengirimUang.TotalAmount = reqSendMoney - backBalanceTransaction;
-
-            if (request.WitholdingAmount != 0)
-            {
-                var discount = await _context.Account.FirstAsync(x => x.Id == request.DiscountForAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-                discount.Balance += backBalanceTransaction;
-            }
-        }
-        else
-        {
-            var backBalanceTransaction = request.TotalAmount - dataPengirimUang.TotalAmount;
-            dataPengirimUang.TotalAmount = reqSendMoney + backBalanceTransaction;
-
-            if (request.WitholdingAmount != 0)
-            {
-                var discount = await _context.Account.FirstAsync(x => x.Id == request.DiscountForAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-                discount.Balance += backBalanceTransaction;
-            }
-        }
-        if (request.TotalAmount == 0) // || pengirim.Balance == 0
-        {
-            result.IsOk = false;
-            result.ErrorMessage = "Transaction account lines must not be blank / is invalid, Failed!";
-            return result;
-        }
-
 
             dataPengirimUang.PayFromAccountId = request.PayFromAccountId;
-            dataPengirimUang.PayLater = request.PayLater;
-            dataPengirimUang.RecipientContactId = request.RecipientContactId;
+            //dataPengirimUang.PayLater = request.PayLater;
             dataPengirimUang.TransactionDate = request.TransactionDate;
-            dataPengirimUang.PaymentMethodId = request.PaymentMethodId;
+            //dataPengirimUang.PaymentMethodId = request.PaymentMethodId;
             dataPengirimUang.TransactionNo = request.TransactionNo;
-            dataPengirimUang.BillingAddress = request.BillingAddress;
-            dataPengirimUang.DueDate = request.DueDate;
-            dataPengirimUang.PaymentTermId = 0;
+            //dataPengirimUang.BillingAddress = request.BillingAddress;
+            //dataPengirimUang.DueDate = request.DueDate;
+            //dataPengirimUang.PaymentTermId = request.PaymentTermId;
             dataPengirimUang.Memo = request.Memo;
             dataPengirimUang.Status = request.Status;
             dataPengirimUang.DiscountPercent = request.DiscountPercent;
             dataPengirimUang.DiscountAmount = request.DiscountAmount;
             dataPengirimUang.DiscountForAccountId = request.DiscountForAccountId;
+            dataPengirimUang.TotalAmount = request.TotalAmount;
+            //dataPengirimUang.BalanceDue = request.BalanceDue;
             dataPengirimUang.WitholdingAmount = request.WitholdingAmount;
 
-            //expenseId = request.Id;
             List<int> idUpdateExpenseTag = new List<int>();
             List<int> idUpdateExpenseAttachment = new List<int>();
             List<int> idUpdateExpenseList = new List<int>();
@@ -172,7 +112,7 @@ public class ExpenseUpdateHandler : IRequestHandler<ExpenseUpdateDto, RowRespons
             // ATTACHMENT
             if (request.AttachmentFile.Count > 0)
             {
-                foreach (ExpenseAttachmentUpdate i in request.AttachmentFile)
+                foreach (ExpenseAttachmentUpdateBill i in request.AttachmentFile)
                 {
                     idUpdateExpenseAttachment.Add(i.Id);
                     expenseAttachment.Add(new ExpenseAttachment
@@ -201,7 +141,7 @@ public class ExpenseUpdateHandler : IRequestHandler<ExpenseUpdateDto, RowRespons
             // TAG
             if (request.ExpenseTagList.Count > 0)
             {
-                foreach (ExpenseUpdateTag expTag in request.ExpenseTagList)
+                foreach (ExpenseUpdateBillTag expTag in request.ExpenseTagList)
                 {
                     idUpdateExpenseTag.Add(expTag.Id);
                     expenseTag.Add(new ExpenseTag
@@ -224,28 +164,28 @@ public class ExpenseUpdateHandler : IRequestHandler<ExpenseUpdateDto, RowRespons
             // EXPENSE LIST
             if (request.ExpenseList.Count > 0)
             {
-                foreach (ExpenseUpdateList expList in request.ExpenseList)
+                foreach (ExpenseUpdateBillList expList in request.ExpenseList)
                 {
                     idUpdateExpenseList.Add(expList.Id);
                     expenseUpdateList.Add(new ExpenseList
                     {
                         Id = expList.Id,
-                        PriceIncludesTax = expList.PriceIncludesTax,
+                        //PriceIncludesTax = expList.PriceIncludesTax,
                         ExpenseAccountId = expList.ExpenseAccountId,
                         Description = expList.Description,
-                        TaxId = expList.TaxId,
-                        Amount = expList.Amount,
+                        //TaxId = expList.TaxId,
+                        Amount = totalAmount,
                         TransId = expenseId,
                         CreatedUid = _currentUser.UserId
                     });
                     expenseFetchList.Add(new ExpenseFetchList
                     {
                         Id = expList.Id,
-                        PriceIncludesTax = expList.PriceIncludesTax,
+                        //PriceIncludesTax = expList.PriceIncludesTax,
                         ExpenseAccountId = expList.ExpenseAccountId,
                         Description = expList.Description,
-                        TaxId = expList.TaxId,
-                        Amount = expList.Amount,
+                        //TaxId = expList.TaxId,
+                        Amount = totalAmount,
                         TransId = expenseId
                     });
                 }
@@ -265,31 +205,31 @@ public class ExpenseUpdateHandler : IRequestHandler<ExpenseUpdateDto, RowRespons
             {
                 Id = request.Id,
                 PayFromAccountId = request.PayFromAccountId,
-                PayLater = request.PayLater,
+                PayLater = payLater,
                 RecipientContactId = request.RecipientContactId,
                 TransactionDate = request.TransactionDate,
-                PaymentMethodId = request.PaymentMethodId,
+                PaymentMethodId = paymentMethodId,
                 TransactionNo = request.TransactionNo,
-                BillingAddress = request.BillingAddress,
-                DueDate = request.DueDate,
-                PaymentTermId = 0,
+                BillingAddress = billingAddress,
+                DueDate = dueDate,
+                PaymentTermId = paymentTermId,
                 Memo = request.Memo,
                 Status = request.Status,
                 DiscountPercent = request.DiscountPercent,
                 DiscountAmount = request.DiscountAmount,
                 DiscountForAccountId = request.DiscountForAccountId,
                 TotalAmount = request.TotalAmount,
+                BalanceDue = payBill,
                 WitholdingAmount = request.WitholdingAmount,
                 ExpenseTagList = expenseFetchTag,
                 ExpenseAttachmentList = expenseFetchAttachment,
                 ExpenseFetchList = expenseFetchList
             };
-
             result.IsOk = true;
             result.ErrorMessage = string.Empty;
             result.Row = row;
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
             result.IsOk = false;
             result.ErrorMessage = ex.Message;
@@ -298,21 +238,18 @@ public class ExpenseUpdateHandler : IRequestHandler<ExpenseUpdateDto, RowRespons
     }
 }
 
-
-
-
-public class ExpenseUpdateDto : IRequest<RowResponse<ExpenseFetchDto>>
+public class ExpenseUpdatePayBillDto : IRequest<RowResponse<ExpenseFetchDto>>
 {
     public int Id { get; set; }
     public int PayFromAccountId { get; set; } = 0;
-    public Boolean PayLater { get; set; } = false;
+    //public Boolean PayLater { get; set; } = false;
     public int RecipientContactId { get; set; } = 0;
     public DateTime TransactionDate { get; set; }
-    public int PaymentMethodId { get; set; } = 0;
+    //public int PaymentMethodId { get; set; } = 0;
     public string TransactionNo { get; set; } = string.Empty;
-    public string BillingAddress { get; set; } = string.Empty;
-    public DateTime? DueDate { get; set; }
-    public int PaymentTermId { get; set; } = 0;
+    //public string BillingAddress { get; set; } = string.Empty;
+    //public DateTime? DueDate { get; set; }
+    //public int PaymentTermId { get; set; } = 0;
     public string Memo { get; set; } = string.Empty;
     public int Status { get; set; } = 0;
     public int DiscountPercent { get; set; } = 0;
@@ -321,12 +258,11 @@ public class ExpenseUpdateDto : IRequest<RowResponse<ExpenseFetchDto>>
     public Int64 TotalAmount { get; set; } = 0;
     public Int64 BalanceDue { get; set; } = 0;
     public Int64 WitholdingAmount { get; set; } = 0;
-    public List<ExpenseAttachmentUpdate> AttachmentFile { get; set; }
-    public List<ExpenseUpdateTag> ExpenseTagList { get; set; }
-    public List<ExpenseUpdateList> ExpenseList { get; set; }
+    public List<ExpenseAttachmentUpdateBill> AttachmentFile { get; set; }
+    public List<ExpenseUpdateBillTag> ExpenseTagList { get; set; }
+    public List<ExpenseUpdateBillList> ExpenseList { get; set; }
 }
-
-public class ExpenseAttachmentUpdate
+public class ExpenseAttachmentUpdateBill
 {
     public int Id { get; set; }
     public string FileName { get; set; } = string.Empty;
@@ -334,18 +270,18 @@ public class ExpenseAttachmentUpdate
     public string FileSize { get; set; } = string.Empty;
     public string Extension { get; set; } = string.Empty;
 }
-public class ExpenseUpdateTag
+public class ExpenseUpdateBillTag
 {
     public int Id { get; set; }
     public int TagId { get; set; }
 }
 
-public class ExpenseUpdateList
+public class ExpenseUpdateBillList
 {
     public int Id { get; set; }
-    public bool PriceIncludesTax { get; set; } = false;
+    //public bool PriceIncludesTax { get; set; } = false;
     public int ExpenseAccountId { get; set; } = 0;
     public string Description { get; set; } = string.Empty;
-    public int TaxId { get; set; } = 0;
+    //public int TaxId { get; set; } = 0;
     public Int64 Amount { get; set; } = 0;
 }

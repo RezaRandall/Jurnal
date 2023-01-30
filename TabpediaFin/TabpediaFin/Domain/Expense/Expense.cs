@@ -3,7 +3,7 @@
 public class Expense : BaseEntity
 {
     public int PayFromAccountId { get; set; } = 0;
-    public Boolean PayLater { get; set; } = false;
+    public Boolean PayLater { get; set; } = true;
     public int RecipientContactId { get; set; } = 0;
     public DateTime TransactionDate { get; set; }
     public int PaymentMethodId { get; set; } = 0;
@@ -17,5 +17,6 @@ public class Expense : BaseEntity
     public Int64 DiscountAmount { get; set; } = 0;
     public int DiscountForAccountId { get; set; } = 0;
     public Int64 TotalAmount { get; set; } = 0;
+    public Int64 BalanceDue { get; set; } = 0;
     public Int64 WitholdingAmount { get; set; } = 0;
 }

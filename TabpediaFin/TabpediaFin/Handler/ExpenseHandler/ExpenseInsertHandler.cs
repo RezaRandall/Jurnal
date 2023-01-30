@@ -20,102 +20,210 @@ public class ExpenseInsertHandler : IRequestHandler<ExpenseInsertDto, RowRespons
         Int64 RequestAmountTotal;
         DateTime TransDate = TimeZoneInfo.ConvertTimeToUtc(request.TransactionDate);
 
-        var expense = new Expense()
+        if (request.PayLater == true)
         {
-            PayFromAccountId = request.PayFromAccountId,
-            PayLater = request.PayLater,
-            RecipientContactId = request.RecipientContactId,
-            TransactionDate = TransDate,
-            PaymentMethodId = request.PaymentMethodId,
-            TransactionNo = request.TransactionNo,
-            BillingAddress = request.BillingAddress,
-            DueDate = request.DueDate,
-            PaymentTermId = request.PaymentTermId,
-            Memo = request.Memo,
-            Status = request.Status,
-            DiscountPercent = request.DiscountPercent,
-            DiscountAmount = request.DiscountAmount,
-            DiscountForAccountId = request.DiscountForAccountId,
-            TotalAmount = request.TotalAmount,
-            WitholdingAmount = request.WitholdingAmount
-        };
-
-        try
-        {
-            await _context.Expense.AddAsync(expense, cancellationToken);
-            RequestAmountTotal = expense.TotalAmount;
-
-            double jumlah = expense.TotalAmount + expense.WitholdingAmount;
-
-            // BALANCE REDUCTION FROM PAYEER ACCOUNT
-            if (request.WitholdingAmount == 0)
+            var expense = new Expense()
             {
-                var accountPayeer = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-                var reductionAmt = accountPayeer.Balance - RequestAmountTotal;
-                accountPayeer.Balance = reductionAmt;
-            }
-            else
-            {
-                var accountPayeer = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-                var reduction = accountPayeer.Balance - jumlah;
-                accountPayeer.Balance = reduction;
-            }
-
-            // WHEN INCLUDE WITHOLDING
-            if (request.DiscountAmount != 0 || request.DiscountPercent != 0 || request.DiscountForAccountId != 0)
-            {
-                var discountInput = await _context.Account.FirstAsync(x => x.Id == request.DiscountForAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-                var countWitholding = discountInput.Balance + request.WitholdingAmount;
-                discountInput.Balance = countWitholding;
-            }
-
-            // BALANCE SUM FROM RECIPIENT ACCOUNT
-            foreach (ExpenseInsertList i in request.ExpenseList)
-            {
-                var paymentForAccountId = await _context.Account.FirstAsync(x => x.Id == i.ExpenseAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
-                var sumBalance = paymentForAccountId.Balance + i.Amount;
-                paymentForAccountId.Balance = sumBalance;
-            }
-
-            await _context.SaveChangesAsync(cancellationToken);
-            transIdResult = expense.Id;
-
-            List<ExpenseFetchAttachment> returnfile = await PostAttachmentAsync(request.AttachmentFile, transIdResult, cancellationToken);
-            List<ExpenseFetchTag> TagListResult = await PostTagAsync(request.TagList, transIdResult, cancellationToken);
-            List<ExpenseFetchList> ExpenseListResult = await PostExpenseListAsync(request.ExpenseList, transIdResult, cancellationToken);
-
-            var row = new ExpenseFetchDto()
-            {
-                Id = expense.Id,
-                PayFromAccountId = expense.PayFromAccountId,
-                PayLater = expense.PayLater,
-                RecipientContactId = expense.RecipientContactId,
-                TransactionDate = expense.TransactionDate,
-                PaymentMethodId = expense.PaymentMethodId,
-                TransactionNo = expense.TransactionNo,
-                BillingAddress = expense.BillingAddress,
-                DueDate = expense.DueDate,
-                PaymentTermId = expense.PaymentTermId,
-                Memo = expense.Memo,
-                Status = expense.Status,
-                DiscountPercent = expense.DiscountPercent,
-                DiscountAmount = expense.DiscountAmount,
-                DiscountForAccountId = expense.DiscountForAccountId,
-                TotalAmount = expense.TotalAmount,
-                WitholdingAmount = expense.WitholdingAmount
+                PayFromAccountId = request.PayFromAccountId,
+                PayLater = request.PayLater,
+                RecipientContactId = request.RecipientContactId,
+                TransactionDate = TransDate,
+                PaymentMethodId = request.PaymentMethodId,
+                TransactionNo = request.TransactionNo,
+                BillingAddress = request.BillingAddress,
+                DueDate = request.DueDate,
+                PaymentTermId = request.PaymentTermId,
+                Memo = request.Memo,
+                Status = request.Status,
+                DiscountPercent = request.DiscountPercent,
+                DiscountAmount = request.DiscountAmount,
+                DiscountForAccountId = request.DiscountForAccountId,
+                TotalAmount = request.TotalAmount,
+                BalanceDue = request.TotalAmount,
+                WitholdingAmount = request.WitholdingAmount
             };
 
-            result.IsOk = true;
-            result.ErrorMessage = string.Empty;
-            result.Row = row;
+            try
+            {
+                await _context.Expense.AddAsync(expense, cancellationToken);
+                RequestAmountTotal = expense.TotalAmount;
+
+                double jumlah = expense.TotalAmount + expense.WitholdingAmount;
+
+                // BALANCE REDUCTION FROM PAYEER ACCOUNT
+                if (request.WitholdingAmount == 0)
+                {
+                    var accountPayeer = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                    var reductionAmt = accountPayeer.Balance - RequestAmountTotal;
+                    accountPayeer.Balance = reductionAmt;
+                }
+                else
+                {
+                    var accountPayeer = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                    var reduction = accountPayeer.Balance - jumlah;
+                    accountPayeer.Balance = reduction;
+                }
+
+                // WHEN INCLUDE WITHOLDING
+                if (request.DiscountAmount != 0 || request.DiscountPercent != 0 || request.DiscountForAccountId != 0)
+                {
+                    var discountInput = await _context.Account.FirstAsync(x => x.Id == request.DiscountForAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                    var countWitholding = discountInput.Balance + request.WitholdingAmount;
+                    discountInput.Balance = countWitholding;
+                }
+
+                // BALANCE SUM FROM RECIPIENT ACCOUNT
+                foreach (ExpenseInsertList i in request.ExpenseList)
+                {
+                    var paymentForAccountId = await _context.Account.FirstAsync(x => x.Id == i.ExpenseAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                    var sumBalance = paymentForAccountId.Balance + i.Amount;
+                    paymentForAccountId.Balance = sumBalance;
+                }
+
+                await _context.SaveChangesAsync(cancellationToken);
+                transIdResult = expense.Id;
+
+                List<ExpenseFetchAttachment> returnfile = await PostAttachmentAsync(request.AttachmentFile, transIdResult, cancellationToken);
+                List<ExpenseFetchTag> TagListResult = await PostTagAsync(request.TagList, transIdResult, cancellationToken);
+                List<ExpenseFetchList> ExpenseListResult = await PostExpenseListAsync(request.ExpenseList, transIdResult, cancellationToken);
+
+                var row = new ExpenseFetchDto()
+                {
+                    Id = expense.Id,
+                    PayFromAccountId = expense.PayFromAccountId,
+                    PayLater = expense.PayLater,
+                    RecipientContactId = expense.RecipientContactId,
+                    TransactionDate = expense.TransactionDate,
+                    PaymentMethodId = expense.PaymentMethodId,
+                    TransactionNo = expense.TransactionNo,
+                    BillingAddress = expense.BillingAddress,
+                    DueDate = expense.DueDate,
+                    PaymentTermId = expense.PaymentTermId,
+                    Memo = expense.Memo,
+                    Status = expense.Status,
+                    DiscountPercent = expense.DiscountPercent,
+                    DiscountAmount = expense.DiscountAmount,
+                    DiscountForAccountId = expense.DiscountForAccountId,
+                    TotalAmount = expense.TotalAmount,
+                    BalanceDue = expense.TotalAmount,
+                    WitholdingAmount = expense.WitholdingAmount
+                };
+
+                result.IsOk = true;
+                result.ErrorMessage = string.Empty;
+                result.Row = row;
+            }
+            catch (Exception ex)
+            {
+                result.IsOk = false;
+                result.ErrorMessage = ex.Message;
+            }
+
+            return result;
         }
-        catch (Exception ex)
+        else
         {
-            result.IsOk = false;
-            result.ErrorMessage = ex.Message;
+            var expense = new Expense()
+            {
+                PayFromAccountId = request.PayFromAccountId,
+                PayLater = request.PayLater,
+                RecipientContactId = request.RecipientContactId,
+                TransactionDate = TransDate,
+                PaymentMethodId = request.PaymentMethodId,
+                TransactionNo = request.TransactionNo,
+                BillingAddress = request.BillingAddress,
+                DueDate = request.DueDate,
+                PaymentTermId = request.PaymentTermId,
+                Memo = request.Memo,
+                Status = request.Status,
+                DiscountPercent = request.DiscountPercent,
+                DiscountAmount = request.DiscountAmount,
+                DiscountForAccountId = request.DiscountForAccountId,
+                TotalAmount = request.TotalAmount,
+                BalanceDue = request.BalanceDue,
+                WitholdingAmount = request.WitholdingAmount
+            };
+
+            try
+            {
+                await _context.Expense.AddAsync(expense, cancellationToken);
+                RequestAmountTotal = expense.TotalAmount;
+
+                double jumlah = expense.TotalAmount + expense.WitholdingAmount;
+
+                // BALANCE REDUCTION FROM PAYEER ACCOUNT
+                if (request.WitholdingAmount == 0)
+                {
+                    var accountPayeer = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                    var reductionAmt = accountPayeer.Balance - RequestAmountTotal;
+                    accountPayeer.Balance = reductionAmt;
+                }
+                else
+                {
+                    var accountPayeer = await _context.Account.FirstAsync(x => x.Id == request.PayFromAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                    var reduction = accountPayeer.Balance - jumlah;
+                    accountPayeer.Balance = reduction;
+                }
+
+                // WHEN INCLUDE WITHOLDING
+                if (request.DiscountAmount != 0 || request.DiscountPercent != 0 || request.DiscountForAccountId != 0)
+                {
+                    var discountInput = await _context.Account.FirstAsync(x => x.Id == request.DiscountForAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                    var countWitholding = discountInput.Balance + request.WitholdingAmount;
+                    discountInput.Balance = countWitholding;
+                }
+
+                // BALANCE SUM FROM RECIPIENT ACCOUNT
+                foreach (ExpenseInsertList i in request.ExpenseList)
+                {
+                    var paymentForAccountId = await _context.Account.FirstAsync(x => x.Id == i.ExpenseAccountId && x.TenantId == _currentUser.TenantId, cancellationToken);
+                    var sumBalance = paymentForAccountId.Balance + i.Amount;
+                    paymentForAccountId.Balance = sumBalance;
+                }
+
+                await _context.SaveChangesAsync(cancellationToken);
+                transIdResult = expense.Id;
+
+                List<ExpenseFetchAttachment> returnfile = await PostAttachmentAsync(request.AttachmentFile, transIdResult, cancellationToken);
+                List<ExpenseFetchTag> TagListResult = await PostTagAsync(request.TagList, transIdResult, cancellationToken);
+                List<ExpenseFetchList> ExpenseListResult = await PostExpenseListAsync(request.ExpenseList, transIdResult, cancellationToken);
+
+                var row = new ExpenseFetchDto()
+                {
+                    Id = expense.Id,
+                    PayFromAccountId = expense.PayFromAccountId,
+                    PayLater = expense.PayLater,
+                    RecipientContactId = expense.RecipientContactId,
+                    TransactionDate = expense.TransactionDate,
+                    PaymentMethodId = expense.PaymentMethodId,
+                    TransactionNo = expense.TransactionNo,
+                    BillingAddress = expense.BillingAddress,
+                    DueDate = expense.DueDate,
+                    PaymentTermId = expense.PaymentTermId,
+                    Memo = expense.Memo,
+                    Status = expense.Status,
+                    DiscountPercent = expense.DiscountPercent,
+                    DiscountAmount = expense.DiscountAmount,
+                    DiscountForAccountId = expense.DiscountForAccountId,
+                    TotalAmount = expense.TotalAmount,
+                    BalanceDue  = expense.BalanceDue,
+                    WitholdingAmount = expense.WitholdingAmount
+                };
+
+                result.IsOk = true;
+                result.ErrorMessage = string.Empty;
+                result.Row = row;
+            }
+            catch (Exception ex)
+            {
+                result.IsOk = false;
+                result.ErrorMessage = ex.Message;
+            }
+
+            return result;
         }
 
-        return result;
+        
     }
 
 
@@ -234,6 +342,7 @@ public class ExpenseInsertDto : IRequest<RowResponse<ExpenseFetchDto>>
     public Int64 DiscountAmount { get; set; } = 0;
     public int DiscountForAccountId { get; set; } = 0;
     public Int64 TotalAmount { get; set; } = 0;
+    public Int64 BalanceDue { get; set; } = 0;
     public Int64 WitholdingAmount { get; set; } = 0;
     public List<ExpenseAttachmentFiles> AttachmentFile { get; set; }
     public List<ExpenseInsertTag> TagList { get; set; }

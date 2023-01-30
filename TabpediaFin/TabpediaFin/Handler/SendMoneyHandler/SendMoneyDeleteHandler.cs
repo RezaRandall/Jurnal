@@ -67,8 +67,6 @@ public class SendMoneyDeleteHandler : IDeleteByIdHandler<SendMoneyFetchDto>
                         file.Delete();
                     }
                 }
-                
-                //await _context.SaveChangesAsync(cancellationToken);
             }
 
             // TAG

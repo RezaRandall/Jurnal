@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using TabpediaFin.Handler.CashAndBank;
+using TabpediaFin.Handler.ExpenseHandler;
+
 using TabpediaFin.Handler.SendMoneyHandler;
 
 namespace TabpediaFin.Controllers;
@@ -52,5 +51,11 @@ public class SendMoneyController : ApiControllerBase
         await _mediator.Send(new DeleteByIdRequestDto<SendMoneyFetchDto>(id));
     }
 
+    [HttpPut("PayBill")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> Update([FromBody] ExpenseUpdatePayBillDto command)
+    {
+        return Result(await _mediator.Send(command));
+    }
 
 }
